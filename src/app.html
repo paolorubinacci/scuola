@@ -315,7 +315,7 @@ function kbHTML(b){const id='kb'+(kbN++);KB[id]=b;
  <span class="seg sp">${[[.5,'50%'],[.75,'75%'],[1,'100%']].map(([r,l])=>`<button data-sp="${r}" class="${r===1?'on':''}">${l}</button>`).join('')}</span>
  <span class="tr"><button data-tr="-1">−</button><span class="kn"></span><button data-tr="1">+</button></span>
  <span class="seg"><button data-hand="R">Destra</button><button data-hand="L">Sinistra</button><button data-hand="" class="on">Entrambe</button></span>
- <button class="btn sm" data-kloop>⟲ Loop</button><button class="btn sm" data-kclick>♩ Click</button></div></div>`}
+ <button class="btn sm" data-kloop>⟲ Loop</button><button class="btn sm" data-kclick>♩ Click</button></div><div class="legend" style="padding-top:0">Pianoforte: Salamander Grand Piano, A. Holm (CC-BY 3.0)</div></div>`}
 function isBlack(m){return [1,3,6,8,10].includes(m%12)}
 function initKb(el){
  const b=KB[el.dataset.k],cv=el.querySelector('canvas'),ctx=cv.getContext('2d');
@@ -334,7 +334,9 @@ function initKb(el){
  function upd(){el.querySelector('.kn').textContent=keyName()+(st.tr?` (${st.tr>0?'+':''}${st.tr})`:'');draw()}
  function bpm(){return base*st.sp}
  function stop(){st.playing=false;clearInterval(st.timer);cancelAnimationFrame(st.raf);st.on.clear();el.querySelector('.play').classList.remove('on');el.querySelector('.play').textContent='▶';el.querySelector('.prog i').style.width='0';draw();if(kbActive===stop)kbActive=null}
- function start(){if(kbActive)kbActive();stopMetro();stopRhythm();ac();kbActive=stop;st.playing=true;st.t0=AC.currentTime+.1;st.next=0;
+ async function start(){if(kbActive)kbActive();stopMetro();stopRhythm();ac();const pb=el.querySelector('.play');
+  if(!st.ready){pb.textContent='…';await loadPiano(lo+Math.min(0,st.tr)-6,hi+Math.max(0,st.tr)+6);st.ready=true}
+  kbActive=stop;st.playing=true;st.t0=AC.currentTime+.1;st.next=0;
   el.querySelector('.play').classList.add('on');el.querySelector('.play').textContent='■';
   const spb=60/bpm(),ns=b.notes.filter(n=>!st.hand||n[3]===st.hand).slice().sort((x,y)=>x[0]-y[0]);let i=0,clickB=0;
   st.timer=setInterval(()=>{const now=AC.currentTime,until=now+.15;
@@ -345,16 +347,24 @@ function initKb(el){
   const loopf=()=>{if(!st.playing)return;const p=Math.min(1,(AC.currentTime-st.t0)/(len*60/bpm()));el.querySelector('.prog i').style.width=(p*100)+'%';st.raf=requestAnimationFrame(loopf)};loopf()}
  el.querySelector('.play').onclick=()=>st.playing?stop():start();
  el.querySelectorAll('[data-sp]').forEach(x=>x.onclick=()=>{st.sp=+x.dataset.sp;el.querySelectorAll('[data-sp]').forEach(y=>y.classList.toggle('on',y===x));if(st.playing){stop();start()}});
- el.querySelectorAll('[data-tr]').forEach(x=>x.onclick=()=>{st.tr=Math.max(-6,Math.min(6,st.tr+ +x.dataset.tr));upd();if(st.playing){stop();start()}});
+ el.querySelectorAll('[data-tr]').forEach(x=>x.onclick=()=>{st.tr=Math.max(-6,Math.min(6,st.tr+ +x.dataset.tr));st.ready=false;upd();if(st.playing){stop();start()}});
  el.querySelectorAll('[data-hand]').forEach(x=>x.onclick=()=>{st.hand=x.dataset.hand;el.querySelectorAll('[data-hand]').forEach(y=>y.classList.toggle('on',y===x));if(st.playing){stop();start()}});
  el.querySelector('[data-kloop]').onclick=e=>{st.loop=!st.loop;e.currentTarget.classList.toggle('on',st.loop)};
  el.querySelector('[data-kclick]').onclick=e=>{st.click=!st.click;e.currentTarget.classList.toggle('on',st.click)};
- upd();new ResizeObserver(draw).observe(cv)}
-/* simple piano-like voice: two partials + hammer, exponential decay */
-function pianoNote(t,dur,m,v){const f=440*Math.pow(2,(m-69)/12),g=AC.createGain(),lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=Math.min(9000,f*7);
- g.connect(lp);lp.connect(MASTER);const dec=Math.min(dur+.25,2.5);
- g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.32*v,t+.006);g.gain.exponentialRampToValueAtTime(.12*v,t+.25);g.gain.setValueAtTime(.12*v,t+Math.max(.26,dur));g.gain.exponentialRampToValueAtTime(.0005,t+Math.max(.26,dur)+.22);
- [[1,'triangle',1],[2,'sine',.35],[3,'sine',.12]].forEach(([k,type,a])=>{const o=AC.createOscillator(),og=AC.createGain();o.type=type;o.frequency.value=f*k;og.gain.value=a;o.connect(og);og.connect(g);o.start(t);o.stop(t+Math.max(.26,dur)+.25)})}
+ upd();new ResizeObserver(draw).observe(cv);
+ setTimeout(()=>loadPiano(lo-6,hi+6).then(()=>{st.ready=true}),1200)}
+/* real piano: Salamander Grand Piano samples (Alexander Holm, CC-BY 3.0), one every minor third, repitched */
+const PSMP={},PNAMES={0:'C',3:'Ds',6:'Fs',9:'A'};let pianoLoading=null;
+function sampleFor(m){let best=null;for(const k in PSMP){const d=Math.abs(m-k);if(best==null||d<Math.abs(m-best))best=+k}return best}
+function loadPiano(lo,hi){ac();const want=[];for(let m=Math.max(24,lo-3);m<=Math.min(105,hi+3);m++){if(PNAMES[m%12]!=null&&!PSMP[m])want.push(m)}
+ return Promise.all(want.map(m=>fetch('piano/'+PNAMES[m%12]+(Math.floor(m/12)-1)+'.mp3').then(r=>r.ok?r.arrayBuffer():Promise.reject()).then(b=>new Promise((ok,ko)=>AC.decodeAudioData(b,ok,ko))).then(buf=>{PSMP[m]=buf}).catch(()=>{})))}
+function pianoNote(t,dur,m,v){const k=sampleFor(m);if(k==null)return synthNote(t,dur,m,v);
+ const s=AC.createBufferSource(),g=AC.createGain();s.buffer=PSMP[k];s.playbackRate.value=Math.pow(2,(m-k)/12);
+ s.connect(g);g.connect(MASTER);const end=t+Math.max(.12,dur);const lvl=.9*v;
+ g.gain.setValueAtTime(lvl,t);g.gain.setValueAtTime(lvl,end);g.gain.exponentialRampToValueAtTime(.001,end+.35);
+ s.start(t);s.stop(end+.4)}
+function synthNote(t,dur,m,v){const f=440*Math.pow(2,(m-69)/12),g=AC.createGain(),o=AC.createOscillator();o.type='triangle';o.frequency.value=f;o.connect(g);g.connect(MASTER);
+ g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.25*v,t+.005);g.gain.exponentialRampToValueAtTime(.0005,t+Math.max(.2,dur)+.2);o.start(t);o.stop(t+Math.max(.2,dur)+.25)}
 /* ================= audio engine ================= */
 let AC=null,MASTER=null,NOISE=null;
 function ac(){if(!AC){AC=new (window.AudioContext||window.webkitAudioContext)();MASTER=AC.createGain();MASTER.gain.value=.9;MASTER.connect(AC.destination);
