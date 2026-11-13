@@ -15,7 +15,7 @@
 --font:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--safe-b:env(safe-area-inset-bottom);--safe-t:env(safe-area-inset-top);
 --r:18px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+html,body{overflow-x:hidden;width:100%;max-width:100%;margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
 a{color:var(--blue)}button{font:inherit;color:inherit}
 .wrap{max-width:760px;margin:0 auto;padding:0 18px}
 .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:10px 16px;font:600 14px var(--font);cursor:pointer;text-decoration:none;color:var(--ink)}
@@ -135,7 +135,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .timer{font:800 54px var(--font);letter-spacing:-.03em;text-align:center}
 .log{list-style:none;padding:0;margin:10px 0;display:grid;gap:8px}
 .log li{background:var(--surf);border-radius:12px;padding:10px 12px;font-size:14px}.log li .d{font-size:12px;color:var(--muted)}
-textarea,input[type=text],input[type=password],input[type=number]{width:100%;background:#fff;border:1px solid var(--line);border-radius:12px;color:var(--ink);padding:12px;font:15px var(--font)}
+textarea,input[type=text],input[type=password],input[type=number]{width:100%;background:#fff;border:1px solid var(--line);border-radius:12px;color:var(--ink);padding:12px;font:16px var(--font)}
 /* gate */
 #gate{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(90% 60% at 100% 0%,#dbe9ff,transparent 60%),radial-gradient(70% 50% at 0% 100%,#ffe3dc,transparent 60%),#fff}
 #gate .box{width:100%;max-width:360px;text-align:center}
@@ -176,7 +176,8 @@ const LS={get(k,d){try{const v=localStorage.getItem('scuola-'+k);return v?JSON.p
 function b2u(b){const s=atob(b),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u}
 async function kdf(pw,salt){const k0=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);
  return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:200000,hash:'SHA-256'},k0,{name:'AES-GCM',length:256},false,['decrypt'])}
-async function decBytes(raw,pw,key){const salt=raw.slice(0,16),iv=raw.slice(16,28),ct=raw.slice(28);key=key||await kdf(pw,salt);
+const keyCache={};
+async function decBytes(raw,pw){const salt=raw.slice(0,16),iv=raw.slice(16,28),ct=raw.slice(28),h=salt.join(',');const key=await (keyCache[h]=keyCache[h]||kdf(pw,salt));
  return {pt:new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv},key,ct)),key}}
 let PW=null;
 async function unlock(pw,silent){
@@ -186,11 +187,13 @@ async function unlock(pw,silent){
  catch(e){if(!silent)$('#ge').textContent='Password non corretta.';LS.set('pw',null)}}
 /* encrypted media: fetch .enc, decrypt with same password, make blob URL */
 const blobCache={};
-async function mediaURL(src,type){
- if(!/\.enc$/.test(src))return src;
- if(blobCache[src])return blobCache[src];
- const r=await fetch(src);const raw=new Uint8Array(await r.arrayBuffer());
- const {pt}=await decBytes(raw,PW);return blobCache[src]=URL.createObjectURL(new Blob([pt],{type}))}
+function mediaURL(src,type){
+ if(!/\.enc$/.test(src))return Promise.resolve(src);
+ return blobCache[src]=blobCache[src]||(async()=>{const r=await fetch(src);const raw=new Uint8Array(await r.arrayBuffer());
+  const {pt}=await decBytes(raw,PW);return URL.createObjectURL(new Blob([pt],{type}))})().catch(e=>{delete blobCache[src];throw e})}
+/* background prefetch: clips of the open lesson load one after another, so a tap plays at once */
+let pfToken=0;
+async function prefetch(list){const tok=++pfToken;for(const [src,type] of list){if(tok!==pfToken)return;try{await mediaURL(src,type)}catch(e){}}}
 $('#gf').addEventListener('submit',e=>{e.preventDefault();unlock($('#gp').value)});
 
 /* ================= router ================= */
@@ -217,9 +220,9 @@ function updStreak(){const s=streakDays(),el=$('#streak');el.hidden=!s;el.textCo
 function theme(n){$('#app').className=n||''}
 function nextLesson(c){const done=progress();return c.lessons.find(l=>!done[c.id+'-'+l.n])}
 function renderHome(){
- theme('');$('#crumb').textContent='';updStreak();
+ pfToken++;theme('');$('#crumb').textContent='';updStreak();
  const done=progress(),goal=LS.get('goal',150),wm=weekMin(),tot=DATA.courses.reduce((a,c)=>a+c.lessons.filter(l=>done[c.id+'-'+l.n]).length,0);
- $('#app').innerHTML=`<div class="wrap"><section class="hero"><div class="eyebrow">Ciao Paolo</div><h1>La tua <em>scuola</em> di pianoforte</h1><p>Videocorsi, passaggi da studiare e strumenti per esercitarti ogni giorno.</p></section>
+ $('#app').innerHTML=`<div class="wrap"><section class="hero"><div class="eyebrow">Ciao Paolo</div><h1>La tua <em>scuola</em> di musica</h1><p>Videocorsi, esercizi e strumenti per fare pratica ogni giorno.</p></section>
  <div class="stats"><div class="stat goal" id="goalStat"><b>${wm}<small style="font-size:13px;font-weight:600"> / ${goal} min</small></b><span>pratica questa settimana</span><div class="meter"><i style="width:${Math.min(100,wm/goal*100)}%"></i></div></div>
  <div class="stat"><b>${streakDays()} 🔥</b><span>giorni di fila</span></div><div class="stat"><b>${tot}</b><span>lezioni completate</span></div></div>
  <div class="sec-t">I miei corsi</div>
@@ -249,6 +252,7 @@ function renderLesson(c,l){
  $('#doneBtn').onclick=()=>{const p=progress();p[key]=!p[key];LS.set('done',p);renderLesson(c,l)};
  document.querySelectorAll('.clip[data-src]').forEach(initClip);
  document.querySelectorAll('img[data-enc]').forEach(async i=>{i.src=await mediaURL(i.dataset.enc,'image/png')});
+ const clips=[...document.querySelectorAll('.clip[data-src]')];(async()=>{const tok=++pfToken;for(const c of clips){if(tok!==pfToken)return;try{await c._load()}catch(e){}}})();
 }
 function blockHTML(b){
  const pr=b.practice?practiceBtn(b.practice):'';
@@ -268,9 +272,13 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-practice]'
  if(p.rhythm&&RHY[p.rhythm]){R.id=p.rhythm;R.bpm=p.bpm;openTools('rhythm');startRhythm()}else{M.bpm=p.bpm;if(p.swing!=null)M.swing=p.swing;openTools('metro');startMetro()}});
 /* clip player with A-B loop & slow-down (pitch preserved) */
 function initClip(el){
- const v=el.querySelector('video');let A=null,B=null,loop=false,loaded=false;
- async function load(){if(loaded)return;loaded=true;v.src=await mediaURL(el.dataset.src,'video/mp4');v.preservesPitch=true;v.webkitPreservesPitch=true}
- v.addEventListener('play',load,{once:true});el.querySelector('.vh').addEventListener('click',async()=>{await load();v.play()});
+ const v=el.querySelector('video');let A=null,B=null,loop=false,ready=null;
+ v.preservesPitch=true;v.webkitPreservesPitch=true;v.removeAttribute('controls');v.setAttribute('preload','auto');
+ const vh=el.querySelector('.vh b'),label=vh.textContent;
+ function load(){return ready=ready||mediaURL(el.dataset.src,'video/mp4').then(u=>{v.src=u;v.setAttribute('controls','');el.classList.add('ok');return u})}
+ el._load=load;
+ v.addEventListener('click',async()=>{if(!el.classList.contains('ok')){await load();v.play()}});
+ el.querySelector('.vh').addEventListener('click',async()=>{if(!el.classList.contains('ok'))vh.textContent='⏳ '+label.replace(/^▶ /,'');await load();vh.textContent=label;v.play()});
  v.addEventListener('timeupdate',()=>{if(loop&&A!=null&&B!=null&&v.currentTime>=B){v.currentTime=A}});
  el.querySelectorAll('[data-r]').forEach(b=>b.onclick=async()=>{await load();v.playbackRate=+b.dataset.r;el.querySelectorAll('[data-r]').forEach(x=>x.classList.toggle('on',x===b))});
  el.querySelectorAll('[data-ab]').forEach(b=>b.onclick=async()=>{await load();const k=b.dataset.ab;
@@ -325,7 +333,7 @@ function paneMetro(){
  <input type="range" id="mSwing" min="0" max="100" value="${M.swing}" ${M.sub===2?'':'disabled'}>
  <div class="lbl">Allenatore di velocità</div>
  <div class="row" style="justify-content:flex-start"><button class="btn sm ${M.train?'on':''}" id="mTrain">${M.train?'Attivo':'Spento'}</button>
-  <span class="small">+<input type="number" id="tS" value="${M.trainStep}" style="width:58px;padding:6px"> bpm ogni <input type="number" id="tB" value="${M.trainBars}" style="width:58px;padding:6px"> battute, fino a <input type="number" id="tM" value="${M.trainMax}" style="width:68px;padding:6px"></span></div>
+  <span class="small">+<input type="number" id="tS" value="${M.trainStep}" style="width:62px;padding:6px;font-size:16px"> bpm ogni <input type="number" id="tB" value="${M.trainBars}" style="width:62px;padding:6px;font-size:16px"> battute, fino a <input type="number" id="tM" value="${M.trainMax}" style="width:72px;padding:6px;font-size:16px"></span></div>
  <button class="go ${M.playing?'stop':''}" id="mGo">${M.playing?'■ Stop':'▶ Avvia'}</button></div>`;
  const setB=v=>{M.bpm=Math.max(30,Math.min(260,Math.round(v)));$('#mBpm').innerHTML=M.bpm+'<small>bpm</small>';$('#mRange').value=M.bpm;mSave();live()};
  $('#mRange').oninput=e=>setB(+e.target.value);

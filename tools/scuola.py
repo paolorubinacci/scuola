@@ -9,7 +9,8 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 R=os.path.dirname(os.path.dirname(os.path.abspath(__file__)));PW=os.environ['SCUOLA_PW']
 def key(s):return PBKDF2HMAC(algorithm=hashes.SHA256(),length=32,salt=s,iterations=200000).derive(PW.encode())
-def enc(b):s=os.urandom(16);iv=os.urandom(12);return s+iv+AESGCM(key(s)).encrypt(iv,b,None)
+SALT=bytes.fromhex(open(os.path.join(R,'tools','salt.hex')).read().strip())  # sale comune: la chiave si calcola una volta sola nel browser
+def enc(b):s=SALT;iv=os.urandom(12);return s+iv+AESGCM(key(s)).encrypt(iv,b,None)
 def dec(b):return AESGCM(key(b[:16])).decrypt(b[16:28],b[28:],None)
 cmd=sys.argv[1]
 if cmd=='decrypt':
@@ -19,5 +20,11 @@ elif cmd=='build':
     t=open(R+'/src/app.html').read();d=json.load(open(R+'/data.json'))
     e=base64.b64encode(enc(json.dumps(d,ensure_ascii=False).encode())).decode()
     open(R+'/index.html','w').write(t.replace('id="enc">__ENC__</script>','id="enc">'+e+'</script>'));print('index.html')
+elif cmd=='reenc':  # ricifra tutti i file .enc con il sale comune
+    import glob
+    for f in glob.glob(R+'/clips/*.enc')+glob.glob(R+'/img/*.enc'):
+        b=open(f,'rb').read()
+        if b[:16]!=SALT: open(f,'wb').write(enc(dec(b)))
+    print('ok')
 elif cmd=='enc':
     open(sys.argv[3],'wb').write(enc(open(sys.argv[2],'rb').read()));print(sys.argv[3])
