@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#120f1c">
+<title>Scuola · Paolo Rubinacci</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root{--bg:#120f1c;--bg2:#1a1628;--card:#221d33;--card2:#2b2540;--ink:#f4efe6;--muted:#a9a2b8;--line:rgba(244,239,230,.1);
+--gold:#e2b45c;--gold2:#f3d08a;--green:#3fa37a;--purple:#8e6bd8;--red:#d9604c;
+--disp:"Abril Fatface",Georgia,serif;--serif:"Playfair Display",Georgia,serif;--sans:"Inter",system-ui,-apple-system,sans-serif;
+--safe-b:env(safe-area-inset-bottom);--safe-t:env(safe-area-inset-top)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--gold2)}
+button{font:inherit;color:inherit}
+.wrap{max-width:760px;margin:0 auto;padding:0 18px}
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:10px 16px;font-weight:600;font-size:14px;cursor:pointer;text-decoration:none;color:var(--ink)}
+.btn.gold{background:var(--gold);color:#1b1305;border-color:var(--gold)}
+.btn.sm{padding:7px 12px;font-size:13px}
+.btn.on{background:var(--green);border-color:var(--green);color:#fff}
+.ib{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;font-weight:700}
+.muted{color:var(--muted)}.small{font-size:13px}
+/* top */
+header.top{position:sticky;top:0;z-index:20;background:rgba(18,15,28,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding-top:var(--safe-t)}
+header.top .wrap{display:flex;align-items:center;gap:10px;height:56px}
+.brand{font-family:var(--disp);font-size:22px;letter-spacing:.01em;cursor:pointer}
+.brand span{color:var(--gold)}
+.crumb{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px;color:var(--muted)}
+/* hero */
+.hero{padding:44px 0 18px}
+.hero h1{font-family:var(--disp);font-weight:400;font-size:clamp(40px,10vw,64px);line-height:1;margin:0 0 10px}
+.hero p{color:var(--muted);margin:0}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+.grid{display:grid;gap:14px;margin:26px 0 40px}
+.course{position:relative;overflow:hidden;border-radius:22px;padding:24px 22px;cursor:pointer;border:1px solid var(--line);
+ background:radial-gradient(120% 90% at 100% 0%,rgba(142,107,216,.45),transparent 55%),radial-gradient(90% 80% at 0% 100%,rgba(63,163,122,.35),transparent 60%),var(--card)}
+.course h2{font-family:var(--disp);font-weight:400;font-size:34px;line-height:1.05;margin:6px 0 6px}
+.course .meta{font-size:13px;color:var(--muted)}
+.course .bar{height:6px;border-radius:9px;background:rgba(255,255,255,.08);margin-top:16px;overflow:hidden}
+.course .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2))}
+.course.soon{cursor:default;background:var(--bg2);border-style:dashed}
+.course.soon h2{font-size:24px;color:var(--muted)}
+/* lesson list */
+.lessons{list-style:none;margin:20px 0 40px;padding:0;display:grid;gap:10px}
+.lessons li{display:flex;gap:14px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;cursor:pointer}
+.lessons .num{font-family:var(--disp);font-size:26px;color:var(--gold);width:34px;text-align:center}
+.lessons .t{font-weight:600}.lessons .d{font-size:12px;color:var(--muted)}
+.lessons .chk{margin-left:auto;font-size:12px;color:var(--muted);white-space:nowrap}
+.lessons .chk.done{color:var(--green)}
+/* lesson */
+.lhead{padding:30px 0 6px}
+.lhead h1{font-family:var(--disp);font-weight:400;font-size:clamp(32px,8vw,48px);line-height:1.05;margin:6px 0}
+.brief{background:linear-gradient(180deg,rgba(226,180,92,.12),rgba(226,180,92,.04));border:1px solid rgba(226,180,92,.3);border-radius:18px;padding:18px 18px 8px;margin:18px 0 26px}
+.brief h3{font-family:var(--serif);margin:0 0 8px;font-size:20px}
+.flow h2{font-family:var(--serif);font-size:24px;margin:34px 0 6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.flow p{margin:0 0 14px}
+.ts{display:inline-block;font:600 11px/1 var(--sans);color:var(--gold);background:rgba(226,180,92,.12);border-radius:6px;padding:4px 6px;margin-right:6px;vertical-align:2px}
+.quote{border-left:3px solid var(--gold);background:#f6efe1;color:#2a2116;border-radius:4px 14px 14px 4px;padding:14px 16px;margin:16px 0;font-family:var(--serif);font-size:16px}
+.quote .src{display:block;font:700 10px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:#9a7426;margin-bottom:8px}
+figure{margin:18px 0}figure img{width:100%;border-radius:12px;background:#fff}figcaption{font-size:12px;color:var(--muted);margin-top:6px}
+.pending{border:1.5px dashed var(--line);border-radius:16px;padding:16px;color:var(--muted);font-size:14px;margin:16px 0}
+/* clip */
+.clip{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;margin:16px 0 20px}
+.clip .vh{display:flex;align-items:center;gap:10px;padding:12px 14px}
+.clip .vh b{font-size:14px}.clip .vh .ts{margin-left:auto}
+.clip video{display:block;width:100%;background:#000;max-height:60vh}
+.clip .ctl{display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px;border-top:1px solid var(--line)}
+.clip .noclip{padding:18px 14px;font-size:13px;color:var(--muted);border-top:1px solid var(--line)}
+/* practice button */
+.pbtn{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(63,163,122,.5);background:rgba(63,163,122,.14);color:#bff0d9;border-radius:999px;padding:6px 11px;font:600 12px/1 var(--sans);cursor:pointer}
+/* fab + sheet */
+.fab{position:fixed;right:16px;bottom:calc(16px + var(--safe-b));z-index:40;display:flex;gap:8px}
+.fab button{height:52px;border-radius:999px;border:0;padding:0 18px;font-weight:700;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.fab .tools{background:var(--gold);color:#1b1305}
+.fab .live{background:var(--green);color:#fff;display:none}
+.fab .live.show{display:inline-flex;align-items:center;gap:8px}
+.dot{width:9px;height:9px;border-radius:50%;background:#fff;animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.25}}
+.scrim{position:fixed;inset:0;z-index:50;background:rgba(5,4,10,.6);display:none}
+.scrim.show{display:block}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:51;max-height:88vh;overflow:auto;background:var(--bg2);border-radius:24px 24px 0 0;border-top:1px solid var(--line);
+ transform:translateY(105%);transition:transform .28s ease;padding:10px 0 calc(24px + var(--safe-b))}
+.sheet.show{transform:none}
+.grab{width:44px;height:5px;border-radius:9px;background:rgba(255,255,255,.2);margin:4px auto 10px}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:0 18px 10px;scrollbar-width:none}
+.tabs button{all:unset;cursor:pointer;white-space:nowrap;padding:9px 14px;border-radius:999px;font-weight:600;font-size:14px;background:var(--card);border:1px solid var(--line)}
+.tabs button.on{background:var(--ink);color:var(--bg)}
+.pane{padding:6px 18px}
+.big{font-family:var(--disp);font-size:72px;line-height:1;text-align:center;margin:6px 0 2px}
+.big small{font:600 14px var(--sans);color:var(--muted);margin-left:6px}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;margin:10px 0}
+input[type=range]{width:100%;accent-color:var(--gold)}
+.lbl{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:16px 0 6px}
+.beats{display:flex;justify-content:center;gap:8px;margin:14px 0}
+.beats i{width:18px;height:18px;border-radius:50%;background:var(--card2);border:2px solid transparent;cursor:pointer}
+.beats i.acc{border-color:var(--gold)}
+.beats i.mute{opacity:.25}
+.beats i.hit{background:var(--gold)}
+.seg{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px}
+.seg button{all:unset;cursor:pointer;padding:7px 12px;border-radius:999px;font-size:13px;font-weight:600}
+.seg button.on{background:var(--gold);color:#1b1305}
+.go{display:block;width:100%;height:56px;border-radius:16px;border:0;font-weight:800;font-size:17px;cursor:pointer;background:var(--gold);color:#1b1305;margin-top:14px}
+.go.stop{background:var(--red);color:#fff}
+.rlist{display:grid;gap:8px}
+.rlist button{all:unset;cursor:pointer;display:block;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.rlist button.on{border-color:var(--gold);background:rgba(226,180,92,.12)}
+.rlist b{display:block}.rlist span{font-size:12px;color:var(--muted)}
+.grid16{display:grid;gap:3px;margin:12px 0}
+.grid16 .r{display:grid;grid-template-columns:64px repeat(16,1fr);gap:3px;align-items:center;font-size:11px;color:var(--muted)}
+.grid16 .c{height:16px;border-radius:3px;background:var(--card2)}
+.grid16 .c.x{background:var(--gold)}.grid16 .c.o{background:rgba(226,180,92,.45)}
+.grid16 .c.now{outline:2px solid #fff}
+.timer{font-family:var(--disp);font-size:56px;text-align:center}
+.log{list-style:none;padding:0;margin:10px 0;display:grid;gap:8px}
+.log li{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14px}
+.log li .d{font-size:12px;color:var(--muted)}
+textarea,input[type=text],input[type=password],input[type=number]{width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;color:var(--ink);padding:12px;font:inherit}
+/* gate */
+#gate{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:24px;
+ background:radial-gradient(100% 70% at 80% 0%,rgba(142,107,216,.35),transparent 60%),radial-gradient(80% 60% at 0% 100%,rgba(63,163,122,.25),transparent 60%),var(--bg)}
+#gate .box{width:100%;max-width:360px;text-align:center}
+#gate h1{font-family:var(--disp);font-weight:400;font-size:52px;margin:0}
+#gate form{display:flex;gap:8px;margin-top:22px}
+#gate .err{color:var(--red);font-size:13px;min-height:20px;margin-top:10px}
+.foot{padding:30px 0 120px;font-size:12px;color:var(--muted);text-align:center}
+</style>
+</head>
+<body>
+<div id="gate"><div class="box">
+  <div class="eyebrow">Paolo Rubinacci</div>
+  <h1>Scuola</h1>
+  <p class="muted small">Area personale di studio</p>
+  <form id="gf"><input id="gp" type="password" placeholder="Password" autocomplete="current-password"><button class="btn gold" type="submit">Entra</button></form>
+  <div class="err" id="ge"></div>
+</div></div>
+
+<header class="top"><div class="wrap"><div class="brand" data-go="home">Scuola<span>.</span></div><div class="crumb" id="crumb"></div></div></header>
+<main id="app"></main>
+
+<div class="fab"><button class="live" id="live"><span class="dot"></span><span id="liveTxt">Metronomo</span></button><button class="tools" id="openTools">♩ Strumenti</button></div>
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet"><div class="grab"></div>
+  <div class="tabs" id="tabs"><button data-t="metro">Metronomo</button><button data-t="rhythm">Ritmi New Orleans</button><button data-t="diary">Diario</button></div>
+  <div id="pane"></div>
+</div>
+
+<script type="text/plain" id="enc">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</script>
+<script>
+"use strict";
+/* ================= data (filled after decrypt) ================= */
+let DATA={courses:[]};
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const LS={get(k,d){try{const v=localStorage.getItem('scuola-'+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem('scuola-'+k,JSON.stringify(v))}catch(e){}}};
+
+/* ================= crypto gate ================= */
+function b2u(b){const s=atob(b),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u}
+async function kdf(pw,salt){const k0=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);
+ return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:200000,hash:'SHA-256'},k0,{name:'AES-GCM',length:256},false,['decrypt'])}
+async function decBytes(raw,pw,key){const salt=raw.slice(0,16),iv=raw.slice(16,28),ct=raw.slice(28);key=key||await kdf(pw,salt);
+ return {pt:new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv},key,ct)),key}}
+let PW=null;
+async function unlock(pw,silent){
+ const enc=$('#enc').textContent.trim();
+ if(!enc||enc==='__ENC__'){DATA=window.DEMO_DATA||DATA;return boot()}
+ try{const {pt}=await decBytes(b2u(enc),pw);DATA=JSON.parse(new TextDecoder().decode(pt));PW=pw;LS.set('pw',pw);boot()}
+ catch(e){if(!silent)$('#ge').textContent='Password non corretta.';LS.set('pw',null)}}
+/* encrypted media: fetch .enc, decrypt with same password, make blob URL */
+const blobCache={};
+async function mediaURL(src,type){
+ if(!/\.enc$/.test(src))return src;
+ if(blobCache[src])return blobCache[src];
+ const r=await fetch(src);const raw=new Uint8Array(await r.arrayBuffer());
+ const {pt}=await decBytes(raw,PW);return blobCache[src]=URL.createObjectURL(new Blob([pt],{type}))}
+$('#gf').addEventListener('submit',e=>{e.preventDefault();unlock($('#gp').value)});
+
+/* ================= router ================= */
+function go(h){location.hash=h}
+window.addEventListener('hashchange',render);
+document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g){go(g.dataset.go==='home'?'':g.dataset.go)}});
+function boot(){$('#gate').remove();render()}
+function progress(){return LS.get('done',{})}
+function render(){
+ const h=location.hash.slice(1),[cid,lid]=h.split('-l');const c=DATA.courses.find(x=>x.id===cid);
+ if(c&&lid)return renderLesson(c,c.lessons.find(l=>String(l.n)===lid));
+ if(c)return renderCourse(c);
+ renderHome()}
+function renderHome(){
+ $('#crumb').textContent='';
+ const done=progress();
+ $('#app').innerHTML=`<div class="wrap"><section class="hero"><div class="eyebrow">La mia scuola</div><h1>Studio &amp; pratica</h1><p>I corsi che sto seguendo, con i passaggi suonati, gli esercizi e gli strumenti per esercitarmi.</p></section>
+ <div class="grid">${DATA.courses.map(c=>{const n=c.lessons.length,d=c.lessons.filter(l=>done[c.id+'-'+l.n]).length;
+  return`<div class="course" data-go="${c.id}"><div class="eyebrow">${esc(c.kind||'Videocorso')}</div><h2>${esc(c.title)}</h2><div class="meta">${esc(c.sub)}</div><div class="meta" style="margin-top:6px">${d} / ${n} lezioni completate</div><div class="bar"><i style="width:${n?d/n*100:0}%"></i></div></div>`}).join('')}
+  <div class="course soon"><div class="eyebrow">Prossimamente</div><h2>Altri corsi</h2><div class="meta">Qui arriveranno i prossimi videocorsi.</div></div></div>
+ <div class="foot">Scuola · Paolo Rubinacci · area privata</div></div>`;window.scrollTo(0,0)}
+function renderCourse(c){
+ $('#crumb').textContent=c.title;const done=progress();
+ $('#app').innerHTML=`<div class="wrap"><section class="hero"><div class="eyebrow">${esc(c.kind||'Videocorso')}</div><h1>${esc(c.title)}</h1><p>${esc(c.sub)}</p></section>
+ ${c.intro?`<p class="muted">${c.intro}</p>`:''}
+ <ul class="lessons">${c.lessons.map(l=>`<li data-go="${c.id}-l${l.n}"><span class="num">${l.n}</span><div><div class="t">${esc(l.title)}</div><div class="d">${esc(l.dur||'')}${l.clips?` · ${l.clips} passaggi suonati`:''}${l.ready?'':' · in preparazione'}</div></div><span class="chk ${done[c.id+'-'+l.n]?'done':''}">${done[c.id+'-'+l.n]?'✓ fatta':'›'}</span></li>`).join('')}</ul>
+ <div class="foot"></div></div>`;window.scrollTo(0,0)}
+function renderLesson(c,l){
+ if(!l)return go(c.id);
+ $('#crumb').textContent=c.title+' · Lezione '+l.n;const key=c.id+'-'+l.n,done=progress()[key];
+ let h=`<div class="wrap"><section class="lhead"><div class="eyebrow">Lezione ${l.n} · ${esc(l.dur||'')}</div><h1>${esc(l.title)}</h1></section>`;
+ if(l.brief)h+=`<div class="brief"><h3>In breve</h3>${l.brief}</div>`;
+ h+=`<div class="flow">`+(l.blocks||[]).map(blockHTML).join('')+`</div>`;
+ if(!l.ready)h+=`<div class="pending">Questa lezione è in preparazione: trascrizione, citazioni dal PDF del corso e partiture arrivano qui, con i passaggi suonati integrati nel testo.</div>`;
+ const i=c.lessons.indexOf(l),prev=c.lessons[i-1],next=c.lessons[i+1];
+ h+=`<div class="row" style="justify-content:space-between;margin:30px 0">${prev?`<button class="btn sm" data-go="${c.id}-l${prev.n}">‹ Lezione ${prev.n}</button>`:'<span></span>'}
+  <button class="btn sm ${done?'on':''}" id="doneBtn">${done?'✓ Completata':'Segna come fatta'}</button>
+  ${next?`<button class="btn sm" data-go="${c.id}-l${next.n}">Lezione ${next.n} ›</button>`:'<span></span>'}</div><div class="foot"></div></div>`;
+ $('#app').innerHTML=h;window.scrollTo(0,0);
+ $('#doneBtn').onclick=()=>{const p=progress();p[key]=!p[key];LS.set('done',p);renderLesson(c,l)};
+ document.querySelectorAll('.clip[data-src]').forEach(initClip);
+}
+function blockHTML(b){
+ const pr=b.practice?practiceBtn(b.practice):'';
+ switch(b.t){
+  case'h':return`<h2>${esc(b.text)}${pr}</h2>`;
+  case'p':return`<p>${b.time?`<span class="ts">${esc(b.time)}</span>`:''}${b.html}</p>`;
+  case'quote':return`<div class="quote"><span class="src">Dal PDF del corso</span>${b.html}</div>`;
+  case'img':return`<figure><img src="${esc(b.src)}" alt="${esc(b.cap||'')}" loading="lazy"><figcaption>${esc(b.cap||'')}</figcaption></figure>`;
+  case'clip':return`<div class="clip"${b.src?` data-src="${esc(b.src)}"`:''}><div class="vh"><b>▶ ${esc(b.label)}</b><span class="ts">${esc(b.from)}–${esc(b.to)}</span></div>
+   ${b.src?`<video playsinline controls preload="none"></video><div class="ctl"><span class="seg sp"><button data-r=".5">50%</button><button data-r=".75">75%</button><button data-r="1" class="on">100%</button></span>
+   <button class="btn sm" data-ab="a">A</button><button class="btn sm" data-ab="b">B</button><button class="btn sm" data-ab="loop">⟲ Loop</button>${pr}</div>`
+   :`<div class="noclip">Ritaglio video in arrivo.${pr?' '+pr:''}</div>`}</div>`;
+  case'practice':return`<p>${pr}</p>`;
+  default:return''}}
+function practiceBtn(p){return` <button class="pbtn" data-practice='${esc(JSON.stringify(p))}'>♩ ${esc(p.label||'Esercitati')} · ${p.bpm} bpm${p.rhythm?' · '+esc(RHY[p.rhythm]?.name||''):''}</button>`}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-practice]');if(!b)return;const p=JSON.parse(b.dataset.practice);
+ if(p.rhythm&&RHY[p.rhythm]){R.id=p.rhythm;R.bpm=p.bpm;openTools('rhythm');startRhythm()}else{M.bpm=p.bpm;if(p.swing!=null)M.swing=p.swing;openTools('metro');startMetro()}});
+/* clip player with A-B loop & slow-down (pitch preserved) */
+function initClip(el){
+ const v=el.querySelector('video');let A=null,B=null,loop=false,loaded=false;
+ async function load(){if(loaded)return;loaded=true;v.src=await mediaURL(el.dataset.src,'video/mp4');v.preservesPitch=true;v.webkitPreservesPitch=true}
+ v.addEventListener('play',load,{once:true});el.querySelector('.vh').addEventListener('click',async()=>{await load();v.play()});
+ v.addEventListener('timeupdate',()=>{if(loop&&A!=null&&B!=null&&v.currentTime>=B){v.currentTime=A}});
+ el.querySelectorAll('[data-r]').forEach(b=>b.onclick=async()=>{await load();v.playbackRate=+b.dataset.r;el.querySelectorAll('[data-r]').forEach(x=>x.classList.toggle('on',x===b))});
+ el.querySelectorAll('[data-ab]').forEach(b=>b.onclick=async()=>{await load();const k=b.dataset.ab;
+  if(k==='a'){A=v.currentTime;b.textContent='A '+fmt(A)}else if(k==='b'){B=v.currentTime;b.textContent='B '+fmt(B)}
+  else{loop=!loop;b.classList.toggle('on',loop);if(loop){if(A==null)A=0;if(B==null)B=v.duration||1e9;v.currentTime=A;v.play()}}})}
+function fmt(t){t=Math.max(0,t||0);return Math.floor(t/60)+':'+String(Math.floor(t%60)).padStart(2,'0')}
+
+/* ================= audio engine ================= */
+let AC=null,MASTER=null,NOISE=null;
+function ac(){if(!AC){AC=new (window.AudioContext||window.webkitAudioContext)();MASTER=AC.createGain();MASTER.gain.value=.9;MASTER.connect(AC.destination);
+ const n=AC.createBuffer(1,AC.sampleRate*.3,AC.sampleRate),d=n.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;NOISE=n}
+ if(AC.state==='suspended')AC.resume();return AC}
+function env(t,g,a,dur){g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(a,t+.002);g.gain.exponentialRampToValueAtTime(.0008,t+dur)}
+const SND={
+ click(t,acc){const o=AC.createOscillator(),g=AC.createGain();o.frequency.value=acc?1760:1100;o.connect(g);g.connect(MASTER);env(t,g,acc?.9:.55,.05);o.start(t);o.stop(t+.06)},
+ sub(t){const o=AC.createOscillator(),g=AC.createGain();o.frequency.value=880;o.connect(g);g.connect(MASTER);env(t,g,.18,.03);o.start(t);o.stop(t+.04)},
+ clave(t,v=1){const o=AC.createOscillator(),g=AC.createGain(),f=AC.createBiquadFilter();o.type='square';o.frequency.value=2500;f.type='bandpass';f.frequency.value=2500;f.Q.value=8;o.connect(f);f.connect(g);g.connect(MASTER);env(t,g,.7*v,.05);o.start(t);o.stop(t+.06)},
+ kick(t,v=1){const o=AC.createOscillator(),g=AC.createGain();o.frequency.setValueAtTime(140,t);o.frequency.exponentialRampToValueAtTime(45,t+.12);o.connect(g);g.connect(MASTER);env(t,g,1*v,.22);o.start(t);o.stop(t+.25)},
+ snare(t,v=1){const s=AC.createBufferSource(),g=AC.createGain(),f=AC.createBiquadFilter();s.buffer=NOISE;f.type='highpass';f.frequency.value=1500;s.connect(f);f.connect(g);g.connect(MASTER);env(t,g,.55*v,.14);s.start(t);s.stop(t+.16);
+  const o=AC.createOscillator(),g2=AC.createGain();o.frequency.value=190;o.connect(g2);g2.connect(MASTER);env(t,g2,.3*v,.08);o.start(t);o.stop(t+.1)},
+ hat(t,v=1){const s=AC.createBufferSource(),g=AC.createGain(),f=AC.createBiquadFilter();s.buffer=NOISE;f.type='highpass';f.frequency.value=7000;s.connect(f);f.connect(g);g.connect(MASTER);env(t,g,.28*v,.04);s.start(t);s.stop(t+.05)},
+ bass(t,v=1){const o=AC.createOscillator(),g=AC.createGain();o.type='triangle';o.frequency.value=73.4;o.connect(g);g.connect(MASTER);env(t,g,.7*v,.18);o.start(t);o.stop(t+.2)},
+ bell(t,v=1){const o=AC.createOscillator(),g=AC.createGain();o.type='triangle';o.frequency.value=1320;o.connect(g);g.connect(MASTER);env(t,g,.35*v,.12);o.start(t);o.stop(t+.14)}};
+
+/* ================= metronome ================= */
+const M=Object.assign({bpm:90,beats:4,sub:1,swing:0,acc:[2,0,0,0],playing:false,train:false,trainStep:2,trainBars:4,trainMax:160},LS.get('metro',{}),{playing:false});
+let mTimer=null,mNext=0,mStep=0,mBar=0;
+function mSave(){const {playing,...s}=M;LS.set('metro',s)}
+function startMetro(){stopRhythm();ac();if(M.playing)return;M.playing=true;mStep=0;mBar=0;mNext=AC.currentTime+.08;mTimer=setInterval(mTick,25);live();if(curTab==='metro')paneMetro()}
+function stopMetro(){M.playing=false;clearInterval(mTimer);live();if(curTab==='metro')paneMetro()}
+function mTick(){const spb=60/M.bpm,stepDur=spb/M.sub;
+ while(mNext<AC.currentTime+.12){const beat=Math.floor(mStep/M.sub),s=mStep%M.sub;let t=mNext;
+  if(M.sub===2&&s===1)t+=stepDur*(M.swing/100)*.667; /* swing: 0 = straight, 100 = full triplet */
+  if(s===0){const a=M.acc[beat]||0;if(a!==-1)SND.click(t,a===2||a===1);flash(beat,t)}else SND.sub(t);
+  mNext+=stepDur;mStep++;if(mStep>=M.beats*M.sub){mStep=0;mBar++;
+   if(M.train&&mBar%M.trainBars===0&&M.bpm<M.trainMax){M.bpm=Math.min(M.trainMax,M.bpm+M.trainStep);const e=$('#mBpm');if(e)e.innerHTML=M.bpm+'<small>bpm</small>';const r=$('#mRange');if(r)r.value=M.bpm;live()}}}}
+function flash(beat,t){setTimeout(()=>{document.querySelectorAll('#mBeats i').forEach((x,k)=>x.classList.toggle('hit',k===beat))},Math.max(0,(t-AC.currentTime)*1000))}
+let taps=[];
+function paneMetro(){
+ if(M.acc.length!==M.beats){M.acc=Array.from({length:M.beats},(_,k)=>k===0?2:0)}
+ $('#pane').innerHTML=`<div class="pane">
+ <div class="big" id="mBpm">${M.bpm}<small>bpm</small></div>
+ <input type="range" id="mRange" min="30" max="260" value="${M.bpm}">
+ <div class="row"><button class="ib" data-d="-5">−5</button><button class="ib" data-d="-1">−</button><button class="btn sm" id="tap">Tap</button><button class="ib" data-d="1">+</button><button class="ib" data-d="5">+5</button></div>
+ <div class="beats" id="mBeats">${M.acc.map(a=>`<i class="${a===2||a===1?'acc':''} ${a===-1?'mute':''}"></i>`).join('')}</div>
+ <p class="small muted" style="text-align:center;margin:0">Tocca un pallino: accento → normale → muto.</p>
+ <div class="lbl">Battute e suddivisione</div>
+ <div class="row" style="justify-content:flex-start"><span class="seg" id="mBeatsSeg">${[2,3,4,6].map(n=>`<button data-b="${n}" class="${M.beats===n?'on':''}">${n}/4</button>`).join('')}</span>
+ <span class="seg" id="mSubSeg">${[[1,'♩'],[2,'♪♪'],[3,'3'],[4,'♬']].map(([n,l])=>`<button data-s="${n}" class="${M.sub===n?'on':''}">${l}</button>`).join('')}</span></div>
+ <div class="row" style="justify-content:flex-start"><span class="seg">${[['acc1','Accento sull\'1'],['acc24','2 e 4'],['accall','Tutti']].map(([k,l])=>`<button data-preset="${k}">${l}</button>`).join('')}</span></div>
+ <div class="lbl">Swing ${M.sub===2?'· '+M.swing+'%':'(con ♪♪)'}</div>
+ <input type="range" id="mSwing" min="0" max="100" value="${M.swing}" ${M.sub===2?'':'disabled'}>
+ <div class="lbl">Allenatore di velocità</div>
+ <div class="row" style="justify-content:flex-start"><button class="btn sm ${M.train?'on':''}" id="mTrain">${M.train?'Attivo':'Spento'}</button>
+  <span class="small">+<input type="number" id="tS" value="${M.trainStep}" style="width:58px;padding:6px"> bpm ogni <input type="number" id="tB" value="${M.trainBars}" style="width:58px;padding:6px"> battute, fino a <input type="number" id="tM" value="${M.trainMax}" style="width:68px;padding:6px"></span></div>
+ <button class="go ${M.playing?'stop':''}" id="mGo">${M.playing?'■ Stop':'▶ Avvia'}</button></div>`;
+ const setB=v=>{M.bpm=Math.max(30,Math.min(260,Math.round(v)));$('#mBpm').innerHTML=M.bpm+'<small>bpm</small>';$('#mRange').value=M.bpm;mSave();live()};
+ $('#mRange').oninput=e=>setB(+e.target.value);
+ document.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>setB(M.bpm+ +b.dataset.d));
+ $('#tap').onclick=()=>{const n=performance.now();taps=taps.filter(x=>n-x<2500);taps.push(n);if(taps.length>1){const d=(taps[taps.length-1]-taps[0])/(taps.length-1);setB(60000/d)}};
+ document.querySelectorAll('#mBeats i').forEach((x,k)=>x.onclick=()=>{const a=M.acc[k];M.acc[k]=a===2||a===1?0:a===0?-1:2;mSave();paneMetro()});
+ document.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>{M.beats=+b.dataset.b;M.acc=[];mSave();paneMetro()});
+ document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{M.sub=+b.dataset.s;mSave();paneMetro()});
+ document.querySelectorAll('[data-preset]').forEach(b=>b.onclick=()=>{const k=b.dataset.preset;M.acc=Array.from({length:M.beats},(_,i)=>k==='accall'?2:k==='acc1'?(i===0?2:0):(i%2===1?2:0));mSave();paneMetro()});
+ $('#mSwing').oninput=e=>{M.swing=+e.target.value;mSave();document.querySelectorAll('.lbl')[1].textContent='Swing · '+M.swing+'%'};
+ $('#mTrain').onclick=()=>{M.train=!M.train;mSave();paneMetro()};
+ [['tS','trainStep'],['tB','trainBars'],['tM','trainMax']].forEach(([id,k])=>$('#'+id).onchange=e=>{M[k]=Math.max(1,+e.target.value||1);mSave()});
+ $('#mGo').onclick=()=>M.playing?stopMetro():startMetro()}
+
+/* ================= New Orleans rhythms (16 steps per bar; x = strong, o = soft) ================= */
+const RHY={
+ habanera:{name:'Habanera / tango',desc:'La base dello "Spanish tinge": croma puntata, semicroma, due crome.',bpm:90,
+  parts:{bass:'x..xx.x.x..xx.x.',hat:'o.o.o.o.o.o.o.o.'}},
+ tresillo:{name:'Tresillo',desc:'3-3-2: la cellula che sta sotto tutto, dal second line al R&B.',bpm:100,
+  parts:{clave:'x.....x.....x...',kick:'x.....x.....x...',hat:'o.o.o.o.o.o.o.o.'}},
+ clave32:{name:'Clave 3-2 (son)',desc:'Lato "3" poi lato "2".',bpm:95,bars:2,
+  parts:{clave:'x.....x.....x.......x...x.......',hat:'o.o.o.o.o.o.o.o.o.o.o.o.o.o.o.o.'}},
+ clave23:{name:'Clave 2-3',desc:'Stessa clave, partendo dal lato "2".',bpm:95,bars:2,
+  parts:{clave:'....x...x.......x.....x.....x...',hat:'o.o.o.o.o.o.o.o.o.o.o.o.o.o.o.o.'}},
+ rumba:{name:'Rumba alla Longhair',desc:'Rumba-boogie (semplificata): tresillo nel basso, clave 3-2 sopra.',bpm:100,bars:2,
+  parts:{bass:'x.....x.....x...x.....x.....x...',clave:'x.....x.....x.......x...x.......',snare:'....x.......x.......x.......x...',hat:'o.o.o.o.o.o.o.o.o.o.o.o.o.o.o.o.'}},
+ secondline:{name:'Second line',desc:'Groove di strada delle brass band (semplificato): cassa sincopata, rullante con ghost notes.',bpm:96,
+  parts:{kick:'x.....x.x.......',snare:'..o.x.o...o.x..o',hat:'x.x.x.x.x.x.x.x.'}},
+ shuffle:{name:'Shuffle / boogie',desc:'Terzine con la croma di mezzo muta: base di boogie e New Orleans blues.',bpm:110,triplet:true,
+  parts:{kick:'x.....x.....',snare:'...x.....x..',hat:'x.xx.xx.xx.x'}},
+ funk:{name:'Street beat / funk',desc:'Groove sincopato alla Meters (semplificato): rullante sul 2 e 4.',bpm:96,
+  parts:{kick:'x..x..x...x..x..',snare:'....x..o.o..x...',hat:'x.xxx.xxx.xxx.xx'}}};
+const R=Object.assign({id:'rumba',bpm:100,playing:false,mute:{}},LS.get('rhythm',{}),{playing:false});
+let rTimer=null,rNext=0,rStep=0;
+function rSave(){const {playing,...s}=R;LS.set('rhythm',s)}
+function startRhythm(){stopMetro();ac();R.playing=true;rStep=0;rNext=AC.currentTime+.08;clearInterval(rTimer);rTimer=setInterval(rTick,25);live();if(curTab==='rhythm')paneRhythm()}
+function stopRhythm(){R.playing=false;clearInterval(rTimer);live();if(curTab==='rhythm')paneRhythm()}
+function rTick(){const r=RHY[R.id],per=r.triplet?3:4,len=(r.triplet?12:16)*(r.bars||1),step=60/R.bpm/per;
+ while(rNext<AC.currentTime+.12){const t=rNext;
+  for(const [p,pat] of Object.entries(r.parts)){if(R.mute[p])continue;const c=pat[rStep%pat.length];if(c==='x')SND[p](t,1);else if(c==='o')SND[p](t,.45)}
+  const s=rStep;setTimeout(()=>document.querySelectorAll('.grid16 .c').forEach(x=>x.classList.toggle('now',+x.dataset.i===s)),Math.max(0,(t-AC.currentTime)*1000));
+  rNext+=step;rStep=(rStep+1)%len}}
+const PNAME={clave:'Clave',kick:'Cassa',snare:'Rullante',hat:'Charleston',bass:'Basso',bell:'Campana'};
+function paneRhythm(){const r=RHY[R.id];
+ $('#pane').innerHTML=`<div class="pane">
+ <div class="rlist">${Object.entries(RHY).map(([k,x])=>`<button data-rid="${k}" class="${k===R.id?'on':''}"><b>${x.name}</b><span>${x.desc}</span></button>`).join('')}</div>
+ <div class="grid16">${Object.entries(r.parts).map(([p,pat])=>`<div class="r" style="grid-template-columns:64px repeat(${pat.length},1fr)"><span data-mute="${p}" style="cursor:pointer;${R.mute[p]?'text-decoration:line-through;opacity:.5':''}">${PNAME[p]}</span>${[...pat].map((c,i)=>`<i class="c ${c==='x'?'x':c==='o'?'o':''}" data-i="${i}"></i>`).join('')}</div>`).join('')}</div>
+ <p class="small muted">Tocca il nome di uno strumento per toglierlo e suonarlo tu.</p>
+ <div class="big" id="rBpm">${R.bpm}<small>bpm</small></div><input type="range" id="rRange" min="50" max="180" value="${R.bpm}">
+ <button class="go ${R.playing?'stop':''}" id="rGo">${R.playing?'■ Stop':'▶ Suona il ritmo'}</button></div>`;
+ document.querySelectorAll('[data-rid]').forEach(b=>b.onclick=()=>{R.id=b.dataset.rid;R.bpm=RHY[R.id].bpm;rStep=0;rSave();paneRhythm()});
+ document.querySelectorAll('[data-mute]').forEach(b=>b.onclick=()=>{R.mute[b.dataset.mute]=!R.mute[b.dataset.mute];rSave();paneRhythm()});
+ $('#rRange').oninput=e=>{R.bpm=+e.target.value;$('#rBpm').innerHTML=R.bpm+'<small>bpm</small>';rSave();live()};
+ $('#rGo').onclick=()=>R.playing?stopRhythm():startRhythm()}
+
+/* ================= practice diary ================= */
+const D=Object.assign({start:null,acc:0},LS.get('timer',{}));let dInt=null;
+function tNow(){return D.acc+(D.start?Date.now()-D.start:0)}
+function hms(ms){const s=Math.floor(ms/1000);return`${Math.floor(s/3600)?Math.floor(s/3600)+':':''}${String(Math.floor(s/60)%60).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`}
+function paneDiary(){const log=LS.get('log',[]),week=log.filter(e=>Date.now()-e.at<7*864e5).reduce((a,e)=>a+e.ms,0);
+ $('#pane').innerHTML=`<div class="pane">
+ <div class="timer" id="tShow">${hms(tNow())}</div>
+ <div class="row"><button class="btn ${D.start?'':'gold'}" id="tGo">${D.start?'❚❚ Pausa':'▶ Inizia la pratica'}</button><button class="btn sm" id="tReset">Azzera</button></div>
+ <div class="lbl">Cosa hai esercitato</div>
+ <input type="text" id="dWhat" placeholder="Es. Lezione 3 · rumba alla Longhair, mano sinistra">
+ <div class="row" style="justify-content:flex-start"><span class="small">Tempo raggiunto</span><input type="number" id="dBpm" value="${M.playing?M.bpm:R.playing?R.bpm:''}" placeholder="bpm" style="width:90px;padding:8px"></div>
+ <textarea id="dNote" rows="2" placeholder="Note: cosa migliorare la prossima volta"></textarea>
+ <button class="go" id="dSave">Salva nel diario</button>
+ <div class="lbl">Ultimi 7 giorni · ${hms(week)}</div>
+ <ul class="log">${log.slice().reverse().slice(0,30).map(e=>`<li><b>${esc(e.what||'Pratica')}</b>${e.bpm?` · ${e.bpm} bpm`:''} · ${hms(e.ms)}<div class="d">${new Date(e.at).toLocaleDateString('it-IT',{weekday:'short',day:'numeric',month:'short'})}${e.note?' · '+esc(e.note):''}</div></li>`).join('')||'<li class="muted">Ancora nessuna sessione salvata.</li>'}</ul>
+ <p class="small muted">Il diario resta salvato su questo telefono.</p></div>`;
+ $('#tGo').onclick=()=>{if(D.start){D.acc=tNow();D.start=null}else D.start=Date.now();LS.set('timer',D);paneDiary()};
+ $('#tReset').onclick=()=>{D.start=null;D.acc=0;LS.set('timer',D);paneDiary()};
+ $('#dSave').onclick=()=>{const ms=tNow();const l=LS.get('log',[]);l.push({at:Date.now(),ms,what:$('#dWhat').value.trim(),bpm:+$('#dBpm').value||null,note:$('#dNote').value.trim()});LS.set('log',l);D.start=null;D.acc=0;LS.set('timer',D);paneDiary()};
+ clearInterval(dInt);dInt=setInterval(()=>{const e=$('#tShow');if(e)e.textContent=hms(tNow());else clearInterval(dInt)},500)}
+
+/* ================= tools sheet ================= */
+let curTab=null;
+function openTools(t){curTab=t||curTab||'metro';$('#sheet').classList.add('show');$('#scrim').classList.add('show');showTab()}
+function closeTools(){$('#sheet').classList.remove('show');$('#scrim').classList.remove('show');curTab=null}
+function showTab(){document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===curTab));({metro:paneMetro,rhythm:paneRhythm,diary:paneDiary})[curTab]()}
+let lastTab='metro';
+$('#openTools').onclick=()=>openTools(lastTab);
+$('#scrim').onclick=()=>{lastTab=curTab;closeTools()};
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{curTab=b.dataset.t;lastTab=curTab;showTab()});
+function live(){const on=M.playing||R.playing,l=$('#live');l.classList.toggle('show',on);$('#liveTxt').textContent=M.playing?M.bpm+' bpm · Stop':R.playing?RHY[R.id].name.split(' ')[0]+' '+R.bpm+' · Stop':''}
+$('#live').onclick=()=>{stopMetro();stopRhythm()};
+
+/* start */
+const saved=LS.get('pw',null);
+if($('#enc').textContent.trim()==='__ENC__')unlock('');else if(saved)unlock(saved,true);
+</script>
+</body>
+</html>
