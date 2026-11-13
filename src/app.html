@@ -248,6 +248,7 @@ function renderLesson(c,l){
  $('#app').innerHTML=h;window.scrollTo(0,0);
  $('#doneBtn').onclick=()=>{const p=progress();p[key]=!p[key];LS.set('done',p);renderLesson(c,l)};
  document.querySelectorAll('.clip[data-src]').forEach(initClip);
+ document.querySelectorAll('img[data-enc]').forEach(async i=>{i.src=await mediaURL(i.dataset.enc,'image/png')});
 }
 function blockHTML(b){
  const pr=b.practice?practiceBtn(b.practice):'';
@@ -255,7 +256,7 @@ function blockHTML(b){
   case'h':return`<h2><span class="nt">${esc(b.text)}</span>${pr}</h2>`;
   case'p':return`<p>${b.time?`<span class="ts">${esc(b.time)}</span>`:''}${b.html}</p>`;
   case'quote':return`<div class="quote"><span class="src">Dal PDF del corso</span>${b.html}</div>`;
-  case'img':return`<figure><img src="${esc(b.src)}" alt="${esc(b.cap||'')}" loading="lazy"><figcaption>${esc(b.cap||'')}</figcaption></figure>`;
+  case'img':return`<figure><img ${/\.enc$/.test(b.src)?'data-enc':'src'}="${esc(b.src)}" alt="${esc(b.cap||'')}" loading="lazy"><figcaption>${esc(b.cap||'')}</figcaption></figure>`;
   case'clip':return`<div class="clip"${b.src?` data-src="${esc(b.src)}"`:''}><div class="vh"><b>▶ ${esc(b.label)}</b><span class="ts">${esc(b.from)}–${esc(b.to)}</span></div>
    ${b.src?`<video playsinline controls preload="none"></video><div class="ctl"><span class="seg sp"><button data-r=".5">50%</button><button data-r=".75">75%</button><button data-r="1" class="on">100%</button></span>
    <button class="btn sm" data-ab="a">A</button><button class="btn sm" data-ab="b">B</button><button class="btn sm" data-ab="loop">⟲ Loop</button>${pr}</div>`
