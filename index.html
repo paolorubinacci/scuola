@@ -160,6 +160,47 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .log{list-style:none;padding:0;margin:10px 0;display:grid;gap:8px}
 .log li{background:var(--surf);border-radius:12px;padding:10px 12px;font-size:14px}.log li .d{font-size:12px;color:var(--muted)}
 textarea,input[type=text],input[type=password],input[type=number]{width:100%;background:#fff;border:1px solid var(--line);border-radius:12px;color:var(--ink);padding:12px;font:16px var(--font)}
+
+/* ascolti consigliati */
+.acard{display:flex;gap:14px;align-items:center;margin:22px 0 4px;padding:16px;background:var(--navy);color:var(--cream);border-bottom:3px solid var(--gold);cursor:pointer}
+.acard .ic{flex:none;width:46px;height:46px;border-radius:50%;background:var(--gold);color:var(--navy);display:flex;align-items:center;justify-content:center;font-size:20px}
+.acard b{display:block;font:400 24px/1.1 "NolaMardiGras",Georgia,serif}.acard span{font:500 13px var(--font);color:rgba(250,246,236,.8)}
+.asec{font:700 11px var(--font);letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:28px 0 8px}
+.alist{display:grid;gap:10px}
+.atr{background:var(--cream);border:1px solid var(--nline);border-left:3px solid var(--gold);padding:12px 14px;cursor:pointer}
+.atr.has{border-left-color:var(--wine)}
+.atr .h{display:flex;align-items:center;gap:10px}
+.atr .pl{flex:none;width:34px;height:34px;border-radius:50%;background:var(--paper);border:1px solid var(--nline);display:flex;align-items:center;justify-content:center;color:var(--nmuted);font:700 13px var(--font)}
+.atr.has .pl{background:var(--wine);border-color:var(--wine);color:#fff}
+.atr .tt{font:700 17px/1.25 "Playfair Display",Georgia,serif;color:var(--navy)}.atr .ar{font:500 13px var(--font);color:var(--nmuted)}
+.atr .cx{font-size:15px;margin:8px 0 0;color:var(--nink)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--nline);background:var(--paper);border-radius:999px;padding:5px 10px;font:600 12px/1 var(--font);color:var(--navy);cursor:pointer}
+.chip.r{border-color:var(--gold2);color:var(--gold)}.chip.s{cursor:default;color:var(--nmuted)}
+.disco li{margin:6px 0}
+.stp{background:var(--cream);border:1px solid var(--nline);border-top:3px solid var(--wine);padding:14px;margin:18px 0;font-family:var(--font)}
+.stp .tr{display:flex;align-items:center;gap:10px}
+.stp .pp{flex:none;width:56px;height:56px;border-radius:50%;border:0;background:var(--wine);color:#fff;font-size:22px;cursor:pointer}
+.stp .time{font:700 13px var(--font);color:var(--nmuted);min-width:92px;text-align:right}
+.stp input[type=range]{accent-color:var(--wine)}
+.stp .ab{position:relative;height:6px;margin:-2px 0 6px}.stp .ab i{position:absolute;top:0;height:6px;background:rgba(184,137,58,.45);border-radius:3px}
+.stp .modes{display:flex;gap:6px;margin:12px 0 4px}
+.stp .modes button{all:unset;flex:1;text-align:center;cursor:pointer;padding:9px 6px;border:1px solid var(--nline);background:var(--paper);font:700 13px var(--font);color:var(--navy)}
+.stp .modes button.on{background:var(--navy);color:var(--cream);border-color:var(--navy)}
+.stems{display:grid;gap:6px;margin:10px 0}
+.stem{display:grid;grid-template-columns:110px 1fr 38px;gap:10px;align-items:center;background:var(--paper);border:1px solid var(--nline);padding:8px 10px}
+.stem .nm{all:unset;cursor:pointer;font:700 14px var(--font);color:var(--navy);display:flex;align-items:center;gap:8px}
+.stem .nm i{width:12px;height:12px;border-radius:50%;background:var(--gold);flex:none}
+.stem.off .nm{color:var(--nmuted);text-decoration:line-through}.stem.off .nm i{background:var(--nline)}
+.stem .so{all:unset;cursor:pointer;width:34px;height:30px;text-align:center;border:1px solid var(--nline);font:800 12px/30px var(--font);color:var(--nmuted)}
+.stem .so.on{background:var(--gold);border-color:var(--gold);color:#fff}
+.presets{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px}
+.stp .row2{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px}
+.stp .note{font-size:12px;color:var(--nmuted);margin:8px 0 0}
+.rctx{font-size:13px;margin:10px 0 0;color:var(--ink)}
+.rsongs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.rsongs span{display:inline-block;background:#fff;border:1px solid var(--line);border-radius:12px;padding:6px 11px;font:500 12px/1.35 var(--font);color:var(--muted)}
+.rsongs span b{color:var(--ink)}.rsongs span.lk{border-color:var(--blue);cursor:pointer}.rsongs span.lk b{color:var(--blue)}
 /* gate */
 #gate{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(90% 60% at 100% 0%,#dbe9ff,transparent 60%),radial-gradient(70% 50% at 0% 100%,#ffe3dc,transparent 60%),#fff}
 #gate .box{width:100%;max-width:360px;text-align:center}
@@ -233,7 +274,10 @@ new MutationObserver(()=>applyNola(document)).observe(document.getElementById('a
 function boot(){$('#gate').remove();render()}
 function progress(){return LS.get('done',{})}
 function render(){
- const h=location.hash.slice(1),[cid,lid]=h.split('-l');const c=DATA.courses.find(x=>x.id===cid);
+ ascStop();
+ const h=location.hash.slice(1),am=h.match(/^(.+?)-ascolti(?:-([a-z0-9]+))?$/);
+ if(am){const ac_=DATA.courses.find(x=>x.id===am[1]);if(ac_)return renderAscolti(ac_,am[2])}
+ const [cid,lid]=h.split('-l');const c=DATA.courses.find(x=>x.id===cid);
  if(c&&lid)return renderLesson(c,c.lessons.find(l=>String(l.n)===lid));
  if(c)return renderCourse(c);
  renderHome()}
@@ -259,6 +303,7 @@ function renderCourse(c){
  theme(c.theme?'t-'+c.theme.replace(/^.*\s/,''):'');$('#crumb').textContent=c.title;updStreak();const done=progress();
  $('#app').innerHTML=`<section class="chero"><div class="wrap"><div class="eyebrow">${esc(c.kind||'Videocorso')}</div><h1 class="nt">${esc(c.title)}</h1><p>${esc(c.sub)}</p></div></section><div class="wrap">
  <ul class="lessons">${c.lessons.map(l=>`<li data-go="${c.id}-l${l.n}"><span class="num">${l.n}</span><div><div class="t">${esc(l.title)}</div><div class="d">${esc(l.dur||'')}${l.clips?` · ${l.clips} passaggi suonati`:''}${l.ready?'':' · in preparazione'}</div></div><span class="chk ${done[c.id+'-'+l.n]?'done':''}">${done[c.id+'-'+l.n]?'✓ fatta':'›'}</span></li>`).join('')}</ul>
+ ${isNola(c)?`<div class="acard" data-go="${c.id}-ascolti"><span class="ic">♫</span><div><b>Ascolti consigliati</b><span>${ASC.tracks.length} brani · ascolto e tracce separate</span></div></div>`:''}
  <div class="foot"></div></div>`;window.scrollTo(0,0)}
 function renderLesson(c,l){
  if(!l)return go(c.id);
@@ -477,6 +522,7 @@ const RHY={
   parts:{kick:'x.....x.....',snare:'...x.....x..',hat:'x.xx.xx.xx.x'}},
  funk:{name:'Street beat / funk',desc:'Groove sincopato alla Meters (semplificato): rullante sul 2 e 4.',bpm:96,
   parts:{kick:'x..x..x...x..x..',snare:'....x..o.o..x...',hat:'x.xxx.xxx.xxx.xx'}}};
+const RCTX={"habanera": {"ctx": "Danza cubana dell'Ottocento arrivata a New Orleans: è lo «Spanish tinge» di cui parlava Jelly Roll Morton.", "songs": [{"t": "St. Louis Blues", "a": "W. C. Handy · la sezione in tempo di tango", "id": "stlouis"}, {"t": "«Spanish tinge»", "a": "Jelly Roll Morton · corso, lezione 2", "id": null}]}, "tresillo": {"ctx": "Cellula 3-3-2 di origine cubana, la metà «forte» dell'habanera e della clave. È la base ritmica di tanta musica di New Orleans, dal piano rumba-boogie al R&B.", "songs": [{"t": "Basso della rumba-boogie", "a": "vedi «Rumba alla Longhair»", "id": null}]}, "clave32": {"ctx": "Il pattern guida della musica cubana: due battute, prima il lato con 3 colpi poi quello con 2. Il «Bo Diddley beat» è questa clave portata nel rock'n'roll.", "songs": [{"t": "Bo Diddley", "a": "Bo Diddley", "id": "bodiddley"}]}, "clave23": {"ctx": "Stessa clave che parte dal lato da 2 colpi. Professor Longhair la usa quasi come un ostinato.", "songs": [{"t": "Mardi Gras in New Orleans", "a": "Professor Longhair", "id": "mardigras"}]}, "rumba": {"ctx": "Il «rhumba-boogie» di Professor Longhair: boogie-woogie e blues con sotto un groove latino. Il marchio del piano di New Orleans.", "songs": [{"t": "Tipitina", "a": "Professor Longhair", "id": "tipitina"}, {"t": "Longhair's Blues Rhumba", "a": "Professor Longhair", "id": "bluesrhumba"}]}, "secondline": {"ctx": "Il ritmo delle parate delle brass band (la «second line» è la gente che segue la banda): cassa sincopata, rullante pieno di ghost notes.", "songs": [{"t": "Big Chief", "a": "Professor Longhair · scritta da Earl King", "id": "bigchief"}, {"t": "Street Parade", "a": "Earl King · corso, lezione 2", "id": "streetparade"}]}, "shuffle": {"ctx": "Terzine con la nota di mezzo muta: è il feel del boogie-woogie e del R&B di New Orleans anni '50.", "songs": [{"t": "Mess Around", "a": "Dr. John · Gumbo", "id": "messaround"}, {"t": "Blueberry Hill", "a": "Fats Domino · terzine alla destra", "id": "blueberry"}]}, "funk": {"ctx": "Il funk di New Orleans nato da The Meters a fine anni '60: second line e R&B suonati sincopati e asciutti.", "songs": [{"t": "Just Kissed My Baby", "a": "The Meters · corso, lezione 2", "id": "kissed"}, {"t": "Cissy Strut", "a": "The Meters", "id": "cissy"}]}};
 const R=Object.assign({id:'rumba',bpm:100,playing:false,mute:{}},LS.get('rhythm',{}),{playing:false});
 let rTimer=null,rNext=0,rStep=0;
 function rSave(){const {playing,...s}=R;LS.set('rhythm',s)}
@@ -493,7 +539,7 @@ function rTick(){const r=RHY[R.id],per=r.triplet?3:4,len=(r.triplet?12:16)*(r.ba
 const PNAME={clave:'Clave',kick:'Cassa',snare:'Rullante',hat:'Charleston',bass:'Basso',bell:'Campana'};
 function paneRhythm(){const r=RHY[R.id];
  $('#pane').innerHTML=`<div class="pane">
- <div class="rplayer"><h3>${r.name}</h3><p>${r.desc}</p>
+ <div class="rplayer"><h3>${r.name}</h3><p>${r.desc}</p>${RCTX[R.id]?`<div class="rctx">${esc(RCTX[R.id].ctx)}</div><div class="rsongs">${RCTX[R.id].songs.map(s=>`<span class="${s.id&&nolaCourse()?'lk':''}" ${s.id&&nolaCourse()?`data-asc="${s.id}"`:''}>${s.id&&nolaCourse()?'♫ ':''}<b>${esc(s.t)}</b>&nbsp;· ${esc(s.a)}</span>`).join('')}</div>`:''}
  <div class="grid16">${Object.entries(r.parts).map(([p,pat])=>`<div class="r" style="grid-template-columns:64px repeat(${pat.length},1fr)"><span data-mute="${p}" style="cursor:pointer;${R.mute[p]?'text-decoration:line-through;opacity:.5':''}">${PNAME[p]}</span>${[...pat].map((c,i)=>`<i class="c ${c==='x'?'x':c==='o'?'o':''}" data-i="${i}"></i>`).join('')}</div>`).join('')}</div>
  <div class="bpmrow"><button class="ib" data-rd="-5">−</button><input type="range" id="rRange" min="50" max="180" value="${R.bpm}"><b id="rBpm">${R.bpm}<small> bpm</small></b><button class="ib" data-rd="5">+</button></div>
  <button class="go ${R.playing?'stop':''}" id="rGo">${R.playing?'■ Stop':'▶ Suona il ritmo'}</button></div>
@@ -507,7 +553,122 @@ function paneRhythm(){const r=RHY[R.id];
  const setRB=v=>{R.bpm=Math.max(50,Math.min(180,Math.round(v)));$('#rBpm').innerHTML=R.bpm+'<small> bpm</small>';$('#rRange').value=R.bpm;rSave();live()};
  $('#rRange').oninput=e=>setRB(+e.target.value);
  document.querySelectorAll('[data-rd]').forEach(b=>b.onclick=()=>setRB(R.bpm+ +b.dataset.rd));
+ document.querySelectorAll('[data-asc]').forEach(b=>b.onclick=()=>{lastTab=curTab;closeTools();go(nolaCourse().id+'-ascolti-'+b.dataset.asc)});
  $('#rGo').onclick=()=>R.playing?stopRhythm():startRhythm()}
+
+
+/* ================= ascolti consigliati ================= */
+const isNola=c=>/nola/.test(c&&c.theme||'');
+const nolaCourse=()=>DATA.courses.find(isNola);
+/* brani: ctx = perche' ascoltarlo; r = ritmo collegato; l = lezione del corso. Audio in ascolti/<id>/ (vedi tools/ascolti.py) */
+const ASC={tracks:[
+ {id:'tipitina',t:'Tipitina',a:'Professor Longhair',g:'Dal corso',l:3,r:'rumba',ctx:'Il manifesto del rhumba-boogie: la sinistra «incespicante» che è il marchio del piano di New Orleans.'},
+ {id:'junco',t:'Junco Partner',a:'Dr. John · Gumbo',g:'Dal corso',l:3,ctx:'Le ottave alla sinistra di Dr. John che il tutor mostra nella lezione 3.'},
+ {id:'kps',t:'King Porter Stomp',a:'Jelly Roll Morton',g:'Dal corso',l:3,ctx:'Jelly Roll Morton, il ponte tra ragtime e jazz: la sinistra che si muove oltre lo stride.'},
+ {id:'elite',t:'Elite Syncopations',a:'Scott Joplin',g:'Dal corso',l:3,ctx:'Ragtime classico: nella lezione 3 lo senti con la sinistra dritta e poi «alla Jelly Roll».'},
+ {id:'kissed',t:'Just Kissed My Baby',a:'The Meters',g:'Dal corso',l:2,r:'funk',ctx:'Il riff dei Meters suonato nella lezione 2: street beat e funk di New Orleans.'},
+ {id:'streetparade',t:'Street Parade',a:'Earl King',g:'Dal corso',l:2,r:'secondline',ctx:'Citato nel PDF della lezione 2: il sapore della parata second line.'},
+ {id:'mardigras',t:'Mardi Gras in New Orleans',a:'Professor Longhair',g:'Per i ritmi',r:'clave23',ctx:'Longhair usa la clave quasi come un ostinato: l\'inno del Carnevale di New Orleans.'},
+ {id:'bluesrhumba',t:"Longhair's Blues Rhumba",a:'Professor Longhair',g:'Per i ritmi',r:'rumba',ctx:'Un blues lineare sovrapposto a un ritmo di clave: la rumba-boogie allo stato puro.'},
+ {id:'bigchief',t:'Big Chief',a:'Professor Longhair',g:'Per i ritmi',r:'secondline',ctx:'Scritta da Earl King: groove second line, un classico del Carnevale.'},
+ {id:'messaround',t:'Mess Around',a:'Dr. John · Gumbo',g:'Per i ritmi',r:'shuffle',ctx:'Boogie-woogie / barrelhouse puro, nato per Ray Charles e rifatto da Dr. John.'},
+ {id:'blueberry',t:'Blueberry Hill',a:'Fats Domino',g:'Per i ritmi',r:'shuffle',ctx:'Le terzine alla destra di Fats Domino sopra il basso: il «triplet style».'},
+ {id:'cissy',t:'Cissy Strut',a:'The Meters',g:'Per i ritmi',r:'funk',ctx:'Lo strumentale simbolo dei Meters: il funk di New Orleans asciutto e sincopato.'},
+ {id:'stlouis',t:'St. Louis Blues',a:'W. C. Handy',g:'Per i ritmi',r:'habanera',ctx:'Un blues con una sezione in tempo di tango/habanera: lo «Spanish tinge» in un brano celebre.'},
+ {id:'bodiddley',t:'Bo Diddley',a:'Bo Diddley',g:'Per i ritmi',r:'clave32',ctx:'Il «Bo Diddley beat»: la clave cubana diventata rock\'n\'roll.'}],
+ disco:[['Dr. John','tutto; per iniziare: <i>Gumbo</i>, <i>Dr. John Plays Mac Rebennack</i> (vol. 1 e 2), <i>Desitively Bonnaroo</i>, <i>In the Right Place</i>'],
+ ['James Booker','tutto; <i>Junco Partner</i>, <i>New Orleans Piano Wizard: Live</i>, <i>Piano Prince of New Orleans</i>, <i>Blues &amp; Ragtime from New Orleans</i>, <i>Classified</i>, <i>Lost Paramount Tapes</i>'],
+ ['Professor Longhair','tutto; <i>Crawfish Fiesta</i>, <i>New Orleans Piano</i>, <i>Rock \'n\' Roll Gumbo</i>, e i primi singoli nella raccolta <i>Tipitina</i>'],
+ ['Henry Butler','<i>PiaNOLA Live</i>'],['Jon Cleary','<i>Mo Hippa Live</i>, <i>GoGo Juice</i>'],
+ ['Huey «Piano» Smith · Champion Jack Dupree · Fats Domino · Tuts Washington',''],
+ ['Jelly Roll Morton','tutto, comprese le interviste delle registrazioni <i>Library of Congress</i>']]};
+let ASCIDX=null;
+function ascIndex(){return ASCIDX=ASCIDX||fetch('ascolti/index.json',{cache:'no-store'}).then(r=>r.ok?r.json():{}).catch(()=>({}))}
+const STN={drums:'Batteria',bass:'Basso',piano:'Piano',vocals:'Voce',other:'Altro'};
+function trackHTML(c,x,idx){const has=!!idx[x.id];return`<div class="atr ${has?'has':''}" data-go="${c.id}-ascolti-${x.id}"><div class="h"><span class="pl">${has?'▶':'♪'}</span><div><div class="tt">${esc(x.t)}</div><div class="ar">${esc(x.a)}</div></div></div>
+ <div class="cx">${esc(x.ctx)}</div><div class="chips">${x.r&&RHY[x.r]?`<span class="chip r" data-rhy="${x.r}">♩ ${esc(RHY[x.r].name)}</span>`:''}${x.l?`<span class="chip" data-go="${c.id}-l${x.l}">Lezione ${x.l}</span>`:''}${has?'':'<span class="chip s">MP3 da aggiungere</span>'}</div></div>`}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-rhy]');if(!b)return;e.stopPropagation();R.id=b.dataset.rhy;R.bpm=RHY[R.id].bpm;rSave();openTools('rhythm')},true);
+async function renderAscolti(c,tid){
+ theme(c.theme?'t-'+c.theme.replace(/^.*\s/,''):'');updStreak();const idx=await ascIndex();
+ const x=tid&&ASC.tracks.find(t=>t.id===tid);
+ if(x){$('#crumb').textContent=c.title+' · Ascolti';
+  $('#app').innerHTML=`<section class="chero"><div class="wrap"><div class="eyebrow">Ascolti consigliati</div><h1 class="nt">${esc(x.t)}</h1><p>${esc(x.a)}</p></div></section><div class="wrap">
+  <div class="brief"><p>${esc(x.ctx)}</p><div class="chips" style="margin-bottom:12px">${x.r&&RHY[x.r]?`<span class="chip r" data-rhy="${x.r}">♩ Ritmo: ${esc(RHY[x.r].name)}</span>`:''}${x.l?`<span class="chip" data-go="${c.id}-l${x.l}">Lezione ${x.l}</span>`:''}</div></div>
+  ${idx[x.id]?'<div id="stp"></div>':`<div class="pending">L'MP3 di questo brano non c'è ancora. Quando lo aggiungeremo, qui potrai ascoltarlo e separare le tracce: batteria, basso, piano, voce e il resto.</div>`}
+  <div class="row"><button class="btn sm" data-go="${c.id}-ascolti">‹ Tutti gli ascolti</button></div><div class="foot"></div></div>`;window.scrollTo(0,0);
+  if(idx[x.id])stemPlayer($('#stp'),x.id,idx[x.id]);return}
+ $('#crumb').textContent=c.title+' · Ascolti';
+ const grp=g=>ASC.tracks.filter(t=>t.g===g).map(t=>trackHTML(c,t,idx)).join('');
+ $('#app').innerHTML=`<section class="chero"><div class="wrap"><div class="eyebrow">${esc(c.title)}</div><h1 class="nt">Ascolti consigliati</h1><p>Ascoltali qui e isola il piano, il basso o la batteria</p></div></section><div class="wrap">
+ <div class="asec">Brani citati nel corso</div><div class="alist">${grp('Dal corso')}</div>
+ <div class="asec">Per riconoscere i ritmi</div><div class="alist">${grp('Per i ritmi')}</div>
+ <div class="asec">Discografia consigliata dal corso</div><div class="brief disco"><ul>${ASC.disco.map(([a,b])=>`<li><b>${esc(a)}</b>${b?' – '+b:''}</li>`).join('')}</ul></div>
+ <div class="row"><button class="btn sm" data-go="${c.id}">‹ ${esc(c.title)}</button></div><div class="foot"></div></div>`;window.scrollTo(0,0)}
+
+/* ---- stem player: un <audio> per traccia (streaming, poca memoria; velocita' senza cambiare intonazione), volumi via Web Audio ---- */
+let ASCP=null;
+function ascStop(){if(ASCP){ASCP.destroy();ASCP=null}}
+function fmt(s){s=Math.max(0,s||0);return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0')}
+async function stemPlayer(el,id,info){
+ const st={mode:'mix',on:{},solo:null,vol:{},rate:1,A:null,B:null,loop:false,ready:false,els:{},gains:{},timer:null,dead:false};
+ const prev=LS.get('asc-'+id,{});info.stems.forEach(k=>{st.on[k]=prev.on?prev.on[k]!==false:true;st.vol[k]=prev.vol?.[k]??1});
+ const save=()=>LS.set('asc-'+id,{on:st.on,vol:st.vol});
+ const keys=['mix',...info.stems];
+ el.innerHTML=`<div class="stp"><div class="tr"><button class="pp" data-pp>▶</button><input type="range" data-seek min="0" max="${info.dur}" step="0.1" value="0"><span class="time" data-time>0:00 / ${fmt(info.dur)}</span></div>
+ <div class="ab" data-ab></div>
+ <div class="modes"><button data-mode="mix">Originale</button><button data-mode="stems">Tracce separate</button></div>
+ <div data-stems></div>
+ <div class="row2"><button class="btn sm" data-back>⟲ 5 s</button><button class="btn sm" data-a>A</button><button class="btn sm" data-b>B</button><button class="btn sm" data-loop>Loop A-B</button>
+ <span class="seg">${[.5,.7,.85,1].map(r=>`<button data-rate="${r}" class="${r===1?'on':''}">${r===1?'100%':Math.round(r*100)+'%'}</button>`).join('')}</span></div>
+ <div class="note" data-msg></div></div>`;
+ const q=s=>el.querySelector(s),msg=t=>q('[data-msg]').textContent=t;
+ ASCP={destroy(){st.dead=true;clearInterval(st.timer);Object.values(st.els).forEach(a=>{try{a.pause();a.removeAttribute('src');a.load()}catch(e){}})}};
+ const master=()=>st.mode==='mix'?st.els.mix:st.els[info.stems[0]];
+ const active=()=>st.mode==='mix'?['mix']:info.stems;
+ const audible=k=>st.solo?k===st.solo:st.on[k];
+ function applyGains(){info.stems.forEach(k=>{const v=audible(k)?st.vol[k]:0;if(st.gains[k])st.gains[k].gain.value=v;else if(st.els[k])st.els[k].muted=v===0})}
+ function drawStems(){
+  el.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('on',b.dataset.mode===st.mode));
+  q('[data-stems]').innerHTML=st.mode==='mix'?'<div class="note">Il brano com\'è. Passa a «Tracce separate» per isolare gli strumenti.</div>':
+  `<div class="presets">${[['Tutto','all'],...(info.stems.includes('piano')?[['Solo piano','p'],['Senza piano · suoni tu','np']]:[]),['Basso + batteria','bd'],['Senza voce','nv']].map(([n,k])=>`<button class="chip" data-pre="${k}">${n}</button>`).join('')}</div>
+  <div class="stems">${info.stems.map(k=>`<div class="stem ${audible(k)?'':'off'}"><button class="nm" data-tog="${k}"><i></i>${STN[k]}</button><input type="range" data-vol="${k}" min="0" max="1.5" step="0.05" value="${st.vol[k]}"><button class="so ${st.solo===k?'on':''}" data-solo="${k}">S</button></div>`).join('')}</div>
+  ${info.stems.includes('piano')?'':'<div class="note">In questo brano il piano non è separato: lo trovi dentro «Altro».</div>'}
+  <div class="note">Separazione automatica (Demucs): nelle registrazioni vecchie gli strumenti si sentono un po\' anche nelle altre tracce.</div>`;
+  el.querySelectorAll('[data-tog]').forEach(b=>b.onclick=()=>{const k=b.dataset.tog;if(st.solo){st.solo=null}else st.on[k]=!st.on[k];save();applyGains();drawStems()});
+  el.querySelectorAll('[data-solo]').forEach(b=>b.onclick=()=>{const k=b.dataset.solo;st.solo=st.solo===k?null:k;applyGains();drawStems()});
+  el.querySelectorAll('[data-vol]').forEach(b=>b.oninput=()=>{st.vol[b.dataset.vol]=+b.value;save();applyGains()});
+  el.querySelectorAll('[data-pre]').forEach(b=>b.onclick=()=>{const p=b.dataset.pre;st.solo=null;
+   info.stems.forEach(k=>st.on[k]=p==='all'?true:p==='p'?k==='piano':p==='np'?k!=='piano':p==='bd'?(k==='bass'||k==='drums'):k!=='vocals');save();applyGains();drawStems()})}
+ async function load(){if(st.ready)return;ac();msg('Carico le tracce…');
+  const urls=await Promise.all(keys.map(k=>mediaURL('ascolti/'+id+'/'+k+'.mp3.enc','audio/mpeg')));if(st.dead)return;
+  keys.forEach((k,i)=>{const a=new Audio();a.preload='auto';a.setAttribute('playsinline','');a.src=urls[i];a.preservesPitch=true;a.webkitPreservesPitch=true;a.mozPreservesPitch=true;
+   try{const s=AC.createMediaElementSource(a),g=AC.createGain();s.connect(g);g.connect(MASTER);if(k!=='mix')st.gains[k]=g}catch(e){}st.els[k]=a});
+  st.ready=true;applyGains();msg('')}
+ function setRate(){Object.values(st.els).forEach(a=>{a.playbackRate=st.rate})}
+ function seek(t){t=Math.max(0,Math.min(info.dur-.05,t));Object.values(st.els).forEach(a=>{try{a.currentTime=t}catch(e){}})}
+ function playing(){const m=master();return m&&!m.paused}
+ function pauseAll(){Object.values(st.els).forEach(a=>a.pause());clearInterval(st.timer);q('[data-pp]').textContent='▶'}
+ async function play(){if(kbActive)kbActive();await load();if(st.dead)return;if(AC.state!=='running'){try{await AC.resume()}catch(e){}}
+  const t=master().currentTime;keys.forEach(k=>{if(!active().includes(k))st.els[k].pause()});seek(t);setRate();
+  await Promise.all(active().map(k=>st.els[k].play().catch(()=>{})));q('[data-pp]').textContent='❚❚';
+  clearInterval(st.timer);st.timer=setInterval(tick,200)}
+ function tick(){const m=master();if(!m)return;let t=m.currentTime;
+  if(st.loop&&st.A!=null&&st.B!=null&&t>=st.B){seek(st.A);t=st.A}
+  if(st.mode==='stems')info.stems.slice(1).forEach(k=>{const a=st.els[k];if(Math.abs(a.currentTime-t)>.06)a.currentTime=t});
+  if(m.ended){pauseAll();seek(0);t=0}
+  q('[data-seek]').value=t;q('[data-time]').textContent=fmt(t)+' / '+fmt(info.dur)}
+ function drawAB(){const ab=q('[data-ab]');ab.innerHTML=st.A!=null&&st.B!=null?`<i style="left:${st.A/info.dur*100}%;width:${(st.B-st.A)/info.dur*100}%"></i>`:'';
+  q('[data-a]').classList.toggle('on',st.A!=null);q('[data-b]').classList.toggle('on',st.B!=null);q('[data-loop]').classList.toggle('on',st.loop)}
+ const now=()=>st.ready?master().currentTime:+q('[data-seek]').value;
+ q('[data-pp]').onclick=()=>playing()?pauseAll():play();
+ q('[data-seek]').oninput=e=>{const v=+e.target.value;q('[data-time]').textContent=fmt(v)+' / '+fmt(info.dur);if(st.ready)seek(v)};
+ q('[data-back]').onclick=()=>{if(st.ready)seek(now()-5)};
+ q('[data-a]').onclick=()=>{st.A=now();if(st.B!=null&&st.B<=st.A)st.B=null;drawAB()};
+ q('[data-b]').onclick=()=>{const t=now();if(st.A!=null&&t>st.A){st.B=t;st.loop=true}drawAB()};
+ q('[data-loop]').onclick=()=>{if(st.A!=null&&st.B!=null)st.loop=!st.loop;else{st.A=null;st.B=null;st.loop=false}drawAB()};
+ el.querySelectorAll('[data-rate]').forEach(b=>b.onclick=()=>{st.rate=+b.dataset.rate;setRate();el.querySelectorAll('[data-rate]').forEach(y=>y.classList.toggle('on',y===b))});
+ el.querySelectorAll('[data-mode]').forEach(b=>b.onclick=async()=>{const was=playing(),t=now();st.mode=b.dataset.mode;drawStems();if(st.ready){pauseAll();seek(t);if(was)play()}});
+ drawStems();drawAB()}
 
 /* ================= practice diary ================= */
 const D=Object.assign({start:null,acc:0},LS.get('timer',{}));let dInt=null;
