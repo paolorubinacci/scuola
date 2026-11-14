@@ -310,7 +310,7 @@ let kbN=0,kbActive=null;
 function kbHTML(b){const id='kb'+(kbN++);KB[id]=b;
  return`<div class="kb" data-k="${id}"><div class="kh"><span class="tag">Tastiera</span><b>${esc(b.title||'')}</b></div>
  <div class="legend">Mano destra<i style="background:var(--blue)"></i> · Mano sinistra<i style="background:var(--coral)"></i></div>
- <canvas height="150"></canvas><div class="prog"><i></i></div>
+ <canvas></canvas><div class="prog"><i></i></div>
  <div class="kc"><button class="play" aria-label="Play">▶</button>
  <span class="seg sp">${[[.5,'50%'],[.75,'75%'],[1,'100%']].map(([r,l])=>`<button data-sp="${r}" class="${r===1?'on':''}">${l}</button>`).join('')}</span>
  <span class="tr"><button data-tr="-1">−</button><span class="kn"></span><button data-tr="1">+</button></span>
@@ -324,13 +324,15 @@ function initKb(el){
  let lo=Math.min(...b.notes.map(n=>n[2]))-2,hi=Math.max(...b.notes.map(n=>n[2]))+2;
  function range(){let a=lo+Math.min(0,st.tr),z=hi+Math.max(0,st.tr);while(isBlack(a))a--;while(isBlack(z))z++;return [a,z]}
  function keyName(){return (NN[((KEYI[b.key]??0)+st.tr+120)%12])+(b.minor?'m':'')}
- function draw(){const dpr=window.devicePixelRatio||1,W=cv.clientWidth,H=150;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
+ function draw(){const dpr=window.devicePixelRatio||1,W=cv.clientWidth;
   const [a,z]=range();const whites=[];for(let m=a;m<=z;m++)if(!isBlack(m))whites.push(m);const ww=W/whites.length,pos={};
+  /* real keyboard proportions: white key about 1 : 5.5, black key about 0.6 of the length */
+  const H=Math.round(Math.max(52,Math.min(165,ww*5.5)));cv.style.height=H+'px';cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
   whites.forEach((m,i)=>pos[m]=i*ww);
   ctx.clearRect(0,0,W,H);
   for(const m of whites){const on=st.on.get(m);ctx.fillStyle=on?(on==='R'?'#2f7bf6':'#ff6a4d'):'#fff';ctx.fillRect(pos[m]+.5,0,ww-1,H);ctx.strokeStyle='#cfd8e6';ctx.strokeRect(pos[m]+.5,0,ww-1,H);
-   if(m%12===0){ctx.fillStyle=on?'#fff':'#8a94a6';ctx.font='10px sans-serif';ctx.textAlign='center';ctx.fillText('C'+(Math.floor(m/12)-1),pos[m]+ww/2,H-8)}}
-  for(let m=a;m<=z;m++)if(isBlack(m)){const x=pos[m-1]+ww*.68,on=st.on.get(m);ctx.fillStyle=on?(on==='R'?'#2f7bf6':'#ff6a4d'):'#1d2433';ctx.fillRect(x,0,ww*.64,H*.62)}}
+   if(m%12===0){ctx.fillStyle=on?'#fff':'#8a94a6';ctx.font=Math.max(8,Math.min(11,ww*.55))+'px sans-serif';ctx.textAlign='center';ctx.fillText('C'+(Math.floor(m/12)-1),pos[m]+ww/2,H-8)}}
+  for(let m=a;m<=z;m++)if(isBlack(m)){const x=pos[m-1]+ww*.71,on=st.on.get(m);ctx.fillStyle=on?(on==='R'?'#2f7bf6':'#ff6a4d'):'#1d2433';ctx.fillRect(x,0,ww*.58,H*.6)}}
  function upd(){el.querySelector('.kn').textContent=keyName()+(st.tr?` (${st.tr>0?'+':''}${st.tr})`:'');draw()}
  function bpm(){return base*st.sp}
  function stop(){st.playing=false;clearInterval(st.timer);cancelAnimationFrame(st.raf);st.on.clear();el.querySelector('.play').classList.remove('on');el.querySelector('.play').textContent='▶';el.querySelector('.prog i').style.width='0';draw();if(kbActive===stop)kbActive=null}
