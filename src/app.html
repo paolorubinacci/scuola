@@ -379,7 +379,11 @@ function ac(){if(!AC){AC=new (window.AudioContext||window.webkitAudioContext)();
  const n=AC.createBuffer(1,AC.sampleRate*.3,AC.sampleRate),d=n.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;NOISE=n}
  if(AC.state==='suspended')AC.resume();return AC}
 function env(t,g,a,dur){g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(a,t+.002);g.gain.exponentialRampToValueAtTime(.0008,t+dur)}
-const SND={
+/* real drum samples (acoustic kit + OLPC Berklee clave/bass, see drums/CREDITS.txt); synth fallback */
+const DS={};let dsLoad=null;
+function loadDrums(){if(dsLoad)return dsLoad;ac();return dsLoad=Promise.all(['kick','snare','hat','clave','bass'].map(n=>fetch('drums/'+n+'.mp3').then(r=>r.ok?r.arrayBuffer():Promise.reject()).then(b=>new Promise((ok,ko)=>AC.decodeAudioData(b,ok,ko))).then(buf=>{DS[n]=buf}).catch(()=>{})))}
+function playS(n,t,v,rate){const s=AC.createBufferSource(),g=AC.createGain();s.buffer=DS[n];if(rate)s.playbackRate.value=rate;g.gain.value=v;s.connect(g);g.connect(MASTER);s.start(t)}
+const SYN={
  click(t,acc){const o=AC.createOscillator(),g=AC.createGain();o.frequency.value=acc?1760:1100;o.connect(g);g.connect(MASTER);env(t,g,acc?.9:.55,.05);o.start(t);o.stop(t+.06)},
  sub(t){const o=AC.createOscillator(),g=AC.createGain();o.frequency.value=880;o.connect(g);g.connect(MASTER);env(t,g,.18,.03);o.start(t);o.stop(t+.04)},
  clave(t,v=1){const o=AC.createOscillator(),g=AC.createGain(),f=AC.createBiquadFilter();o.type='square';o.frequency.value=2500;f.type='bandpass';f.frequency.value=2500;f.Q.value=8;o.connect(f);f.connect(g);g.connect(MASTER);env(t,g,.7*v,.05);o.start(t);o.stop(t+.06)},
@@ -389,6 +393,12 @@ const SND={
  hat(t,v=1){const s=AC.createBufferSource(),g=AC.createGain(),f=AC.createBiquadFilter();s.buffer=NOISE;f.type='highpass';f.frequency.value=7000;s.connect(f);f.connect(g);g.connect(MASTER);env(t,g,.28*v,.04);s.start(t);s.stop(t+.05)},
  bass(t,v=1){const o=AC.createOscillator(),g=AC.createGain();o.type='triangle';o.frequency.value=73.4;o.connect(g);g.connect(MASTER);env(t,g,.7*v,.18);o.start(t);o.stop(t+.2)},
  bell(t,v=1){const o=AC.createOscillator(),g=AC.createGain();o.type='triangle';o.frequency.value=1320;o.connect(g);g.connect(MASTER);env(t,g,.35*v,.12);o.start(t);o.stop(t+.14)}};
+const SND={click:(t,a)=>SYN.click(t,a),sub:t=>SYN.sub(t),bell:(t,v)=>SYN.bell(t,v),
+ kick:(t,v=1)=>DS.kick?playS('kick',t,1.1*v):SYN.kick(t,v),
+ snare:(t,v=1)=>DS.snare?playS('snare',t,.8*v):SYN.snare(t,v),
+ hat:(t,v=1)=>DS.hat?playS('hat',t,.45*v):SYN.hat(t,v),
+ clave:(t,v=1)=>DS.clave?playS('clave',t,.9*v):SYN.clave(t,v),
+ bass:(t,v=1)=>DS.bass?playS('bass',t,1.2*v,Math.pow(2,(38-42)/12)):SYN.bass(t,v)};
 
 /* ================= metronome ================= */
 const M=Object.assign({bpm:90,beats:4,sub:1,swing:0,acc:[2,0,0,0],playing:false,train:false,trainStep:2,trainBars:4,trainMax:160},LS.get('metro',{}),{playing:false});
@@ -456,7 +466,7 @@ const RHY={
 const R=Object.assign({id:'rumba',bpm:100,playing:false,mute:{}},LS.get('rhythm',{}),{playing:false});
 let rTimer=null,rNext=0,rStep=0;
 function rSave(){const {playing,...s}=R;LS.set('rhythm',s)}
-function startRhythm(){if(kbActive)kbActive();stopMetro();ac();R.playing=true;rStep=0;rNext=AC.currentTime+.08;clearInterval(rTimer);rTimer=setInterval(rTick,25);live();if(curTab==='rhythm')paneRhythm()}
+async function startRhythm(){if(kbActive)kbActive();stopMetro();ac();await loadDrums();R.playing=true;rStep=0;rNext=AC.currentTime+.08;clearInterval(rTimer);rTimer=setInterval(rTick,25);live();if(curTab==='rhythm')paneRhythm()}
 function stopRhythm(){R.playing=false;clearInterval(rTimer);live();if(curTab==='rhythm')paneRhythm()}
 function rTick(){const r=RHY[R.id],per=r.triplet?3:4,len=(r.triplet?12:16)*(r.bars||1),step=60/R.bpm/per;
  while(rNext<AC.currentTime+.12){const t=rNext;
@@ -468,7 +478,7 @@ function paneRhythm(){const r=RHY[R.id];
  $('#pane').innerHTML=`<div class="pane">
  <div class="rlist">${Object.entries(RHY).map(([k,x])=>`<button data-rid="${k}" class="${k===R.id?'on':''}"><b>${x.name}</b><span>${x.desc}</span></button>`).join('')}</div>
  <div class="grid16">${Object.entries(r.parts).map(([p,pat])=>`<div class="r" style="grid-template-columns:64px repeat(${pat.length},1fr)"><span data-mute="${p}" style="cursor:pointer;${R.mute[p]?'text-decoration:line-through;opacity:.5':''}">${PNAME[p]}</span>${[...pat].map((c,i)=>`<i class="c ${c==='x'?'x':c==='o'?'o':''}" data-i="${i}"></i>`).join('')}</div>`).join('')}</div>
- <p class="small muted">Tocca il nome di uno strumento per toglierlo e suonarlo tu.</p>
+ <p class="small muted">Tocca il nome di uno strumento per toglierlo e suonarlo tu.</p><p class="small muted" style="font-size:11px">Suoni: acoustic kit (web-audio-samples, C. Wilson); clave e basso: OLPC Berklee Sound Library (CC BY 3.0).</p>
  <div class="big" id="rBpm">${R.bpm}<small>bpm</small></div><input type="range" id="rRange" min="50" max="180" value="${R.bpm}">
  <button class="go ${R.playing?'stop':''}" id="rGo">${R.playing?'■ Stop':'▶ Suona il ritmo'}</button></div>`;
  document.querySelectorAll('[data-rid]').forEach(b=>b.onclick=()=>{R.id=b.dataset.rid;R.bpm=RHY[R.id].bpm;rStep=0;rSave();paneRhythm()});
@@ -499,7 +509,7 @@ function paneDiary(){const log=LS.get('log',[]),week=log.filter(e=>Date.now()-e.
 
 /* ================= tools sheet ================= */
 let curTab=null;
-function openTools(t){curTab=t||curTab||'metro';$('#sheet').classList.add('show');$('#scrim').classList.add('show');showTab()}
+function openTools(t){try{loadDrums()}catch(e){}curTab=t||curTab||'metro';$('#sheet').classList.add('show');$('#scrim').classList.add('show');showTab()}
 function closeTools(){$('#sheet').classList.remove('show');$('#scrim').classList.remove('show');curTab=null}
 function showTab(){document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===curTab));({metro:paneMetro,rhythm:paneRhythm,diary:paneDiary})[curTab]()}
 let lastTab='metro';

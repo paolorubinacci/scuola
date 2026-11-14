@@ -1,0 +1,2 @@
+Batteria (kick, snare, hihat): acoustic-kit da web-audio-samples di Chris Wilson (via Tonejs/audio).
+Clave (woodblock) e basso (bass_string1, Fa#2): OLPC Berklee Sound Library, CC BY 3.0 (http://wiki.laptop.org/go/Sound_samples).
