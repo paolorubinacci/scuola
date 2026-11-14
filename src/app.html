@@ -312,6 +312,7 @@ function kbHTML(b){const id='kb'+(kbN++);KB[id]=b;
  <div class="legend">Mano destra<i style="background:var(--blue)"></i> · Mano sinistra<i style="background:var(--coral)"></i></div>
  <canvas></canvas><div class="prog"><i></i></div>
  <div class="kc"><button class="play" aria-label="Play">▶</button>
+ <span class="seg">${[['0','Straight'],['1','Swing']].map(([v,l])=>`<button data-sw="${v}" class="${(+v===(b.swing?1:0))?'on':''}">${l}</button>`).join('')}</span>
  <span class="seg sp">${[[.5,'50%'],[.75,'75%'],[1,'100%']].map(([r,l])=>`<button data-sp="${r}" class="${r===1?'on':''}">${l}</button>`).join('')}</span>
  <span class="tr"><button data-tr="-1">−</button><span class="kn"></span><button data-tr="1">+</button></span>
  <span class="seg"><button data-hand="R">Destra</button><button data-hand="L">Sinistra</button><button data-hand="" class="on">Entrambe</button></span>
@@ -319,7 +320,7 @@ function kbHTML(b){const id='kb'+(kbN++);KB[id]=b;
 function isBlack(m){return [1,3,6,8,10].includes(m%12)}
 function initKb(el){
  const b=KB[el.dataset.k],cv=el.querySelector('canvas'),ctx=cv.getContext('2d');
- const st={tr:0,sp:1,hand:'',loop:false,click:false,playing:false,t0:0,raf:0,timer:0,next:0,on:new Map()};
+ const st={sw:!!b.swing,tr:0,sp:1,hand:'',loop:false,click:false,playing:false,t0:0,raf:0,timer:0,next:0,on:new Map()};
  const base=b.bpm||90,len=b.length||Math.max(...b.notes.map(n=>n[0]+n[1]));
  let lo=Math.min(...b.notes.map(n=>n[2]))-2,hi=Math.max(...b.notes.map(n=>n[2]))+2;
  function range(){let a=lo+Math.min(0,st.tr),z=hi+Math.max(0,st.tr);while(isBlack(a))a--;while(isBlack(z))z++;return [a,z]}
@@ -340,7 +341,8 @@ function initKb(el){
   if(!st.ready){pb.textContent='…';await loadPiano(lo+Math.min(0,st.tr)-6,hi+Math.max(0,st.tr)+6);st.ready=true}
   kbActive=stop;st.playing=true;st.t0=AC.currentTime+.1;st.next=0;
   el.querySelector('.play').classList.add('on');el.querySelector('.play').textContent='■';
-  const spb=60/bpm(),ns=b.notes.filter(n=>!st.hand||n[3]===st.hand).slice().sort((x,y)=>x[0]-y[0]);let i=0,clickB=0;
+  const spb=60/bpm(),SW=x=>{if(!st.sw)return x;const k=Math.floor(x),f=x-k;return k+(f<.5?f*4/3:2/3+(f-.5)*2/3)};
+  const ns=b.notes.filter(n=>!st.hand||n[3]===st.hand).map(n=>{const s=SW(n[0]),e=SW(n[0]+n[1]);return [s,Math.max(.04,e-s),n[2],n[3],n[4]]}).sort((x,y)=>x[0]-y[0]);let i=0,clickB=0;
   st.timer=setInterval(()=>{const now=AC.currentTime,until=now+.15;
    while(i<ns.length&&st.t0+ns[i][0]*spb<until){const [s,d,m,h,v]=ns[i];const t=st.t0+s*spb,mm=m+st.tr;pianoNote(t,Math.max(.06,d*spb),mm,v||(h==='L'?.55:.7));
     setTimeout(()=>{st.on.set(mm,h);draw()},Math.max(0,(t-now)*1000));setTimeout(()=>{if(st.on.get(mm)===h){st.on.delete(mm);draw()}},Math.max(0,(t-now+Math.max(.06,d*spb)*.95)*1000));i++}
@@ -350,6 +352,7 @@ function initKb(el){
  el.querySelector('.play').onclick=()=>st.playing?stop():start();
  el.querySelectorAll('[data-sp]').forEach(x=>x.onclick=()=>{st.sp=+x.dataset.sp;el.querySelectorAll('[data-sp]').forEach(y=>y.classList.toggle('on',y===x));if(st.playing){stop();start()}});
  el.querySelectorAll('[data-tr]').forEach(x=>x.onclick=()=>{st.tr=Math.max(-6,Math.min(6,st.tr+ +x.dataset.tr));st.ready=false;upd();if(st.playing){stop();start()}});
+ el.querySelectorAll('[data-sw]').forEach(x=>x.onclick=()=>{st.sw=x.dataset.sw==='1';el.querySelectorAll('[data-sw]').forEach(y=>y.classList.toggle('on',y===x));if(st.playing){stop();start()}});
  el.querySelectorAll('[data-hand]').forEach(x=>x.onclick=()=>{st.hand=x.dataset.hand;el.querySelectorAll('[data-hand]').forEach(y=>y.classList.toggle('on',y===x));if(st.playing){stop();start()}});
  el.querySelector('[data-kloop]').onclick=e=>{st.loop=!st.loop;e.currentTarget.classList.toggle('on',st.loop)};
  el.querySelector('[data-kclick]').onclick=e=>{st.click=!st.click;e.currentTarget.classList.toggle('on',st.click)};
