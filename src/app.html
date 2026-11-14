@@ -305,7 +305,7 @@ function initClip(el){
 function fmt(t){t=Math.max(0,t||0);return Math.floor(t/60)+':'+String(Math.floor(t%60)).padStart(2,'0')}
 
 /* ================= keyboard player (MIDI-like note lists) ================= */
-const KB={},NN=['C','C♯','D','E♭','E','F','F♯','G','A♭','A','B♭','B'],KEYI={C:0,'C#':1,Db:1,D:2,Eb:3,E:4,F:5,'F#':6,Gb:6,G:7,Ab:8,A:9,Bb:10,B:11};
+const KB={},NN=['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'],KEYI={C:0,'C#':1,Db:1,D:2,Eb:3,E:4,F:5,'F#':6,Gb:6,G:7,Ab:8,A:9,Bb:10,B:11};
 let kbN=0,kbActive=null;
 function kbHTML(b){const id='kb'+(kbN++);KB[id]=b;
  return`<div class="kb" data-k="${id}"><div class="kh"><span class="tag">Tastiera</span><b>${esc(b.title||'')}</b></div>
