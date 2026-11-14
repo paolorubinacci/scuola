@@ -316,12 +316,12 @@ function kbHTML(b){const id='kb'+(kbN++);KB[id]=b;
  <span class="seg sp">${[[.5,'50%'],[.75,'75%'],[1,'100%']].map(([r,l])=>`<button data-sp="${r}" class="${r===1?'on':''}">${l}</button>`).join('')}</span>
  <span class="tr"><button data-tr="-1">−</button><span class="kn"></span><button data-tr="1">+</button></span>
  <span class="seg"><button data-hand="R">Destra</button><button data-hand="L">Sinistra</button><button data-hand="" class="on">Entrambe</button></span>
- <button class="btn sm" data-kloop>⟲ Loop</button><button class="btn sm" data-kclick>♩ Click</button></div><div class="legend" style="padding-top:0">Pianoforte: Salamander Grand Piano, A. Holm (CC-BY 3.0)</div></div>`}
+ <span class="tr"><button data-bpm="-1">−</button><span class="kbpm"></span><button data-bpm="1">+</button></span><button class="btn sm" data-ktap>Tap</button><button class="btn sm" data-kloop>⟲ Loop</button><button class="btn sm" data-kclick>♩ Click</button></div><div class="legend" style="padding-top:0">Pianoforte: Salamander Grand Piano, A. Holm (CC-BY 3.0)</div></div>`}
 function isBlack(m){return [1,3,6,8,10].includes(m%12)}
 function initKb(el){
  const b=KB[el.dataset.k],cv=el.querySelector('canvas'),ctx=cv.getContext('2d');
  const st={sw:!!b.swing,tr:0,sp:1,hand:'',loop:false,click:false,playing:false,t0:0,raf:0,timer:0,next:0,on:new Map()};
- const base=b.bpm||90,len=b.length||Math.max(...b.notes.map(n=>n[0]+n[1]));
+ const bkey='kbbpm-'+(b.title||''),saved=LS.get(bkey,null);let base=saved||b.bpm||90;const len0=0,len=b.length||Math.max(...b.notes.map(n=>n[0]+n[1]));
  let lo=Math.min(...b.notes.map(n=>n[2]))-2,hi=Math.max(...b.notes.map(n=>n[2]))+2;
  function range(){let a=lo+Math.min(0,st.tr),z=hi+Math.max(0,st.tr);while(isBlack(a))a--;while(isBlack(z))z++;return [a,z]}
  function keyName(){return (NN[((KEYI[b.key]??0)+st.tr+120)%12])+(b.minor?'m':'')}
@@ -334,7 +334,7 @@ function initKb(el){
   for(const m of whites){const on=st.on.get(m);ctx.fillStyle=on?(on==='R'?'#2f7bf6':'#ff6a4d'):'#fff';ctx.fillRect(pos[m]+.5,0,ww-1,H);ctx.strokeStyle='#cfd8e6';ctx.strokeRect(pos[m]+.5,0,ww-1,H);
    if(m%12===0){ctx.fillStyle=on?'#fff':'#8a94a6';ctx.font=Math.max(8,Math.min(11,ww*.55))+'px sans-serif';ctx.textAlign='center';ctx.fillText('C'+(Math.floor(m/12)-1),pos[m]+ww/2,H-8)}}
   for(let m=a;m<=z;m++)if(isBlack(m)){const x=pos[m-1]+ww*.71,on=st.on.get(m);ctx.fillStyle=on?(on==='R'?'#2f7bf6':'#ff6a4d'):'#1d2433';ctx.fillRect(x,0,ww*.58,H*.6)}}
- function upd(){el.querySelector('.kn').textContent=keyName()+(st.tr?` (${st.tr>0?'+':''}${st.tr})`:'');draw()}
+ function upd(){el.querySelector('.kbpm').textContent=Math.round(base*st.sp)+' bpm';el.querySelector('.kn').textContent=keyName()+(st.tr?` (${st.tr>0?'+':''}${st.tr})`:'');draw()}
  function bpm(){return base*st.sp}
  function stop(){st.playing=false;clearInterval(st.timer);cancelAnimationFrame(st.raf);st.on.clear();el.querySelector('.play').classList.remove('on');el.querySelector('.play').textContent='▶';el.querySelector('.prog i').style.width='0';draw();if(kbActive===stop)kbActive=null}
  async function start(){if(kbActive)kbActive();stopMetro();stopRhythm();ac();const pb=el.querySelector('.play');
@@ -350,8 +350,11 @@ function initKb(el){
    if(now>st.t0+len*spb+.3){if(st.loop){st.t0=now+.05;i=0;clickB=0}else stop()}},25);
   const loopf=()=>{if(!st.playing)return;const p=Math.min(1,(AC.currentTime-st.t0)/(len*60/bpm()));el.querySelector('.prog i').style.width=(p*100)+'%';st.raf=requestAnimationFrame(loopf)};loopf()}
  el.querySelector('.play').onclick=()=>st.playing?stop():start();
- el.querySelectorAll('[data-sp]').forEach(x=>x.onclick=()=>{st.sp=+x.dataset.sp;el.querySelectorAll('[data-sp]').forEach(y=>y.classList.toggle('on',y===x));if(st.playing){stop();start()}});
+ el.querySelectorAll('[data-sp]').forEach(x=>x.onclick=()=>{st.sp=+x.dataset.sp;upd();el.querySelectorAll('[data-sp]').forEach(y=>y.classList.toggle('on',y===x));if(st.playing){stop();start()}});
  el.querySelectorAll('[data-tr]').forEach(x=>x.onclick=()=>{st.tr=Math.max(-6,Math.min(6,st.tr+ +x.dataset.tr));st.ready=false;upd();if(st.playing){stop();start()}});
+ let taps=[];const setBase=v=>{base=Math.max(40,Math.min(260,Math.round(v)));LS.set(bkey,base);upd();if(st.playing){stop();start()}};
+ el.querySelectorAll('[data-bpm]').forEach(x=>x.onclick=()=>setBase(base+ +x.dataset.bpm));
+ el.querySelector('[data-ktap]').onclick=()=>{const n=performance.now();taps=taps.filter(x=>n-x<2500);taps.push(n);if(taps.length>2){setBase(60000/((taps[taps.length-1]-taps[0])/(taps.length-1))/st.sp)}};
  el.querySelectorAll('[data-sw]').forEach(x=>x.onclick=()=>{st.sw=x.dataset.sw==='1';el.querySelectorAll('[data-sw]').forEach(y=>y.classList.toggle('on',y===x));if(st.playing){stop();start()}});
  el.querySelectorAll('[data-hand]').forEach(x=>x.onclick=()=>{st.hand=x.dataset.hand;el.querySelectorAll('[data-hand]').forEach(y=>y.classList.toggle('on',y===x));if(st.playing){stop();start()}});
  el.querySelector('[data-kloop]').onclick=e=>{st.loop=!st.loop;e.currentTarget.classList.toggle('on',st.loop)};
