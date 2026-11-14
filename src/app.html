@@ -139,10 +139,18 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .seg button.on{background:var(--blue);color:#fff}
 .go{display:block;width:100%;height:56px;border-radius:16px;border:0;font:800 17px var(--font);cursor:pointer;background:var(--blue);color:#fff;margin-top:14px;box-shadow:0 8px 20px rgba(47,123,246,.3)}
 .go.stop{background:var(--coral);box-shadow:0 8px 20px rgba(255,106,77,.3)}
-.rlist{display:grid;gap:8px}
-.rlist button{all:unset;cursor:pointer;display:block;background:var(--surf);border:2px solid transparent;border-radius:14px;padding:11px 14px}
+.rlist{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rlist button{all:unset;cursor:pointer;display:flex;align-items:center;gap:8px;min-height:44px;background:var(--surf);border:2px solid transparent;border-radius:14px;padding:8px 12px;font:700 14px/1.2 var(--font);-webkit-tap-highlight-color:transparent}
+.rlist button:active{transform:scale(.97)}
 .rlist button.on{border-color:var(--blue);background:var(--blue2)}
-.rlist b{display:block}.rlist span{font-size:12px;color:var(--muted)}
+.rlist button.on.pl{border-color:var(--coral);background:#fff1ed}
+.rlist button i{flex:none;width:26px;height:26px;border-radius:50%;background:#fff;display:inline-flex;align-items:center;justify-content:center;font:700 11px var(--font);font-style:normal;color:var(--blue)}
+.rlist button.pl i{background:var(--coral);color:#fff}
+.rplayer{background:var(--surf);border-radius:18px;padding:14px;margin-bottom:14px}
+.rplayer h3{margin:0;font:800 18px var(--font)}.rplayer p{margin:4px 0 0;font-size:13px;color:var(--muted)}
+.rplayer .bpmrow{display:flex;align-items:center;gap:10px;margin-top:6px}
+.rplayer .bpmrow b{font:800 22px var(--font);min-width:86px;text-align:center}.rplayer .bpmrow b small{font:600 12px var(--font);color:var(--muted)}
+.rplayer .go{margin-top:12px;height:52px}
 .grid16{display:grid;gap:3px;margin:12px 0}
 .grid16 .r{display:grid;grid-template-columns:64px repeat(16,1fr);gap:3px;align-items:center;font-size:11px;color:var(--muted)}
 .grid16 .c{height:16px;border-radius:4px;background:var(--surf2)}
@@ -375,7 +383,13 @@ function synthNote(t,dur,m,v){const f=440*Math.pow(2,(m-69)/12),g=AC.createGain(
  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.25*v,t+.005);g.gain.exponentialRampToValueAtTime(.0005,t+Math.max(.2,dur)+.2);o.start(t);o.stop(t+Math.max(.2,dur)+.25)}
 /* ================= audio engine ================= */
 let AC=null,MASTER=null,NOISE=null;
-function ac(){if(!AC){AC=new (window.AudioContext||window.webkitAudioContext)();MASTER=AC.createGain();MASTER.gain.value=.9;MASTER.connect(AC.destination);
+/* iPhone: senza questo il Web Audio resta muto se l'interruttore silenzioso è attivo */
+let iosUnlocked=false;
+function iosAudio(){if(iosUnlocked)return;iosUnlocked=true;
+ try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
+ try{const a=document.createElement('audio');a.setAttribute('playsinline','');a.setAttribute('x-webkit-airplay','deny');a.preload='auto';a.loop=true;
+  a.src='data:audio/wav;base64,UklGRmQGAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YUAGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';a.volume=.01;const pr=a.play();if(pr)pr.catch(()=>{iosUnlocked=false})}catch(e){}}
+function ac(){iosAudio();if(!AC){AC=new (window.AudioContext||window.webkitAudioContext)();MASTER=AC.createGain();MASTER.gain.value=.9;MASTER.connect(AC.destination);
  const n=AC.createBuffer(1,AC.sampleRate*.3,AC.sampleRate),d=n.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;NOISE=n}
  if(AC.state==='suspended')AC.resume();return AC}
 function env(t,g,a,dur){g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(a,t+.002);g.gain.exponentialRampToValueAtTime(.0008,t+dur)}
@@ -466,8 +480,11 @@ const RHY={
 const R=Object.assign({id:'rumba',bpm:100,playing:false,mute:{}},LS.get('rhythm',{}),{playing:false});
 let rTimer=null,rNext=0,rStep=0;
 function rSave(){const {playing,...s}=R;LS.set('rhythm',s)}
-async function startRhythm(){if(kbActive)kbActive();stopMetro();ac();await loadDrums();R.playing=true;rStep=0;rNext=AC.currentTime+.08;clearInterval(rTimer);rTimer=setInterval(rTick,25);live();if(curTab==='rhythm')paneRhythm()}
-function stopRhythm(){R.playing=false;clearInterval(rTimer);live();if(curTab==='rhythm')paneRhythm()}
+let rTok=0;
+async function startRhythm(){if(kbActive)kbActive();stopMetro();ac();const tok=++rTok;R.playing=true;clearInterval(rTimer);live();if(curTab==='rhythm')paneRhythm();
+ await loadDrums();if(tok!==rTok||!R.playing)return;if(AC.state!=='running'){try{await AC.resume()}catch(e){}}
+ rStep=0;rNext=AC.currentTime+.08;clearInterval(rTimer);rTimer=setInterval(rTick,25)}
+function stopRhythm(){rTok++;R.playing=false;clearInterval(rTimer);live();if(curTab==='rhythm')paneRhythm()}
 function rTick(){const r=RHY[R.id],per=r.triplet?3:4,len=(r.triplet?12:16)*(r.bars||1),step=60/R.bpm/per;
  while(rNext<AC.currentTime+.12){const t=rNext;
   for(const [p,pat] of Object.entries(r.parts)){if(R.mute[p])continue;const c=pat[rStep%pat.length];if(c==='x')SND[p](t,1);else if(c==='o')SND[p](t,.45)}
@@ -476,14 +493,20 @@ function rTick(){const r=RHY[R.id],per=r.triplet?3:4,len=(r.triplet?12:16)*(r.ba
 const PNAME={clave:'Clave',kick:'Cassa',snare:'Rullante',hat:'Charleston',bass:'Basso',bell:'Campana'};
 function paneRhythm(){const r=RHY[R.id];
  $('#pane').innerHTML=`<div class="pane">
- <div class="rlist">${Object.entries(RHY).map(([k,x])=>`<button data-rid="${k}" class="${k===R.id?'on':''}"><b>${x.name}</b><span>${x.desc}</span></button>`).join('')}</div>
+ <div class="rplayer"><h3>${r.name}</h3><p>${r.desc}</p>
  <div class="grid16">${Object.entries(r.parts).map(([p,pat])=>`<div class="r" style="grid-template-columns:64px repeat(${pat.length},1fr)"><span data-mute="${p}" style="cursor:pointer;${R.mute[p]?'text-decoration:line-through;opacity:.5':''}">${PNAME[p]}</span>${[...pat].map((c,i)=>`<i class="c ${c==='x'?'x':c==='o'?'o':''}" data-i="${i}"></i>`).join('')}</div>`).join('')}</div>
- <p class="small muted">Tocca il nome di uno strumento per toglierlo e suonarlo tu.</p><p class="small muted" style="font-size:11px">Suoni: acoustic kit (web-audio-samples, C. Wilson); clave e basso: OLPC Berklee Sound Library (CC BY 3.0).</p>
- <div class="big" id="rBpm">${R.bpm}<small>bpm</small></div><input type="range" id="rRange" min="50" max="180" value="${R.bpm}">
- <button class="go ${R.playing?'stop':''}" id="rGo">${R.playing?'■ Stop':'▶ Suona il ritmo'}</button></div>`;
- document.querySelectorAll('[data-rid]').forEach(b=>b.onclick=()=>{R.id=b.dataset.rid;R.bpm=RHY[R.id].bpm;rStep=0;rSave();paneRhythm()});
+ <div class="bpmrow"><button class="ib" data-rd="-5">−</button><input type="range" id="rRange" min="50" max="180" value="${R.bpm}"><b id="rBpm">${R.bpm}<small> bpm</small></b><button class="ib" data-rd="5">+</button></div>
+ <button class="go ${R.playing?'stop':''}" id="rGo">${R.playing?'■ Stop':'▶ Suona il ritmo'}</button></div>
+ <div class="lbl" style="margin-top:4px">Tocca un ritmo per suonarlo</div>
+ <div class="rlist">${Object.entries(RHY).map(([k,x])=>`<button data-rid="${k}" class="${k===R.id?'on':''} ${k===R.id&&R.playing?'pl':''}"><i>${k===R.id&&R.playing?'■':'▶'}</i>${x.name}</button>`).join('')}</div>
+ <p class="small muted">Tocca il nome di uno strumento nella griglia per toglierlo e suonarlo tu.</p><p class="small muted" style="font-size:11px">Suoni: acoustic kit (web-audio-samples, C. Wilson); clave e basso: OLPC Berklee Sound Library (CC BY 3.0).</p></div>`;
+ document.querySelectorAll('[data-rid]').forEach(b=>b.onclick=()=>{const k=b.dataset.rid;
+  if(k===R.id&&R.playing){stopRhythm();return}
+  if(k!==R.id){R.id=k;R.bpm=RHY[k].bpm;rStep=0;rSave()}startRhythm()});
  document.querySelectorAll('[data-mute]').forEach(b=>b.onclick=()=>{R.mute[b.dataset.mute]=!R.mute[b.dataset.mute];rSave();paneRhythm()});
- $('#rRange').oninput=e=>{R.bpm=+e.target.value;$('#rBpm').innerHTML=R.bpm+'<small>bpm</small>';rSave();live()};
+ const setRB=v=>{R.bpm=Math.max(50,Math.min(180,Math.round(v)));$('#rBpm').innerHTML=R.bpm+'<small> bpm</small>';$('#rRange').value=R.bpm;rSave();live()};
+ $('#rRange').oninput=e=>setRB(+e.target.value);
+ document.querySelectorAll('[data-rd]').forEach(b=>b.onclick=()=>setRB(R.bpm+ +b.dataset.rd));
  $('#rGo').onclick=()=>R.playing?stopRhythm():startRhythm()}
 
 /* ================= practice diary ================= */
