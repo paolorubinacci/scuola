@@ -1,0 +1,14 @@
+/* Scuola offline — generato da tools/pwa.py, non modificare a mano */
+const V='scuola-6ade68d40c',FILES=["./", "ascolti/index.json", "clips/l2-01.mp4.enc", "clips/l2-02.mp4.enc", "clips/l2-03.mp4.enc", "clips/l2-04.mp4.enc", "clips/l2-05.mp4.enc", "clips/l3-01.mp4.enc", "clips/l3-02.mp4.enc", "clips/l3-03.mp4.enc", "clips/l3-04.mp4.enc", "clips/l3-05.mp4.enc", "clips/l3-06.mp4.enc", "clips/l3-07.mp4.enc", "clips/l3-08.mp4.enc", "clips/l3-09.mp4.enc", "drums/bass.mp3", "drums/clave.mp3", "drums/hat.mp3", "drums/kick.mp3", "drums/snare.mp3", "fonts/NolaMardiGras.ttf", "icons/icon-180.png", "icons/icon-192.png", "icons/icon-512.png", "img/clave.png.enc", "img/habanera.png.enc", "img/heynow.png.enc", "img/kps.png.enc", "img/tipitina.png.enc", "img/tumbao.png.enc", "index.html", "manifest.json", "piano/A1.mp3", "piano/A2.mp3", "piano/A3.mp3", "piano/A4.mp3", "piano/A5.mp3", "piano/A6.mp3", "piano/A7.mp3", "piano/C1.mp3", "piano/C2.mp3", "piano/C3.mp3", "piano/C4.mp3", "piano/C5.mp3", "piano/C6.mp3", "piano/C7.mp3", "piano/Ds1.mp3", "piano/Ds2.mp3", "piano/Ds3.mp3", "piano/Ds4.mp3", "piano/Ds5.mp3", "piano/Ds6.mp3", "piano/Ds7.mp3", "piano/Fs1.mp3", "piano/Fs2.mp3", "piano/Fs3.mp3", "piano/Fs4.mp3", "piano/Fs5.mp3", "piano/Fs6.mp3", "piano/Fs7.mp3"],FONTS='scuola-fonts';
+const NET_FIRST=u=>u.endsWith('/')||u.endsWith('index.html')||u.endsWith('ascolti/index.json');
+self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(V).then(async c=>{
+  let ok=0;for(const f of FILES){try{await c.add(new Request(f,{cache:'reload'}));ok++}catch(err){}}
+  await c.put('__complete',new Response(JSON.stringify({ok,total:FILES.length})))}))});
+self.addEventListener('activate',e=>e.waitUntil((async()=>{for(const k of await caches.keys())if(k!==V&&k!==FONTS)await caches.delete(k);await self.clients.claim()})()));
+self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET')return;const u=new URL(r.url);
+ if(/fonts\.(googleapis|gstatic)\.com$/.test(u.hostname)){e.respondWith(caches.open(FONTS).then(async c=>{const hit=await c.match(r);const net=fetch(r).then(x=>{if(x.ok||x.type==='opaque')c.put(r,x.clone());return x}).catch(()=>hit);return hit||net}));return}
+ if(u.origin!==location.origin)return;
+ const key=u.pathname.replace(/^\//,'')||'./';
+ if(NET_FIRST(u.pathname)){e.respondWith(fetch(r).then(x=>{if(x.ok){const y=x.clone();caches.open(V).then(c=>c.put(key===''?'./':key,y))}return x}).catch(async()=>(await caches.match(key,{ignoreSearch:true}))||(await caches.match('./'))||Response.error()));return}
+ e.respondWith(caches.match(key,{ignoreSearch:true}).then(hit=>hit||fetch(r)))});
+self.addEventListener('message',e=>{if(e.data==='status')caches.open(V).then(c=>c.match('__complete')).then(x=>x?x.json():null).then(s=>e.source.postMessage({offline:s}))});
