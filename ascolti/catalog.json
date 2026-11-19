@@ -70,5 +70,27 @@
    }
   ],
   "agg": "2026-11-19"
+ },
+ "trascrizione": {
+  "r": [
+   {
+    "id": "rmwo5a8y10",
+    "k": "img",
+    "c": "Partitura",
+    "t": "Trascrizione",
+    "f": [
+     "rmwo5a8y10/p1.jpg.enc",
+     "rmwo5a8y10/p2.jpg.enc",
+     "rmwo5a8y10/p3.jpg.enc",
+     "rmwo5a8y10/p4.jpg.enc"
+    ],
+    "st": "pronto",
+    "omr": "attesa"
+   }
+  ],
+  "t": "Trascrizione",
+  "a": "",
+  "al": "",
+  "anno": ""
  }
 }
