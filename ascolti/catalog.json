@@ -33,5 +33,17 @@
    "t": "Partitura su Musicnotes (piano solo, Master Keyz)",
    "u": "https://www.musicnotes.com/sheetmusic/dorothy/107862"
   }
+ },
+ "dorothy2": {
+  "t": "Dorothy",
+  "a": "Dr. John",
+  "al": "",
+  "anno": "",
+  "tipo": "solo",
+  "trascrivi": true,
+  "storia": "",
+  "studio": [],
+  "tag": [],
+  "stato": "elaborazione"
  }
 }
