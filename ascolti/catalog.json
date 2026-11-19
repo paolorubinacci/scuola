@@ -44,6 +44,17 @@
   "storia": "",
   "studio": [],
   "tag": [],
-  "stato": "elaborazione"
+  "stato": "pronto",
+  "stems": [],
+  "dur": 201.53,
+  "midi": {
+   "f": "auto.mid.enc",
+   "auto": true
+  },
+  "pdf": {
+   "f": "auto.pdf.enc",
+   "auto": true
+  },
+  "agg": "2026-11-19"
  }
 }
