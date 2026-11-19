@@ -85,12 +85,31 @@
      "rmwo5a8y10/p4.jpg.enc"
     ],
     "st": "pronto",
-    "omr": "attesa"
+    "omr": "fatto"
+   },
+   {
+    "id": "rmwo5a8y10-omr",
+    "k": "midi",
+    "c": "MIDI",
+    "t": "MIDI da «Trascrizione»",
+    "f": "rmwo5a8y10/omr.mid.enc",
+    "da": "rmwo5a8y10",
+    "omr": true,
+    "st": "pronto",
+    "info": {
+     "note": 947,
+     "misure": 81,
+     "pagine": 4,
+     "metro": "3/4",
+     "bpm": 80,
+     "parti": 2
+    }
    }
   ],
   "t": "Trascrizione",
   "a": "",
   "al": "",
-  "anno": ""
+  "anno": "",
+  "agg": "2026-11-19"
  }
 }
