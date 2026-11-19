@@ -242,7 +242,13 @@ textarea,input[type=text],input[type=password],input[type=number]{width:100%;bac
 .vt .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.25);font-size:40px}
 .vt .pb{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:52px;height:52px;border-radius:50%;background:rgba(122,30,50,.92);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px}
 .vt em{position:absolute;right:6px;bottom:6px;background:rgba(0,0,0,.7);color:#fff;font:600 11px var(--font);font-style:normal;padding:2px 6px;border-radius:4px}
-.vp{grid-column:1/-1;margin:4px 0 10px}.vp video{width:100%;max-height:70vh;background:#000;display:block}
+.vp{grid-column:1/-1;margin:2px 0 12px;background:var(--navy);border-bottom:3px solid var(--wine);scroll-margin-top:60px}
+.vph{display:flex;align-items:center;gap:10px;padding:8px 8px 8px 12px;color:var(--cream)}
+.vpt{flex:1;min-width:0}.vpt b{display:block;font:700 14px/1.3 var(--font);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.vpt small{font:500 12px var(--font);color:rgba(250,246,236,.7)}
+.vx{all:unset;flex:none;cursor:pointer;padding:9px 14px;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;font:700 13px var(--font)}.vx:hover{background:rgba(255,255,255,.24)}
+.vp video{width:100%;max-height:70vh;background:#000;display:block}
+.vpc{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:8px;background:var(--cream)}.vpc .note{margin:0}
+.vc.on{outline:3px solid var(--wine);outline-offset:-3px}.vc.on .pb{background:var(--gold)}
 .yt{position:relative;aspect-ratio:16/9;background:#000}.yt iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .drop{display:grid!important;place-items:center;text-align:center;gap:4px!important;border:2px dashed var(--gold2);background:var(--paper);padding:26px 14px;cursor:pointer}
 .drop input{position:absolute;opacity:0;width:1px;height:1px}.drop b{font:800 17px var(--font);color:var(--wine)}.drop small{font:500 13px var(--font);color:var(--nmuted)}
@@ -715,13 +721,20 @@ function tabVideo(el,c,id,x,list,base){
  el.innerHTML=cats.map(k=>{const l=list.filter(r=>(r.c||'Video')===k);return`<div class="sub">${esc(k)} <i>${l.length}</i></div>${VHINT[k]?`<p class="hint">${VHINT[k]}</p>`:''}<div class="vgrid">${l.map(r=>`<div class="vc" data-v="${r.id}"><div class="vt">${r.k==='yt'?`<img src="https://i.ytimg.com/vi/${ytId(r.u)}/hqdefault.jpg" alt="">`:'<span class="ph">▶</span>'}<b class="pb">▶</b>${r.dur?`<em>${fmt(r.dur)}</em>`:''}</div>${resHead(c,id,r,r.k==='yt'?' · YouTube':'')}${stato(r)}</div>`).join('')}</div>`}).join('')+'<div id="vplay"></div>';
  bindEd(el,c,id,x);
  list.filter(r=>r.k==='video'&&r.poster&&r.st==='pronto').forEach(r=>mediaURL(base+r.poster,'image/jpeg').then(b=>{const t=el.querySelector(`[data-v="${r.id}"] .vt`);if(t)t.insertAdjacentHTML('afterbegin',`<img src="${b}" alt="">`)}).catch(()=>{}));
+ /* lettore: si apre sotto il video scelto, si chiude con ✕ (o toccando di nuovo lo stesso video) */
+ const closeV=()=>{el.querySelectorAll('.vp').forEach(o=>{const v=o.querySelector('video');if(v){v.pause();v.removeAttribute('src');v.load()}o.remove()});el.querySelectorAll('.vc.on').forEach(c2=>c2.classList.remove('on'))};
  el.querySelectorAll('[data-v]').forEach(d=>d.onclick=async e=>{if(e.target.closest('.ed'))return;const r=list.find(q=>q.id===d.dataset.v);if(r.st!=='pronto')return;
-  const p=document.createElement('div');p.className='vp';p.innerHTML='<div class="note">Carico il video…</div>';el.querySelectorAll('.vp').forEach(o=>o.remove());d.after(p);
-  if(r.k==='yt'){p.innerHTML=`<div class="yt"><iframe src="https://www.youtube-nocookie.com/embed/${ytId(r.u)}?autoplay=1&playsinline=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div><div class="note">Su YouTube la velocità si cambia dall'ingranaggio ⚙︎ del video. <a href="${esc(r.u)}" target="_blank" rel="noopener">Apri su YouTube</a></div>`;return}
-  try{const b=await mediaURL(base+r.f,'video/mp4');p.innerHTML=`<video src="${b}" controls playsinline autoplay></video><div class="row2"><span class="seg">${[.5,.75,1].map(s=>`<button data-vs="${s}" class="${s===1?'on':''}">${s===1?'100%':s*100+'%'}</button>`).join('')}</span><button class="btn sm" data-vb>⟲ 5 s</button></div>`;
+  const was=d.classList.contains('on');closeV();if(was)return;d.classList.add('on');
+  const p=document.createElement('div');p.className='vp';
+  p.innerHTML=`<div class="vph"><span class="vpt"><b>${esc(r.t)}</b><small>${esc(r.c||'Video')}</small></span><button type="button" class="vx" aria-label="Chiudi il video">✕ Chiudi</button></div><div class="vpb"><div class="note">Carico il video…</div></div>`;
+  d.after(p);p.querySelector('.vx').onclick=()=>{closeV();d.scrollIntoView({behavior:'smooth',block:'nearest'})};
+  requestAnimationFrame(()=>p.scrollIntoView({behavior:'smooth',block:'start'}));const box=p.querySelector('.vpb');
+  if(r.k==='yt'){box.innerHTML=`<div class="yt"><iframe src="https://www.youtube-nocookie.com/embed/${ytId(r.u)}?autoplay=1&playsinline=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div><div class="vpc"><span class="note">La velocità si cambia dall'ingranaggio ⚙︎ del video.</span><a class="btn sm" href="${esc(r.u)}" target="_blank" rel="noopener">Apri su YouTube</a></div>`;return}
+  try{const b=await mediaURL(base+r.f,'video/mp4');if(!p.isConnected)return;
+   box.innerHTML=`<video src="${b}" controls playsinline autoplay></video><div class="vpc"><span class="seg">${[.5,.75,1].map(s=>`<button data-vs="${s}" class="${s===1?'on':''}">${s===1?'100%':s*100+'%'}</button>`).join('')}</span><button class="btn sm" data-vb>⟲ 5 s</button></div>`;
    const v=p.querySelector('video');v.preservesPitch=true;p.querySelectorAll('[data-vs]').forEach(b2=>b2.onclick=()=>{v.playbackRate=+b2.dataset.vs;p.querySelectorAll('[data-vs]').forEach(y=>y.classList.toggle('on',y===b2))});
    p.querySelector('[data-vb]').onclick=()=>{v.currentTime=Math.max(0,v.currentTime-5)}}
-  catch(err){p.innerHTML='<div class="note">Video non ancora disponibile: riprova tra un minuto (serve la connessione).</div>'}})}
+  catch(err){box.innerHTML='<div class="note">Video non ancora disponibile: riprova tra un minuto (serve la connessione).</div>'}})}
 function tabScheda(el,c,id,x){
  el.innerHTML=`${x.tag&&x.tag.length?`<div class="chips" style="margin-top:14px">${x.tag.map(t=>`<span class="chip s">${esc(t)}</span>`).join('')}</div>`:''}
  ${x.storia?`<div class="asec">La storia</div><div class="atext">${paras(x.storia)}</div>`:'<div class="empty">Ancora nessuna storia: scrivila da «Modifica la scheda», o chiedi a Claude di prepararla.</div>'}
