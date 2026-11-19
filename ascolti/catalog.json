@@ -40,11 +40,57 @@
     "tipo": "solo",
     "stems": [],
     "dur": 201.53,
-    "st": "elaborazione",
-    "rifai": true,
+    "st": "pronto",
     "midi_auto": true,
     "pdf_auto": true
+   },
+   {
+    "id": "r1-mid",
+    "k": "midi",
+    "c": "Trascrizione automatica",
+    "t": "MIDI automatico da «Registrazione originale (1981)»",
+    "f": "r1/auto.mid.enc",
+    "auto": true,
+    "da": "r1",
+    "st": "pronto",
+    "info": {
+     "contrasto": {
+      "2/4": 1.01,
+      "3/4": 1.34,
+      "4/4": 1.06
+     },
+     "metro": "3/4",
+     "bpm": 136,
+     "griglia": "1/4",
+     "note": 1948,
+     "battiti": "beat_this",
+     "tonalita": "C maggiore"
+    }
+   },
+   {
+    "id": "r1-pdf",
+    "k": "pdf",
+    "c": "Trascrizione automatica",
+    "t": "Partitura automatica da «Registrazione originale (1981)»",
+    "f": "r1/auto.pdf.enc",
+    "auto": true,
+    "da": "r1",
+    "st": "pronto",
+    "info": {
+     "contrasto": {
+      "2/4": 1.01,
+      "3/4": 1.34,
+      "4/4": 1.06
+     },
+     "metro": "3/4",
+     "bpm": 136,
+     "griglia": "1/4",
+     "note": 1948,
+     "battiti": "beat_this",
+     "tonalita": "C maggiore"
+    }
    }
-  ]
+  ],
+  "agg": "2026-11-19"
  }
 }
