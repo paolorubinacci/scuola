@@ -7,7 +7,7 @@ for d,ds,fs in os.walk(R):
     ds[:]=[x for x in ds if x not in skip and not x.startswith('.')]
     for f in fs:
         p=os.path.relpath(os.path.join(d,f),R)
-        if p in ('sw.js','CNAME','robots.txt','data.json') or f.startswith('.') or f.endswith(('.txt','.py')):continue
+        if p in ('sw.js','CNAME','robots.txt','data.json') or f.startswith('.') or f.endswith(('.txt','.py','.yml')) or f.startswith(('video.','originale.')):continue  # i video si scaricano quando si aprono
         files.append(p.replace(os.sep,'/'))
 files.sort()
 h=hashlib.sha256()

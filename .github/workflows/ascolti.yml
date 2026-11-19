@@ -4,7 +4,7 @@ name: Ascolti - elabora i brani caricati
 on:
   push:
     branches: [main]
-    paths: ['ascolti/**/originale.mp3.enc', 'ascolti/catalog.json']
+    paths: ['ascolti/**/originale.*.enc', 'ascolti/catalog.json']
   workflow_dispatch:
 permissions:
   contents: write

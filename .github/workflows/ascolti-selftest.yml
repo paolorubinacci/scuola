@@ -36,7 +36,7 @@ jobs:
           MSCORE: mscore3
         run: |
           set -o pipefail
-          W=$(mktemp -d); mkdir -p $W/tools $W/ascolti/valzer $W/ascolti/rifai prova
+          W=$(mktemp -d); mkdir -p $W/tools $W/ascolti prova
           cp tools/salt.hex tools/trascrivi.py $W/tools/
           # valzer di prova in 3/4 con un po' di rubato, suonato con un pianoforte General MIDI
           python - <<'PY'
@@ -57,6 +57,7 @@ jobs:
           PY
           fluidsynth -ni -F /tmp/valzer.wav -r 44100 /usr/share/sounds/sf2/FluidR3_GM.sf2 /tmp/valzer.mid > /dev/null
           ffmpeg -loglevel error -y -i /tmp/valzer.wav -b:a 160k /tmp/valzer.mp3
+          ffmpeg -loglevel error -y -f lavfi -i testsrc=d=6:s=1920x1080 -i /tmp/valzer.mp3 -t 6 -c:v libx264 -pix_fmt yuv420p -c:a aac /tmp/video.mp4
           python - "$W" <<'PY'
           import sys, os, json
           from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
@@ -66,11 +67,15 @@ jobs:
           k = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=s, iterations=200000).derive(b'prova')
           def enc(src, dst):
               iv = os.urandom(12); open(dst, 'wb').write(s + iv + AESGCM(k).encrypt(iv, open(src, 'rb').read(), None))
-          enc('/tmp/valzer.mp3', W + '/ascolti/valzer/originale.mp3.enc')
-          enc('/tmp/valzer.mp3', W + '/ascolti/rifai/mix.mp3.enc')
-          json.dump({'valzer': {'t': 'Valzer di prova', 'tipo': 'solo', 'stato': 'elaborazione', 'midi_auto': True, 'pdf_auto': True},
-                     'rifai': {'t': 'Rifai (solo MIDI)', 'tipo': 'solo', 'stato': 'elaborazione', 'rifai': True, 'stems': [], 'dur': 40,
-                               'midi_auto': True, 'pdf_auto': False, 'pdf': {'f': 'auto.pdf.enc', 'auto': True}}}, open(W + '/ascolti/catalog.json', 'w'))
+          os.makedirs(W + '/ascolti/valzer/r1'); os.makedirs(W + '/ascolti/valzer/rv'); os.makedirs(W + '/ascolti/rifai/r1')
+          enc('/tmp/valzer.mp3', W + '/ascolti/valzer/r1/originale.mp3.enc')
+          enc('/tmp/video.mp4', W + '/ascolti/valzer/rv/originale.mp4.enc')
+          enc('/tmp/valzer.mp3', W + '/ascolti/rifai/r1/mix.mp3.enc')
+          json.dump({'valzer': {'t': 'Valzer di prova', 'r': [
+                        {'id': 'r1', 'k': 'audio', 'c': 'Registrazione', 't': 'Registrazione', 'tipo': 'solo', 'st': 'elaborazione', 'midi_auto': True, 'pdf_auto': True},
+                        {'id': 'rv', 'k': 'video', 'c': 'Live', 't': 'Video di prova', 'st': 'elaborazione'}]},
+                     'rifai': {'t': 'Rifai', 'r': [{'id': 'r1', 'k': 'audio', 'c': 'Registrazione', 't': 'Reg', 'tipo': 'solo', 'st': 'elaborazione', 'rifai': True,
+                        'f': 'r1/mix.mp3.enc', 'stems': [], 'dur': 40, 'midi_auto': True, 'pdf_auto': False}]}}, open(W + '/ascolti/catalog.json', 'w'))
           PY
           python tools/elabora.py $W 2>&1 | tee prova/prova.log
           { echo "== catalogo"; cat $W/ascolti/catalog.json; echo; echo "== file"; find $W/ascolti -type f -printf "%p %s\n"; } >> prova/prova.log
@@ -80,7 +85,7 @@ jobs:
           from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
           from cryptography.hazmat.primitives import hashes
           from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-          W = sys.argv[1]; b = open(W + '/ascolti/valzer/auto.pdf.enc', 'rb').read()
+          W = sys.argv[1]; b = open(W + '/ascolti/valzer/r1/auto.pdf.enc', 'rb').read()
           k = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=b[:16], iterations=200000).derive(b'prova')
           open('/tmp/valzer.pdf', 'wb').write(AESGCM(k).decrypt(b[16:28], b[28:], None))
           PY
