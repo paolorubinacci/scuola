@@ -71,14 +71,14 @@ def metro_note(pos, pitch, vel):
     """metro e primo tempo dal basso: in quale periodo (2, 3, 4 battiti) tornano le note gravi?
     Valzer: basso ogni 3; 4/4: basso su 1 e 3. Restituisce il contrasto per ogni metro e la fase migliore."""
     n = int(np.ceil(pos.max())) + 2
-    s = np.zeros(n)
+    low = np.full(n, np.nan)
     k = np.round(pos).astype(int)
-    near = np.abs(pos - k) < 0.25
-    low = np.asarray(pitch) <= 55
-    w = np.asarray(vel, float) * np.where(low, 1.0, 0.15)
-    for kk, ww, ok in zip(k, w, near):
+    for kk, pp, ok in zip(k, pitch, np.abs(pos - k) < 0.25):
         if ok and 0 <= kk < n:
-            s[kk] += ww
+            low[kk] = pp if np.isnan(low[kk]) else min(low[kk], pp)
+    # quanto e' grave la nota piu' bassa di ogni battito rispetto al solito: il basso del primo tempo spicca
+    ref = np.nanpercentile(low, 75) if np.any(~np.isnan(low)) else 60
+    s = np.nan_to_num(np.clip(ref - low, 0, None)) + 1.0
     s = s[:max(8, n)]
     res = {}
     for m in (2, 3, 4):
@@ -111,7 +111,7 @@ def main():
     best = max(res, key=lambda m: res[m][0])
     if best == 2 and res[4][0] >= 0.9 * res[2][0]:
         best = 4
-    met = m_bt if (m_bt in res and res[m_bt][0] >= 0.85 * res[best][0]) else best
+    met = m_bt if (m_bt in res and res[m_bt][0] >= 0.95 * res[best][0]) else best
     if met == 2 and res[4][0] >= 0.9 * res[2][0]:  # 2/4 e 4/4 si assomigliano: meglio battute da 4
         met = 4
     fase = res[met][1]
