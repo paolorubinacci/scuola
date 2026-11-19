@@ -67,6 +67,27 @@ def metro(b, d):
     return int(vals[np.argmax(cnt)])
 
 
+def metro_note(pos, pitch, vel):
+    """metro e primo tempo dal basso: in quale periodo (2, 3, 4 battiti) tornano le note gravi?
+    Valzer: basso ogni 3; 4/4: basso su 1 e 3. Restituisce il contrasto per ogni metro e la fase migliore."""
+    n = int(np.ceil(pos.max())) + 2
+    s = np.zeros(n)
+    k = np.round(pos).astype(int)
+    near = np.abs(pos - k) < 0.25
+    low = np.asarray(pitch) <= 55
+    w = np.asarray(vel, float) * np.where(low, 1.0, 0.15)
+    for kk, ww, ok in zip(k, w, near):
+        if ok and 0 <= kk < n:
+            s[kk] += ww
+    s = s[:max(8, n)]
+    res = {}
+    for m in (2, 3, 4):
+        means = [s[f::m].mean() for f in range(m)]
+        f = int(np.argmax(means))
+        res[m] = (means[f] / (s.mean() + 1e-9), f)
+    return res
+
+
 def t2beat(t, b):
     """tempo (s) -> posizione in battiti, seguendo i battiti reali; prolunga con l'intervallo ai bordi."""
     t = np.asarray(t, float)
@@ -82,12 +103,20 @@ def main():
     if not notes:
         raise SystemExit('nessuna nota trovata')
     b, d, src = battiti(WAV)
-    met = metro(b, d)
     on = t2beat([n[0] for n in notes], b)
     off = t2beat([n[1] for n in notes], b)
-    # allinea le battute ai primi tempi trovati
-    d0 = int(np.argmin(np.abs(b - d[0]))) if len(d) else 0
-    shift = -d0 + met * math.ceil((d0 - min(0, math.floor(on.min()))) / met)
+    # metro: voto dei primi tempi di Beat This! e del basso; vince il basso se e' molto piu' chiaro
+    res = metro_note(on, [n[2] for n in notes], [n[3] for n in notes])
+    m_bt = metro(b, d) if len(d) >= 3 else None
+    best = max(res, key=lambda m: res[m][0])
+    if best == 2 and res[4][0] >= 0.9 * res[2][0]:
+        best = 4
+    met = m_bt if (m_bt in res and res[m_bt][0] >= 0.85 * res[best][0]) else best
+    if met == 2 and res[4][0] >= 0.9 * res[2][0]:  # 2/4 e 4/4 si assomigliano: meglio battute da 4
+        met = 4
+    fase = res[met][1]
+    # allinea le battute: la fase del basso diventa il primo tempo
+    shift = -fase + met * math.ceil(max(0.0, fase - math.floor(on.min())) / met)
     on, off = on + shift, off + shift
     err = {q: float(np.mean(np.abs(on * q - np.round(on * q))) / q) for q in (4, 3)}
     q = 3 if err[3] < 0.8 * err[4] else 4
@@ -124,7 +153,7 @@ def main():
             tr.append(m)
     mf.save(OUT_MID)
 
-    info = {'metro': f'{met}/4', 'bpm': bpm, 'griglia': '1/%d' % q, 'note': len(ev), 'battiti': src}
+    info = {'contrasto': {f'{m}/4': round(res[m][0], 2) for m in res}, 'metro': f'{met}/4', 'bpm': bpm, 'griglia': '1/%d' % q, 'note': len(ev), 'battiti': src}
     if OUT_XML:
         from music21 import stream, note, chord, meter, clef, key, layout, metadata, duration
         def staff(part, cl):
@@ -152,13 +181,20 @@ def main():
         sc = stream.Score()
         sc.metadata = metadata.Metadata(title=TITOLO or 'Trascrizione', composer='Trascrizione automatica (bozza)')
         r, l = staff(rh, clef.TrebleClef()), staff(lh, clef.BassClef())
+        sharps = 0
         try:
             k = stream.Stream([note.Note(p, quarterLength=e - a) for a, e, p, v in ev]).analyze('key')
-            ks = key.KeySignature(k.sharps)
-            r.insert(0, ks); l.insert(0, key.KeySignature(k.sharps))
+            sharps = k.sharps
+            r.insert(0, key.KeySignature(sharps)); l.insert(0, key.KeySignature(sharps))
             info['tonalita'] = k.tonic.name + (' maggiore' if k.mode == 'major' else ' minore')
         except Exception:
             pass
+        for st_ in (r, l):
+            for p_ in st_.pitches:
+                if p_.accidental is not None and p_.accidental.name == 'natural':
+                    p_.accidental = None
+                elif sharps < 0 and p_.accidental is not None and p_.accidental.name == 'sharp':
+                    p_.getEnharmonic(inPlace=True)
         for s in (r, l):
             sc.insert(0, s)
         sc.insert(0, layout.StaffGroup([r, l], symbol='brace', barTogether=True))
