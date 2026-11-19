@@ -1,29 +1,28 @@
-"""Ascolti consigliati: elabora i brani caricati dal sito (gira da solo su GitHub Actions).
+"""Ascolti consigliati: elabora i file caricati dal sito nei brani (gira da solo su GitHub Actions).
 
-  SCUOLA_PW=... python3 tools/elabora.py [CARTELLA_SITO]
+  SCUOLA_PW=... python3 tools/elabora.py [CARTELLA_SITO]      (--controlla: dice solo se c'e' qualcosa da fare)
 
-Per ogni brano di ascolti/catalog.json con stato "elaborazione" e il file ascolti/<id>/originale.mp3.enc:
-  1. decifra l'MP3 caricato dal sito
-  2. tipo "band": separa le tracce con Demucs (htdemucs_6s: batteria, basso, piano, voce, chitarra+altro -> "altro")
-     tipo "solo": niente separazione (e' gia' tutto piano)
-  3. codifica: originale mp3 160k, tracce mp3 128k
-  4. se richiesto ("trascrivi") e se non c'e' gia' un MIDI caricato da Paolo: trascrizione automatica del piano
-     (Basic Pitch, Spotify) -> auto.mid; poi MuseScore -> auto.pdf (bozza) se non c'e' gia' una partitura caricata
-  5. cifra tutto con la password della Scuola, aggiorna il catalogo (stato "pronto"), cancella originale.mp3.enc
-In caso di errore il brano passa a stato "errore" con il messaggio, e l'MP3 caricato resta li'.
-Comandi esterni: ffmpeg, python con demucs (variabile DEMUCS_PY), python con basic-pitch (BP_PY), mscore3 (MSCORE).
-I file audio in chiaro non vengono MAI scritti nel repository (e' pubblico)."""
+Ogni brano di ascolti/catalog.json e' una «casella» con una lista di risorse "r":
+  {id, k: audio|video|pdf|midi|yt, c: categoria, t: titolo, f: file (dentro ascolti/<brano>/), st: stato, ...}
+Le risorse con st "elaborazione" vengono preparate qui; i file caricati sono in ascolti/<brano>/<risorsa>/originale.*.enc
+  audio: tipo "band" -> tracce separate con Demucs (htdemucs_6s); mp3 160k (+ tracce 128k); poi, se chiesto
+         (midi_auto / pdf_auto) e se non ci sono gia' file di Paolo: trascrizione (tools/trascrivi.py:
+         Transkun + Beat This!) -> nuove risorse "Trascrizione automatica" (MIDI e/o partitura MuseScore).
+         "rifai": rifa' solo la trascrizione dall'audio gia' pubblicato.
+  video: H.264 720p con ffmpeg (avvio rapido in streaming) + immagine di copertina.
+Tutto resta cifrato con la password della Scuola; i file in chiaro non vengono MAI scritti nel repository (e' pubblico).
+Comandi esterni: ffmpeg, python con demucs (DEMUCS_PY), python con transkun/beat_this (TR_PY), mscore3 (MSCORE)."""
 import sys, os, json, shutil, subprocess, tempfile, traceback, datetime
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
-ROOT = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith('--') else os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 PW = os.environ['SCUOLA_PW']
 SALT = bytes.fromhex(open(os.path.join(ROOT, 'tools', 'salt.hex')).read().strip())
 KEY = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=SALT, iterations=200000).derive(PW.encode())
 DEMUCS_PY = os.environ.get('DEMUCS_PY', sys.executable)
-BP_PY = os.environ.get('BP_PY', sys.executable)
+TR_PY = os.environ.get('TR_PY', sys.executable)
 MSCORE = os.environ.get('MSCORE', 'mscore3')
 CAT = os.path.join(ROOT, 'ascolti', 'catalog.json')
 
@@ -58,102 +57,157 @@ def separa(wav, out):
             'vocals': f'{d}/vocals.wav', 'other': other}
 
 
-TRASCRIVI = r'''
-import sys, numpy as np, librosa, pretty_midi
-from basic_pitch.inference import predict
-wav, out = sys.argv[1], sys.argv[2]
-_, pm, _ = predict(wav, onset_threshold=0.5, frame_threshold=0.3, minimum_note_length=80)
-y, sr = librosa.load(wav, sr=22050, mono=True)
-bpm = float(np.atleast_1d(librosa.beat.beat_track(y=y, sr=sr)[0])[0]) or 100.0
-while bpm < 60: bpm *= 2
-while bpm > 180: bpm /= 2
-m = pretty_midi.PrettyMIDI(initial_tempo=round(bpm))
-rh, lh = pretty_midi.Instrument(0, name='Mano destra'), pretty_midi.Instrument(0, name='Mano sinistra')
-for ins in pm.instruments:
-    for n in ins.notes:
-        (rh if n.pitch >= 60 else lh).notes.append(pretty_midi.Note(velocity=n.velocity, pitch=n.pitch, start=n.start, end=n.end))
-m.instruments = [rh, lh]
-m.write(out)
-print('trascrizione', len(rh.notes) + len(lh.notes), 'note', round(bpm), 'bpm')
-'''
+def trascrivi(wav, mid, xml, titolo):
+    cmd = [TR_PY, os.path.join(ROOT, 'tools', 'trascrivi.py'), wav, mid] + ([xml] if xml else []) + ['--titolo', titolo or '']
+    print('$', ' '.join(cmd), flush=True)
+    out = subprocess.run(cmd, check=True, capture_output=True, text=True)
+    sys.stderr.write(out.stderr[-3000:])
+    return json.loads(out.stdout.strip().splitlines()[-1])
 
 
-def trascrivi(wav, mid):
-    f = os.path.join(os.path.dirname(mid), 'trascrivi.py')
-    open(f, 'w').write(TRASCRIVI)
-    sh(BP_PY, f, wav, mid)
-
-
-def pdf_da_midi(mid, pdf):
+def pdf_da_xml(xml, pdf):
     env = dict(os.environ, QT_QPA_PLATFORM='offscreen', XDG_RUNTIME_DIR=tempfile.mkdtemp())
-    sh(MSCORE, '-o', pdf, mid, env=env, timeout=600)
+    sh(MSCORE, '-o', pdf, xml, env=env, timeout=600)
     if not os.path.exists(pdf) or os.path.getsize(pdf) < 500:
         raise RuntimeError('MuseScore non ha prodotto il PDF')
 
 
-def elabora(tid, x, tmp):
-    d = os.path.join(ROOT, 'ascolti', tid)
-    src = os.path.join(d, 'originale.mp3.enc')
-    mp3 = os.path.join(tmp, 'originale.mp3')
-    open(mp3, 'wb').write(dec(open(src, 'rb').read()))
+def trascrizione(bid, x, r, src, tmp):
+    """trascrizione automatica di una registrazione: crea/aggiorna le risorse derivate <id>-mid e <id>-pdf"""
+    d = os.path.join(ROOT, 'ascolti', bid)
+    want_mid, want_pdf = r.get('midi_auto'), r.get('pdf_auto')
+    own = {k for q in x['r'] if not q.get('auto') for k in [q.get('k')]}
+    jobs = {'midi': want_mid and 'midi' not in own, 'pdf': want_pdf and 'pdf' not in own}
+    for k, on in jobs.items():
+        rid = r['id'] + ('-mid' if k == 'midi' else '-pdf')
+        old = next((q for q in x['r'] if q['id'] == rid), None)
+        if not on and old:
+            x['r'].remove(old)
+            f = os.path.join(d, old['f'])
+            if os.path.exists(f): os.remove(f)
+    if not any(jobs.values()):
+        return
+    try:
+        mid = os.path.join(tmp, 'auto.mid')
+        xml = os.path.join(tmp, 'auto.musicxml') if jobs['pdf'] else None
+        info = trascrivi(src, mid, xml, x.get('t'))
+        made = []
+        if jobs['midi']:
+            enc_file(mid, os.path.join(d, r['id'], 'auto.mid.enc'))
+            made.append(('midi', 'auto.mid.enc', 'MIDI'))
+        if jobs['pdf']:
+            try:
+                pdf = os.path.join(tmp, 'auto.pdf')
+                pdf_da_xml(xml, pdf)
+                enc_file(pdf, os.path.join(d, r['id'], 'auto.pdf.enc'))
+                made.append(('pdf', 'auto.pdf.enc', 'Partitura'))
+            except Exception:
+                traceback.print_exc()
+                r.setdefault('avvisi', []).append('Partitura automatica non riuscita.')
+        for k, f, nome in made:
+            rid = r['id'] + ('-mid' if k == 'midi' else '-pdf')
+            q = next((q for q in x['r'] if q['id'] == rid), None)
+            if not q:
+                q = {'id': rid}
+                x['r'].append(q)
+            q.update({'k': k, 'c': 'Trascrizione automatica', 't': nome + ' automatico da «' + r.get('t', 'registrazione') + '»' if k == 'midi'
+                      else 'Partitura automatica da «' + r.get('t', 'registrazione') + '»', 'f': r['id'] + '/' + f,
+                      'auto': True, 'da': r['id'], 'st': 'pronto', 'info': info})
+    except Exception:
+        traceback.print_exc()
+        r.setdefault('avvisi', []).append('Trascrizione automatica non riuscita.')
+
+
+def in_wav(src_enc, ext, tmp):
+    raw = os.path.join(tmp, 'in.' + ext)
+    open(raw, 'wb').write(dec(open(src_enc, 'rb').read()))
     wav = os.path.join(tmp, 'brano.wav')
-    sh('ffmpeg', '-loglevel', 'error', '-y', '-i', mp3, '-ar', '44100', '-ac', '2', wav)
-    stems = separa(wav, os.path.join(tmp, 'sep')) if x.get('tipo') == 'band' else {}
-    files = {'mix': (wav, '160k')}
-    files.update({k: (v, '128k') for k, v in stems.items()})
-    for k, (w, br) in files.items():
-        p = os.path.join(tmp, k + '.mp3')
-        sh('ffmpeg', '-loglevel', 'error', '-y', '-i', w, '-c:a', 'libmp3lame', '-b:a', br, p)
-        enc_file(p, os.path.join(d, k + '.mp3.enc'))
-    x['stems'] = [k for k in ('drums', 'bass', 'piano', 'vocals', 'other') if k in stems]
-    x['dur'] = dur(wav)
-    x['avvisi'] = []
-    if x.get('trascrivi') and not (x.get('midi') and not x['midi'].get('auto')):
-        try:
-            mid = os.path.join(tmp, 'auto.mid')
-            trascrivi(stems.get('piano', wav), mid)
-            enc_file(mid, os.path.join(d, 'auto.mid.enc'))
-            x['midi'] = {'f': 'auto.mid.enc', 'auto': True}
-            if not (x.get('pdf') and not x['pdf'].get('auto')):
-                try:
-                    pdf = os.path.join(tmp, 'auto.pdf')
-                    pdf_da_midi(mid, pdf)
-                    enc_file(pdf, os.path.join(d, 'auto.pdf.enc'))
-                    x['pdf'] = {'f': 'auto.pdf.enc', 'auto': True}
-                except Exception as e:
-                    traceback.print_exc()
-                    x['avvisi'].append('Partitura automatica non riuscita: c\'è solo il MIDI.')
-        except Exception as e:
-            traceback.print_exc()
-            x['avvisi'].append('Trascrizione automatica non riuscita.')
-    if not x['avvisi']:
-        del x['avvisi']
+    sh('ffmpeg', '-loglevel', 'error', '-y', '-i', raw, '-vn', '-ar', '44100', '-ac', '2', wav)
+    return raw, wav
+
+
+def originale(d, rid):
+    fs = [f for f in os.listdir(os.path.join(d, rid)) if f.startswith('originale.')] if os.path.isdir(os.path.join(d, rid)) else []
+    return os.path.join(d, rid, fs[0]) if fs else None
+
+
+def audio(bid, x, r, tmp):
+    d = os.path.join(ROOT, 'ascolti', bid)
+    src = originale(d, r['id'])
+    if src:
+        raw, wav = in_wav(src, src.split('.')[-2], tmp)
+        stems = separa(wav, os.path.join(tmp, 'sep')) if r.get('tipo') == 'band' else {}
+        files = {'mix': (wav, '160k')}
+        files.update({k: (v, '128k') for k, v in stems.items()})
+        for k, (w, br) in files.items():
+            p = os.path.join(tmp, k + '.mp3')
+            sh('ffmpeg', '-loglevel', 'error', '-y', '-i', w, '-c:a', 'libmp3lame', '-b:a', br, p)
+            enc_file(p, os.path.join(d, r['id'], k + '.mp3.enc'))
+        r['stems'] = [k for k in ('drums', 'bass', 'piano', 'vocals', 'other') if k in stems]
+        r['dur'] = dur(wav)
+        r['f'] = r['id'] + '/mix.mp3.enc'
+        trascrizione(bid, x, r, stems.get('piano', wav), tmp)
+        os.remove(src)
+    else:  # rifai: dall'audio gia' pubblicato (traccia del piano se c'e')
+        k = 'piano' if 'piano' in (r.get('stems') or []) else 'mix'
+        _, wav = in_wav(os.path.join(d, r['id'], k + '.mp3.enc'), 'mp3', tmp)
+        trascrizione(bid, x, r, wav, tmp)
+
+
+def video(bid, x, r, tmp):
+    d = os.path.join(ROOT, 'ascolti', bid)
+    src = originale(d, r['id'])
+    raw = os.path.join(tmp, 'in.' + src.split('.')[-2])
+    open(raw, 'wb').write(dec(open(src, 'rb').read()))
+    out, jpg = os.path.join(tmp, 'video.mp4'), os.path.join(tmp, 'poster.jpg')
+    sh('ffmpeg', '-loglevel', 'error', '-y', '-i', raw, '-vf', "scale='min(1280,iw)':-2", '-c:v', 'libx264', '-preset', 'veryfast',
+       '-crf', '26', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '128k', '-movflags', '+faststart', out)
+    t = dur(out)
+    sh('ffmpeg', '-loglevel', 'error', '-y', '-ss', str(round(min(t * 0.15, 20), 1)), '-i', out, '-frames:v', '1', '-vf', 'scale=640:-2', '-q:v', '5', jpg)
+    enc_file(out, os.path.join(d, r['id'], 'video.mp4.enc'))
+    enc_file(jpg, os.path.join(d, r['id'], 'poster.jpg.enc'))
+    r.update({'f': r['id'] + '/video.mp4.enc', 'poster': r['id'] + '/poster.jpg.enc', 'dur': t})
     os.remove(src)
-    x['stato'] = 'pronto'
-    x.pop('errore', None)
-    x['agg'] = datetime.date.today().isoformat()
+
+
+def da_fare(cat):
+    out = []
+    for bid, x in cat.items():
+        d = os.path.join(ROOT, 'ascolti', bid)
+        for r in x.get('r', []):
+            if r.get('st') == 'elaborazione' and (originale(d, r['id']) or (r.get('rifai') and r.get('k') == 'audio')):
+                out.append((bid, r['id']))
+    return out
 
 
 def main():
     cat = json.load(open(CAT))
-    todo = [t for t, x in cat.items() if x.get('stato') == 'elaborazione'
-            and os.path.exists(os.path.join(ROOT, 'ascolti', t, 'originale.mp3.enc'))]
+    todo = da_fare(cat)
     print('da elaborare:', todo or 'nessuno', flush=True)
-    for tid in todo:
+    for bid, rid in todo:
+        x = cat[bid]
+        r = next(q for q in x['r'] if q['id'] == rid)
         tmp = tempfile.mkdtemp(prefix='asc-')
-        x = cat[tid]
         try:
-            elabora(tid, x, tmp)
-            print('ok', tid, {k: x.get(k) for k in ('stems', 'dur', 'midi', 'pdf', 'avvisi')}, flush=True)
+            r.pop('avvisi', None)
+            (video if r['k'] == 'video' else audio)(bid, x, r, tmp)
+            r['st'] = 'pronto'
+            r.pop('err', None)
+            r.pop('rifai', None)
+            print('ok', bid, rid, {k: r.get(k) for k in ('stems', 'dur', 'avvisi')}, flush=True)
         except Exception as e:
             traceback.print_exc()
-            x['stato'] = 'errore'
-            x['errore'] = str(e)[-300:]
+            r['st'] = 'errore'
+            r['err'] = str(e)[-300:]
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
+        x['agg'] = datetime.date.today().isoformat()
         json.dump(cat, open(CAT, 'w'), ensure_ascii=False, indent=1)
     return todo
 
 
 if __name__ == '__main__':
-    main()
+    if '--controlla' in sys.argv:  # per GitHub Actions: c'e' qualcosa da fare?
+        print('si' if da_fare(json.load(open(CAT))) else 'no')
+    else:
+        main()

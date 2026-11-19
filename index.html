@@ -219,6 +219,39 @@ textarea,input[type=text],input[type=password],input[type=number]{width:100%;bac
 .af .ghk{border:1px solid var(--nline);background:var(--paper);padding:10px 12px}.af .ghk summary{cursor:pointer;font:700 14px var(--font);color:var(--navy)}
 .af .ghk input{margin-top:8px}
 .af .note{font-size:13px}
+.btabs{position:sticky;top:0;z-index:20;background:var(--navy);border-bottom:3px solid var(--gold)}
+.btabs .wrap{display:flex;gap:4px;overflow-x:auto;padding-top:6px;padding-bottom:0;scrollbar-width:none}
+.btabs button{all:unset;flex:none;cursor:pointer;padding:11px 14px 12px;font:700 14px var(--font);color:rgba(250,246,236,.72);border-bottom:3px solid transparent;margin-bottom:-3px}
+.btabs button.on{color:#fff;border-bottom-color:var(--wine);background:rgba(255,255,255,.07)}
+.btabs button i{font-style:normal;font-size:11px;background:rgba(255,255,255,.18);padding:1px 7px;border-radius:9px;margin-left:3px}
+.hint{font:500 14px/1.5 var(--font);color:var(--nmuted);margin:16px 0 10px}
+.empty{border:1px dashed var(--gold2);background:var(--cream);padding:16px;margin:16px 0;font:500 15px/1.55 var(--font);color:var(--nmuted)}
+.sub{font:700 12px var(--font);letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin:22px 0 8px}.sub i{font-style:normal;color:var(--nmuted)}
+.reclist{display:grid;gap:8px;margin-bottom:6px}
+.res{background:var(--cream);border:1px solid var(--nline);border-left:3px solid var(--gold);padding:10px 12px;margin-bottom:8px;cursor:pointer}
+.res.on{border-left-color:var(--wine);background:#fff}.res.open{background:#fff;cursor:default}
+.rh{display:flex;align-items:center;gap:10px}.ri{flex:none;width:36px;height:36px;border-radius:50%;background:var(--navy);color:var(--cream);display:flex;align-items:center;justify-content:center;font-size:16px}
+.res.on .ri{background:var(--wine)}
+.rt{flex:1;min-width:0}.rt b{display:block;font:700 15.5px/1.3 var(--font);color:var(--navy)}.rt small{display:block;font:500 12.5px var(--font);color:var(--nmuted)}
+.ed{all:unset;cursor:pointer;flex:none;width:36px;height:36px;text-align:center;line-height:36px;border-radius:50%;color:var(--nmuted);font-size:16px}.ed:hover{background:var(--paper)}
+.rst{font:500 13px/1.45 var(--font);color:var(--nmuted);margin:8px 0 0}.rst.p{color:var(--gold)}.rst.e{color:#a3352a}.rst code{display:block;font-size:11.5px;white-space:pre-wrap;word-break:break-word}
+.rv:empty{display:none}.rv{margin-top:10px}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.vc{background:var(--cream);border:1px solid var(--nline);cursor:pointer;padding:0 0 8px}.vc .rh{padding:8px 8px 0}.vc .ri{display:none}
+.vt{position:relative;aspect-ratio:16/9;background:var(--navy);overflow:hidden}.vt img{width:100%;height:100%;object-fit:cover;display:block}
+.vt .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.25);font-size:40px}
+.vt .pb{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:52px;height:52px;border-radius:50%;background:rgba(122,30,50,.92);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px}
+.vt em{position:absolute;right:6px;bottom:6px;background:rgba(0,0,0,.7);color:#fff;font:600 11px var(--font);font-style:normal;padding:2px 6px;border-radius:4px}
+.vp{grid-column:1/-1;margin:4px 0 10px}.vp video{width:100%;max-height:70vh;background:#000;display:block}
+.yt{position:relative;aspect-ratio:16/9;background:#000}.yt iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.drop{display:grid!important;place-items:center;text-align:center;gap:4px!important;border:2px dashed var(--gold2);background:var(--paper);padding:26px 14px;cursor:pointer}
+.drop input{position:absolute;opacity:0;width:1px;height:1px}.drop b{font:800 17px var(--font);color:var(--wine)}.drop small{font:500 13px var(--font);color:var(--nmuted)}
+.two2{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+.ui{border:1px solid var(--nline);border-left:3px solid var(--wine);background:#fff;padding:12px;display:grid;gap:10px}
+.af select{width:100%;background:#fff;border:1px solid var(--line);border-radius:12px;color:var(--ink);padding:12px;font:16px var(--font)}
+.modal{position:fixed;inset:0;z-index:300;background:rgba(15,27,45,.55);display:flex;align-items:flex-end;justify-content:center;padding:12px}
+.modal .box{background:var(--cream,#faf6ec);width:100%;max-width:520px;padding:18px;margin:0;max-height:90vh;overflow:auto;border-top:3px solid var(--gold)}
+.btn.del{color:#a3352a;border-color:#e2a49c}
 .t-nola .af .go{background:var(--wine);box-shadow:none;border-radius:0}
 @media(max-width:520px){.af .opts{grid-template-columns:1fr}}
 /* gate */
@@ -295,8 +328,8 @@ function boot(){$('#gate').remove();render()}
 function progress(){return LS.get('done',{})}
 function render(){
  ascStop();
- const h=location.hash.slice(1),am=h.match(/^(.+?)-ascolti(?:-([a-z0-9]+)(-modifica)?)?$/);
- if(am){const ac_=DATA.courses.find(x=>x.id===am[1]);if(ac_)return renderAscolti(ac_,am[2],!!am[3])}
+ const h=location.hash.slice(1),am=h.match(/^(.+?)-ascolti(?:-([a-z0-9]+)(?:-(modifica|carica))?)?$/);
+ if(am){const ac_=DATA.courses.find(x=>x.id===am[1]);if(ac_)return renderAscolti(ac_,am[2],am[3])}
  const [cid,lid]=h.split('-l');const c=DATA.courses.find(x=>x.id===cid);
  if(c&&lid)return renderLesson(c,c.lessons.find(l=>String(l.n)===lid));
  if(c)return renderCourse(c);
@@ -579,8 +612,9 @@ function paneRhythm(){const r=RHY[R.id];
 const isNola=c=>/nola/.test(c&&c.theme||'');
 const nolaCourse=()=>DATA.courses.find(isNola);
 /* Artisti e album: SOLO quelli indicati dal corso (PDF lezione 1). Niente aggiunte didattiche non richieste.
-   I brani stanno in ascolti/catalog.json: Paolo li aggiunge dal sito (modulo «Aggiungi un brano»),
-   GitHub Actions li elabora (tools/elabora.py: tracce separate, trascrizione), i file sono cifrati come il resto. */
+   Ogni brano di ascolti/catalog.json e' una «casella» con piu' risorse (x.r): registrazioni, partiture, MIDI, video, link.
+   Paolo carica i file dal sito (pagina «Carica»): il sito riconosce tipo, brano, titolo e categoria; GitHub Actions
+   prepara audio e video (tools/elabora.py). Tutti i file sono cifrati con la password della Scuola. */
 const ASC={disco:[{a:'Dr. John',n:'tutto; per iniziare:',al:['Gumbo','Dr. John Plays Mac Rebennack (vol. 1 e 2)','Desitively Bonnaroo','In the Right Place']},
  {a:'James Booker',n:'tutto;',al:['Junco Partner','New Orleans Piano Wizard: Live','Piano Prince of New Orleans','Blues & Ragtime from New Orleans','Classified','Lost Paramount Tapes']},
  {a:'Professor Longhair',n:'tutto;',al:['Crawfish Fiesta','New Orleans Piano',"Rock 'n' Roll Gumbo",'Tipitina (raccolta dei primi singoli)']},
@@ -590,60 +624,111 @@ const ASC={disco:[{a:'Dr. John',n:'tutto; per iniziare:',al:['Gumbo','Dr. John P
 const GHR='https://api.github.com/repos/PaoloRubinacci/scuola';
 const ghTok=()=>LS.get('gh',null);
 let CAT=null;
-/* catalogo: con la chiave GitHub lo legge direttamente dal repository (subito aggiornato), altrimenti dal sito */
-function ascCat(force){if(force)CAT=null;return CAT=CAT||(async()=>{const t=ghTok();
- if(t&&navigator.onLine!==false){try{const r=await fetch(GHR+'/contents/ascolti/catalog.json?ref=main&t='+Date.now(),{headers:{Authorization:'Bearer '+t,Accept:'application/vnd.github.raw+json'}});if(r.ok)return await r.json()}catch(e){}}
- try{const r=await fetch('ascolti/catalog.json',{cache:'no-store'});return r.ok?await r.json():{}}catch(e){return {}}})()}
+/* catalogo: con la chiave GitHub lo legge dal repository (subito aggiornato), altrimenti dal sito */
+function ascCat(force){if(force)CAT=null;return CAT=CAT||(async()=>{const t=ghTok();let c=null;
+ if(t&&navigator.onLine!==false){try{const r=await fetch(GHR+'/contents/ascolti/catalog.json?ref=main&t='+Date.now(),{headers:{Authorization:'Bearer '+t,Accept:'application/vnd.github.raw+json'}});if(r.ok)c=await r.json()}catch(e){}}
+ if(!c){try{const r=await fetch('ascolti/catalog.json',{cache:'no-store'});c=r.ok?await r.json():{}}catch(e){c={}}}
+ Object.values(c).forEach(x=>{x.r=x.r||[]});return c})()}
 const STN={drums:'Batteria',bass:'Basso',piano:'Piano',vocals:'Voce',other:'Altro'};
-const STATO={attesa:["Manca l'MP3",'w'],elaborazione:['In elaborazione','p'],errore:['Errore','e']};
-const normA=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[^a-z]/g,'');
-function cardHTML(c,id,x){const ok=x.stato==='pronto',s=STATO[x.stato];
- const ch=[ok?(x.stems&&x.stems.length?'Tracce separate':'Ascolto'):'',x.pdf?'Partitura':'',x.midi?'MIDI':'',x.storia?'Storia':''].filter(Boolean);
- return`<div class="atr ${ok?'has':''}" data-go="${c.id}-ascolti-${id}"><div class="h"><span class="pl">${ok?'▶':'♪'}</span><div style="flex:1;min-width:0"><div class="tt">${esc(x.t)}</div><div class="ar">${esc(x.a||'')}${x.al?' · '+esc(x.al):''}${x.anno?' · '+esc(x.anno):''}</div></div>${s?`<span class="badge ${s[1]}">${s[0]}</span>`:''}</div>${ch.length?`<div class="chips">${ch.map(t=>`<span class="chip s">${t}</span>`).join('')}</div>`:''}</div>`}
-async function renderAscolti(c,tid,edit){
+const normA=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[^a-z0-9]/g,'');
+const words=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').split(/[^a-z0-9]+/).filter(Boolean);
+/* le quattro sezioni di un brano */
+const SEZ=[['ascolto','Ascolto',r=>r.k==='audio'],['spartiti','Spartiti e MIDI',r=>r.k==='pdf'||r.k==='midi'],['video','Video',r=>r.k==='video'||r.k==='yt'],['scheda','Scheda',()=>false]];
+const VCAT=['Live','Tutorial','Lezione','Intervista','Video'];
+const CATS={audio:['Registrazione','Registrazione live'],video:VCAT,yt:VCAT,pdf:['Partitura','Trascrizione automatica'],midi:['MIDI','Trascrizione automatica']};
+const VHINT={Live:'Esecuzioni dal vivo: guarda le mani e come cambia il brano rispetto al disco.',Tutorial:'Spiegazioni passo per passo: rallenta il video e suona insieme, un pezzo alla volta.',
+ Lezione:'Lezioni e masterclass sul brano o sullo stile.',Intervista:'Il musicista racconta il brano.',Video:''};
+const KIND={audio:'♫',video:'▶',yt:'▶',pdf:'𝄞',midi:'⌨'};
+function count(x,k){return x.r.filter(SEZ.find(s=>s[0]===k)[2]).length}
+function busy(x){return x.r.some(r=>r.st==='elaborazione')}
+function cardHTML(c,id,x){const n=[['ascolto','registrazion','e','i'],['spartiti','spartit','o','i'],['video','video','','']].map(([k,w,s1,sn])=>{const m=count(x,k);return m?`${m} ${w}${m===1?s1:sn}`:''}).filter(Boolean);
+ const err=x.r.some(r=>r.st==='errore'),has=count(x,'ascolto')>0;
+ return`<div class="atr ${has?'has':''}" data-go="${c.id}-ascolti-${id}"><div class="h"><span class="pl">${has?'▶':'♪'}</span><div style="flex:1;min-width:0"><div class="tt">${esc(x.t)}</div><div class="ar">${esc(x.a||'')}${x.al?' · '+esc(x.al):''}${x.anno?' · '+esc(x.anno):''}</div></div>
+ ${busy(x)?'<span class="badge p">In preparazione</span>':err?'<span class="badge e">Errore</span>':''}</div>
+ <div class="chips">${(n.length?n:['Ancora nessun file']).map(t=>`<span class="chip s">${t}</span>`).join('')}${x.storia?'<span class="chip s">Storia</span>':''}</div></div>`}
+async function renderAscolti(c,tid,mode){
  theme(c.theme?'t-'+c.theme.replace(/^.*\s/,''):'');updStreak();$('#crumb').textContent=c.title+' · Ascolti';
  const cat=await ascCat();
- if(tid==='nuovo')return ascForm(c,null,{});
- if(tid&&cat[tid])return edit?ascForm(c,tid,cat[tid]):ascTrack(c,tid,cat[tid]);
+ if(tid==='nuovo')return ascUpload(c,null,cat);
+ if(tid==='scheda')return ascForm(c,null,{},cat);
+ if(tid&&cat[tid])return mode==='modifica'?ascForm(c,tid,cat[tid],cat):mode==='carica'?ascUpload(c,tid,cat):ascTrack(c,tid,cat[tid]);
  const ids=Object.keys(cat),used=new Set();
  const sec=ASC.disco.map(d=>{const tr=ids.filter(k=>normA(cat[k].a)===normA(d.a));tr.forEach(k=>used.add(k));
   return`<div class="asec">${esc(d.a)}</div>${d.n||d.al?`<p class="adisc">${d.n?esc(d.n)+' ':''}${(d.al||[]).map(a=>`<i>${esc(a)}</i>`).join(', ')}</p>`:''}${tr.length?`<div class="alist">${tr.map(k=>cardHTML(c,k,cat[k])).join('')}</div>`:''}`}).join('');
  const altri=ids.filter(k=>!used.has(k));
- $('#app').innerHTML=`<section class="chero"><div class="wrap"><div class="eyebrow">${esc(c.title)} · dal PDF della lezione 1</div><h1 class="nt">Ascolti consigliati</h1><p>Ascoltali qui, isola il piano, leggi la partitura</p></div></section><div class="wrap">
- <button class="addb" data-go="${c.id}-ascolti-nuovo"><b>＋</b><span><strong>Aggiungi un brano</strong><small>Carica l'MP3 (e se vuoi partitura e MIDI): il resto lo fa il sito</small></span></button>
+ $('#app').innerHTML=`<section class="chero"><div class="wrap"><div class="eyebrow">${esc(c.title)} · dal PDF della lezione 1</div><h1 class="nt">Ascolti consigliati</h1><p>Ogni brano è una casella: registrazioni, spartiti, video</p></div></section><div class="wrap">
+ <button class="addb" data-go="${c.id}-ascolti-nuovo"><b>＋</b><span><strong>Carica file</strong><small>Audio, video, PDF, MIDI o un link: li metto io nel brano giusto</small></span></button>
  ${sec}${altri.length?`<div class="asec">Altri brani</div><div class="alist">${altri.map(k=>cardHTML(c,k,cat[k])).join('')}</div>`:''}
- <div class="row"><button class="btn sm" data-go="${c.id}">‹ ${esc(c.title)}</button></div><div class="foot"></div></div>`;window.scrollTo(0,0)}
+ <div class="row"><button class="btn sm" data-go="${c.id}-ascolti-scheda">＋ Nuovo brano senza file</button><button class="btn sm" data-go="${c.id}">‹ ${esc(c.title)}</button></div><div class="foot"></div></div>`;window.scrollTo(0,0)}
 
-/* ---- pagina del brano ---- */
+/* ---- pagina del brano: sezioni Ascolto · Spartiti e MIDI · Video · Scheda ---- */
 function paras(s){return String(s||'').split(/\n\s*\n/).map(p=>p.trim()).filter(Boolean).map(p=>`<p>${esc(p)}</p>`).join('')}
+const TONI={C:'Do',D:'Re',E:'Mi',F:'Fa',G:'Sol',A:'La',B:'Si'};
+function tonIt(t){return String(t).replace(/^([A-G])(-|#)?/,(m,l,a)=>TONI[l]+(a==='-'?'♭':a==='#'?'♯':''))}
+function infoTr(i){return i?`Riconosciuto: ${esc(i.metro)}, circa ${esc(i.bpm)} bpm${i.tonalita?', '+esc(tonIt(i.tonalita)):''}.`:''}
+const ASCTAB={};
+function stato(r){return r.st==='elaborazione'?`<div class="rst p">⏳ In preparazione${r.k==='audio'?(r.tipo==='band'&&!r.rifai?' · separo le tracce':'')+(r.midi_auto||r.pdf_auto?' · trascrivo':''):''}: 5–15 minuti</div>`:
+ r.st==='errore'?`<div class="rst e">⚠️ Non riuscito. Ricarica il file, o manda a Claude: <code>${esc(r.err||'')}</code></div>`:''}
 async function ascTrack(c,id,x){
- const base='ascolti/'+id+'/',s=x.stato;
- const what=[x.tipo==='band'?'separazione delle tracce':'',x.trascrivi?'trascrizione automatica':''].filter(Boolean).join(' e ');
- const stat=s==='attesa'?`<div class="pending">Manca ancora l'MP3: caricalo da «Modifica · carica file» qui sotto.</div>`:
-  s==='elaborazione'?`<div class="pending">⏳ Il brano è in elaborazione${what?' ('+what+')':''}: di solito ci vogliono 5–15 minuti. <button class="btn sm" data-rel>↻ Controlla di nuovo</button></div>`:
-  s==='errore'?`<div class="pending">⚠️ L'elaborazione non è riuscita. Riprova a caricare l'MP3 da «Modifica · carica file», oppure manda a Claude questo messaggio: <code>${esc(x.errore||'')}</code></div>`:'';
- const pdfL=x.pdf?(x.pdf.auto?'Bozza automatica: il computer l\'ha ricavata dall\'audio. È un punto di partenza, non è precisa: le note vanno controllate a orecchio.':'Partitura caricata da te.'):'';
- const midL=x.midi?(x.midi.auto?'MIDI automatico (bozza, ricavato dall\'audio).':'MIDI caricato da te.'):'';
- $('#app').innerHTML=`<section class="chero"><div class="wrap"><div class="eyebrow">Ascolti consigliati</div><h1 class="nt">${esc(x.t)}</h1><p>${esc(x.a||'')}${x.al?' · '+esc(x.al):''}${x.anno?' · '+esc(x.anno):''}</p></div></section><div class="wrap">
- ${stat}${s==='pronto'?'<div id="stp"></div>':''}
- ${(x.avvisi||[]).map(a=>`<div class="note">${esc(a)}</div>`).join('')}
- ${x.tag&&x.tag.length?`<div class="chips" style="margin-top:14px">${x.tag.map(t=>`<span class="chip s">${esc(t)}</span>`).join('')}</div>`:''}
- ${x.storia?`<div class="asec">La storia</div><div class="atext">${paras(x.storia)}</div>`:''}
+ const base='ascolti/'+id+'/',tabs=SEZ.map(([k,n,f])=>[k,n,x.r.filter(f)]);
+ let tab=ASCTAB[id]||(tabs.find(t=>t[2].length)||tabs[3])[0];
+ const head=`<section class="chero"><div class="wrap"><div class="eyebrow">Ascolti consigliati</div><h1 class="nt">${esc(x.t)}</h1><p>${esc(x.a||'')}${x.al?' · '+esc(x.al):''}${x.anno?' · '+esc(x.anno):''}</p></div></section>`;
+ $('#app').innerHTML=`${head}<nav class="btabs"><div class="wrap">${tabs.map(([k,n,l])=>`<button data-tab="${k}">${n}${l.length?` <i>${l.length}</i>`:''}</button>`).join('')}</div></nav>
+ <div class="wrap"><div id="tabc"></div>
+ <button class="addb" data-go="${c.id}-ascolti-${id}-carica"><b>＋</b><span><strong>Aggiungi file a questo brano</strong><small>Registrazioni, video live, tutorial, spartiti, MIDI, link YouTube</small></span></button>
+ ${busy(x)?'<div class="row2"><button class="btn sm" data-rel>↻ Controlla se è pronto</button></div>':''}
+ <div class="row"><button class="btn sm" data-go="${c.id}-ascolti">‹ Tutti gli ascolti</button></div><div class="foot"></div></div>`;window.scrollTo(0,0);
+ const rel=$('[data-rel]');if(rel)rel.onclick=async()=>{rel.textContent='…';await ascCat(true);if(location.hash.endsWith('-ascolti-'+id))renderAscolti(c,id)};
+ const show=k=>{tab=ASCTAB[id]=k;ascStop();document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('on',b.dataset.tab===k));const el=$('#tabc'),list=tabs.find(t=>t[0]===k)[2];
+  ({ascolto:tabAscolto,spartiti:tabSpartiti,video:tabVideo,scheda:tabScheda})[k](el,c,id,x,list,base)};
+ document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>show(b.dataset.tab));show(tab)}
+function resHead(c,id,r,extra){return`<div class="rh"><span class="ri">${KIND[r.k]}</span><div class="rt"><b>${esc(r.t)}</b><small>${esc(r.c||'')}${r.dur?' · '+fmt(r.dur):''}${extra||''}</small></div><button class="ed" data-ed="${r.id}" aria-label="Modifica">✎</button></div>`}
+function bindEd(el,c,id,x){el.querySelectorAll('[data-ed]').forEach(b=>b.onclick=e=>{e.stopPropagation();resEdit(c,id,x,x.r.find(r=>r.id===b.dataset.ed))})}
+function tabAscolto(el,c,id,x,list,base){
+ if(!list.length){el.innerHTML=`<div class="empty">Ancora nessuna registrazione. Carica un MP3 (o un altro file audio) con «Aggiungi file».</div>`;return}
+ const ready=list.filter(r=>r.st==='pronto');let cur=ready[0]&&ready[0].id;
+ el.innerHTML=`<p class="hint">${list.length>1?'Scegli la registrazione da ascoltare. ':''}Usa il loop A-B e la velocità per studiare un passaggio${list.some(r=>(r.stems||[]).length)?'; con «Tracce separate» isoli il piano':''}.</p>
+ <div class="reclist">${list.map(r=>`<div class="res sel ${r.id===cur?'on':''}" data-pick="${r.id}">${resHead(c,id,r,(r.stems||[]).length?' · tracce separate':'')}${stato(r)}${(r.avvisi||[]).map(a=>`<div class="rst">${esc(a)}</div>`).join('')}</div>`).join('')}</div><div id="stp"></div>`;
+ const play=rid=>{ascStop();const r=list.find(q=>q.id===rid);if(!r||r.st!=='pronto')return;cur=rid;el.querySelectorAll('[data-pick]').forEach(d=>d.classList.toggle('on',d.dataset.pick===rid));
+  stemPlayer($('#stp'),base+rid,{stems:r.stems||[],dur:r.dur||0})};
+ el.querySelectorAll('[data-pick]').forEach(d=>d.onclick=()=>play(d.dataset.pick));bindEd(el,c,id,x);if(cur)play(cur)}
+function tabSpartiti(el,c,id,x,list,base){
+ const own=list.filter(r=>!r.auto),auto=list.filter(r=>r.auto);
+ const card=r=>`<div class="res" data-open="${r.id}">${resHead(c,id,r,r.auto?' · bozza':'')}${stato(r)}${r.auto?`<div class="rst">Ricavata dall'audio dal computer: un punto di partenza da controllare a orecchio. ${infoTr(r.info)}</div>`:''}<div class="rv"></div></div>`;
+ el.innerHTML=(own.length?`<div class="sub">I tuoi spartiti</div>${own.map(card).join('')}`:'')+(auto.length?`<div class="sub">Trascrizioni automatiche</div>${auto.map(card).join('')}`:'')+
+  (!own.some(r=>r.k==='pdf')?`<div class="empty">${own.length||auto.length?'':'Ancora nessuno spartito. '}${x.acquista?`Una trascrizione pubblicata è in vendita: <a href="${esc(x.acquista.u)}" target="_blank" rel="noopener">${esc(x.acquista.t)}</a>. `:''}Puoi caricare un PDF o un MIDI con «Aggiungi file», oppure chiedere la trascrizione automatica dal ✎ di una registrazione.</div>`:'')+
+  `<p class="hint">Tocca uno spartito per aprirlo; il MIDI si suona sulla tastiera, anche rallentato, con una mano sola o trasposto.</p>`;
+ bindEd(el,c,id,x);
+ el.querySelectorAll('[data-open]').forEach(d=>d.onclick=async e=>{if(e.target.closest('.rv,.ed'))return;const r=list.find(q=>q.id===d.dataset.open),v=d.querySelector('.rv');
+  if(d.classList.contains('open')){d.classList.remove('open');v.innerHTML='';return}
+  el.querySelectorAll('[data-open].open').forEach(o=>{o.classList.remove('open');o.querySelector('.rv').innerHTML=''});
+  if(r.st!=='pronto')return;d.classList.add('open');v.innerHTML='<div class="note">Carico…</div>';const u=base+r.f;
+  try{if(r.k==='pdf'){const b=await mediaURL(u,'application/pdf');v.innerHTML='<div class="pdfv"></div><div class="row2"><button class="btn sm" data-pdfo>Apri a tutto schermo</button></div>';
+    v.querySelector('[data-pdfo]').onclick=()=>{location.href=b};await showPDF(v.querySelector('.pdfv'),b)}
+   else{const b=await mediaURL(u,'audio/midi');const kb=midiToKb(await (await fetch(b)).arrayBuffer(),r.t);v.innerHTML=kbHTML(kb)+'<div class="row2"><button class="btn sm" data-midd>⬇︎ Scarica il MIDI</button></div>';
+    initKb(v.querySelector('.kb'));v.querySelector('[data-midd]').onclick=()=>{const a=document.createElement('a');a.href=b;a.download=id+'.mid';document.body.appendChild(a);a.click();a.remove()}}}
+  catch(err){v.innerHTML='<div class="note">Non ancora disponibile: il sito si sta aggiornando, riprova tra un minuto.</div>'}})}
+const ytId=u=>{const m=String(u).match(/(?:youtu\.be\/|v=|shorts\/|embed\/|live\/)([\w-]{11})/);return m&&m[1]};
+function tabVideo(el,c,id,x,list,base){
+ if(!list.length){el.innerHTML=`<div class="empty">Ancora nessun video. Aggiungi esecuzioni live, tutorial o interviste: un file video o un link YouTube.</div>`;return}
+ const cats=[...VCAT,...new Set(list.map(r=>r.c).filter(k=>!VCAT.includes(k)))].filter(k=>list.some(r=>(r.c||'Video')===k));
+ el.innerHTML=cats.map(k=>{const l=list.filter(r=>(r.c||'Video')===k);return`<div class="sub">${esc(k)} <i>${l.length}</i></div>${VHINT[k]?`<p class="hint">${VHINT[k]}</p>`:''}<div class="vgrid">${l.map(r=>`<div class="vc" data-v="${r.id}"><div class="vt">${r.k==='yt'?`<img src="https://i.ytimg.com/vi/${ytId(r.u)}/hqdefault.jpg" alt="">`:'<span class="ph">▶</span>'}<b class="pb">▶</b>${r.dur?`<em>${fmt(r.dur)}</em>`:''}</div>${resHead(c,id,r,r.k==='yt'?' · YouTube':'')}${stato(r)}</div>`).join('')}</div>`}).join('')+'<div id="vplay"></div>';
+ bindEd(el,c,id,x);
+ list.filter(r=>r.k==='video'&&r.poster&&r.st==='pronto').forEach(r=>mediaURL(base+r.poster,'image/jpeg').then(b=>{const t=el.querySelector(`[data-v="${r.id}"] .vt`);if(t)t.insertAdjacentHTML('afterbegin',`<img src="${b}" alt="">`)}).catch(()=>{}));
+ el.querySelectorAll('[data-v]').forEach(d=>d.onclick=async e=>{if(e.target.closest('.ed'))return;const r=list.find(q=>q.id===d.dataset.v);if(r.st!=='pronto')return;
+  const p=document.createElement('div');p.className='vp';p.innerHTML='<div class="note">Carico il video…</div>';el.querySelectorAll('.vp').forEach(o=>o.remove());d.after(p);
+  if(r.k==='yt'){p.innerHTML=`<div class="yt"><iframe src="https://www.youtube-nocookie.com/embed/${ytId(r.u)}?autoplay=1&playsinline=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div><div class="note">Su YouTube la velocità si cambia dall'ingranaggio ⚙︎ del video. <a href="${esc(r.u)}" target="_blank" rel="noopener">Apri su YouTube</a></div>`;return}
+  try{const b=await mediaURL(base+r.f,'video/mp4');p.innerHTML=`<video src="${b}" controls playsinline autoplay></video><div class="row2"><span class="seg">${[.5,.75,1].map(s=>`<button data-vs="${s}" class="${s===1?'on':''}">${s===1?'100%':s*100+'%'}</button>`).join('')}</span><button class="btn sm" data-vb>⟲ 5 s</button></div>`;
+   const v=p.querySelector('video');v.preservesPitch=true;p.querySelectorAll('[data-vs]').forEach(b2=>b2.onclick=()=>{v.playbackRate=+b2.dataset.vs;p.querySelectorAll('[data-vs]').forEach(y=>y.classList.toggle('on',y===b2))});
+   p.querySelector('[data-vb]').onclick=()=>{v.currentTime=Math.max(0,v.currentTime-5)}}
+  catch(err){p.innerHTML='<div class="note">Video non ancora disponibile: riprova tra un minuto (serve la connessione).</div>'}})}
+function tabScheda(el,c,id,x){
+ el.innerHTML=`${x.tag&&x.tag.length?`<div class="chips" style="margin-top:14px">${x.tag.map(t=>`<span class="chip s">${esc(t)}</span>`).join('')}</div>`:''}
+ ${x.storia?`<div class="asec">La storia</div><div class="atext">${paras(x.storia)}</div>`:'<div class="empty">Ancora nessuna storia: scrivila da «Modifica la scheda», o chiedi a Claude di prepararla.</div>'}
  ${x.studio&&x.studio.length?`<div class="asec">Perché studiarlo</div><ul class="aul">${x.studio.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:''}
- <div class="asec">Partitura</div>
- ${x.pdf?`<p class="note">${pdfL}</p><div class="pdfv" id="pdfv"><div class="note">Carico la partitura…</div></div><div class="row2"><button class="btn sm" data-pdfo>Apri a tutto schermo</button></div>`:
-  `<p class="atext">Ancora nessuna partitura.${x.acquista?` Una trascrizione pubblicata è in vendita: <a href="${esc(x.acquista.u)}" target="_blank" rel="noopener">${esc(x.acquista.t)}</a>. Se la compri, caricala da «Modifica · carica file».`:''}</p>`}
- ${x.midi?`<div class="asec">MIDI sulla tastiera</div><p class="note">${midL}</p><div id="midv"><div class="note">Carico il MIDI…</div></div><div class="row2"><button class="btn sm" data-midd>⬇︎ Scarica il file MIDI</button></div>`:''}
+ ${x.acquista?`<div class="asec">Partitura pubblicata</div><p class="atext"><a href="${esc(x.acquista.u)}" target="_blank" rel="noopener">${esc(x.acquista.t)}</a></p>`:''}
  ${x.fonti&&x.fonti.length?`<div class="asec">Fonti</div><ul class="aul src">${x.fonti.map(f=>`<li><a href="${esc(f.u)}" target="_blank" rel="noopener">${esc(f.t)}</a></li>`).join('')}</ul>`:''}
- <div class="row"><button class="btn sm" data-go="${c.id}-ascolti">‹ Tutti gli ascolti</button><button class="btn sm gold" data-go="${c.id}-ascolti-${id}-modifica">✎ Modifica · carica file</button></div><div class="foot"></div></div>`;window.scrollTo(0,0);
- const rel=$('[data-rel]');if(rel)rel.onclick=async()=>{rel.textContent='…';const cat=await ascCat(true);if(location.hash.endsWith('-ascolti-'+id))renderAscolti(c,id)};
- if(s==='pronto')stemPlayer($('#stp'),id,{stems:x.stems||[],dur:x.dur||0});
- if(x.pdf){const u=base+x.pdf.f;$('[data-pdfo]').onclick=async()=>{const w=window.open('','_blank');try{const b=await mediaURL(u,'application/pdf');if(w)w.location=b;else location.href=b}catch(e){if(w)w.close();toast('Partitura non disponibile: il sito si sta aggiornando, riprova tra un minuto.')}};
-  mediaURL(u,'application/pdf').then(b=>showPDF($('#pdfv'),b)).catch(()=>{const v=$('#pdfv');if(v)v.innerHTML='<div class="note">Partitura non ancora disponibile: il sito si sta aggiornando, riprova tra un minuto.</div>'})}
- if(x.midi){const u=base+x.midi.f;
-  $('[data-midd]').onclick=async()=>{try{const b=await mediaURL(u,'audio/midi');const a=document.createElement('a');a.href=b;a.download=id+'.mid';document.body.appendChild(a);a.click();a.remove()}catch(e){toast('MIDI non disponibile, riprova tra un minuto.')}};
-  mediaURL(u,'audio/midi').then(b=>fetch(b)).then(r=>r.arrayBuffer()).then(buf=>{const v=$('#midv');if(!v)return;const kb=midiToKb(buf,x.t);
-   v.innerHTML=kbHTML(kb);initKb(v.querySelector('.kb'))}).catch(()=>{const v=$('#midv');if(v)v.innerHTML='<div class="note">MIDI non ancora disponibile: riprova tra un minuto.</div>'})}}
+ <div class="row2"><button class="btn sm gold" data-go="${c.id}-ascolti-${id}-modifica">✎ Modifica la scheda</button></div>`}
 
 /* ---- PDF dentro la pagina (PDF.js, Mozilla, Apache 2.0) ---- */
 let PDFJS=null;
@@ -659,11 +744,11 @@ function midiToKb(buf,title){const d=new DataView(buf);let p=0;
  const str=n=>{let s='';for(let i=0;i<n;i++)s+=String.fromCharCode(d.getUint8(p+i));p+=n;return s};
  const vlq=()=>{let v=0,b;do{b=d.getUint8(p++);v=v*128+(b&127)}while(b&128);return v};
  if(str(4)!=='MThd')throw new Error('MIDI non valido');const hl=d.getUint32(p);p+=4;const nt=d.getUint16(p+2),div=d.getUint16(p+4)||480;p+=hl;
- let tempo=0;const tracks=[];
+ let tempo=0,tsig=0;const tracks=[];
  for(let t=0;t<nt&&p<d.byteLength-8;t++){const id=str(4),len=d.getUint32(p);p+=4;const end=p+len;if(id!=='MTrk'){p=end;continue}
   let tick=0,run=0;const on={},notes=[];
   while(p<end){tick+=vlq();let st=d.getUint8(p);if(st&128){p++;if(st<0xf0)run=st}else st=run;const ty=st&0xf0;
-   if(st===0xff){const mt=d.getUint8(p++),l=vlq();if(mt===0x51&&!tempo)tempo=(d.getUint8(p)<<16)|(d.getUint8(p+1)<<8)|d.getUint8(p+2);p+=l}
+   if(st===0xff){const mt=d.getUint8(p++),l=vlq();if(mt===0x51&&!tempo)tempo=(d.getUint8(p)<<16)|(d.getUint8(p+1)<<8)|d.getUint8(p+2);if(mt===0x58&&!tsig)tsig=d.getUint8(p);p+=l}
    else if(st===0xf0||st===0xf7){p+=vlq()}
    else if(ty===0x90||ty===0x80){const n=d.getUint8(p),v=d.getUint8(p+1);p+=2;const k=(st&15)*128+n;
     if(ty===0x90&&v>0)(on[k]=on[k]||[]).push([tick,v]);else{const s=(on[k]||[]).shift();if(s)notes.push([s[0],tick-s[0],n,s[1]])}}
@@ -672,10 +757,10 @@ function midiToKb(buf,title){const d=new DataView(buf);let p=0;
  const bpm=Math.round(60e6/(tempo||500000)),two=tracks.length===2,out=[];
  tracks.forEach((ns,i)=>ns.forEach(([s,l,m,v])=>out.push([s/div,Math.max(.05,l/div),m,two?(i===0?'R':'L'):(m>=60?'R':'L'),Math.max(.25,v/127)])));
  out.sort((a,b)=>a[0]-b[0]);if(!out.length)throw new Error('MIDI vuoto');
- return {title:(title||'')+' · MIDI',notes:out,bpm,beats:4,key:null,length:Math.max(...out.map(n=>n[0]+n[1]))}}
+ return {title:title||'MIDI',notes:out,bpm,beats:tsig||4,key:null,length:Math.max(...out.map(n=>n[0]+n[1]))}}
 
-/* ---- modulo: aggiungi / modifica un brano, carica MP3, PDF, MIDI ---- */
-const slug=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g,'').slice(0,40)||'brano';
+/* ---- pubblicazione su GitHub: un solo commit con file + catalogo (riletto subito prima, cosi' non si perde niente) ---- */
+const slug=s=>words(s).join('').slice(0,40)||'brano';
 function u2b(u){let s='';for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s)}
 let ENCK=null;
 async function encBytes(u8){if(!ENCK){const salt=b2u($('#enc').textContent.trim()).slice(0,16);const k0=await crypto.subtle.importKey('raw',new TextEncoder().encode(PW),'PBKDF2',false,['deriveKey']);
@@ -683,58 +768,147 @@ async function encBytes(u8){if(!ENCK){const salt=b2u($('#enc').textContent.trim(
  const iv=crypto.getRandomValues(new Uint8Array(12)),ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},ENCK.key,u8)),o=new Uint8Array(28+ct.length);o.set(ENCK.salt);o.set(iv,16);o.set(ct,28);return o}
 async function gh(path,opt,tok){opt=opt||{};const r=await fetch(GHR+path,Object.assign({},opt,{headers:Object.assign({Authorization:'Bearer '+tok,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'},opt.body?{'Content-Type':'application/json'}:{})}));
  if(!r.ok){const e=new Error(r.status+' '+(await r.text()).slice(0,200));e.status=r.status;throw e}return r.json()}
-/* un solo commit con tutti i file + catalogo aggiornato (riletto dal repository subito prima, cosi' non si perdono modifiche) */
-async function ghCommit(tok,files,change,msg,say){const tree0=[];
- for(const f of files){say('Invio '+f.label+'…');const b=await gh('/git/blobs',{method:'POST',body:JSON.stringify({content:u2b(f.u8),encoding:'base64'})},tok);tree0.push({path:f.path,mode:'100644',type:'blob',sha:b.sha})}
+async function ghCommit(tok,files,change,msg,say,dels){const tree0=[];
+ for(const f of files){say('Invio '+f.label+'…');const b=await gh('/git/blobs',{method:'POST',body:JSON.stringify({content:u2b(f.u8),encoding:'base64'})},tok);f.u8=null;tree0.push({path:f.path,mode:'100644',type:'blob',sha:b.sha})}
  for(let i=0;i<4;i++){say('Pubblico…');const head=(await gh('/git/ref/heads/main',{},tok)).object.sha,com=await gh('/git/commits/'+head,{},tok);
   let cat={};const r=await fetch(GHR+'/contents/ascolti/catalog.json?ref='+head,{headers:{Authorization:'Bearer '+tok,Accept:'application/vnd.github.raw+json'}});if(r.ok)cat=await r.json();
-  change(cat);const cb=await gh('/git/blobs',{method:'POST',body:JSON.stringify({content:JSON.stringify(cat,null,1)+'\n',encoding:'utf-8'})},tok);
-  const tr=await gh('/git/trees',{method:'POST',body:JSON.stringify({base_tree:com.tree.sha,tree:tree0.concat([{path:'ascolti/catalog.json',mode:'100644',type:'blob',sha:cb.sha}])})},tok);
+  Object.values(cat).forEach(x=>{x.r=x.r||[]});const gone=change(cat)||[];
+  const cb=await gh('/git/blobs',{method:'POST',body:JSON.stringify({content:JSON.stringify(cat,null,1)+'\n',encoding:'utf-8'})},tok);
+  let tree=tree0.concat([{path:'ascolti/catalog.json',mode:'100644',type:'blob',sha:cb.sha}]);
+  if(gone.length){const all=await gh('/git/trees/'+com.tree.sha+'?recursive=1',{},tok);const have=new Set(all.tree.map(t=>t.path));
+   tree=tree.concat(gone.filter(p=>have.has(p)).map(p=>({path:p,mode:'100644',type:'blob',sha:null})))}
+  const tr=await gh('/git/trees',{method:'POST',body:JSON.stringify({base_tree:com.tree.sha,tree})},tok);
   const nc=await gh('/git/commits',{method:'POST',body:JSON.stringify({message:msg,tree:tr.sha,parents:[head]})},tok);
   try{await gh('/git/refs/heads/main',{method:'PATCH',body:JSON.stringify({sha:nc.sha})},tok);return cat}catch(e){if(e.status!==422)throw e}}
  throw new Error('Il repository è stato aggiornato nello stesso momento: riprova.')}
-function ascForm(c,id,x){const isNew=!id,tok=ghTok();
- $('#app').innerHTML=`<section class="chero"><div class="wrap"><div class="eyebrow">Ascolti consigliati</div><h1 class="nt">${isNew?'Aggiungi un brano':esc(x.t)}</h1><p>${isNew?'Carica l\'MP3: il sito lo prepara da solo':'Modifica la scheda o carica nuovi file'}</p></div></section><div class="wrap">
+function tokHTML(){const t=ghTok();return`<details class="ghk" ${t?'':'open'}><summary>${t?'✓ Chiave GitHub salvata su questo dispositivo':'Chiave GitHub · serve una volta sola'}</summary>
+ <p class="note">Serve per pubblicare dal sito. Si crea qui: <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">https://github.com/settings/personal-access-tokens/new</a> · nome «Scuola», <b>Only select repositories → scuola</b>, permesso <b>Contents: Read and write</b>. Resta salvata solo su questo dispositivo.</p>
+ <input type="password" name="tok" placeholder="github_pat_…" autocomplete="off"></details>`}
+async function needTok(f,say){const t=(f.elements.tok&&f.elements.tok.value.trim())||ghTok();if(!t){const d=f.querySelector('.ghk');if(d)d.open=true;say('Inserisci la chiave GitHub (vedi sopra).');return null}
+ say('Controllo la chiave GitHub…');await gh('',{},t);if(f.elements.tok&&f.elements.tok.value.trim())LS.set('gh',t);return t}
+const ghErr=err=>/^40[134]/.test(err.message)?'La chiave GitHub non funziona: controlla che abbia «Contents: Read and write» sul repository scuola.':'Errore: '+err.message;
+
+/* ---- «Carica»: qualsiasi file sui brani. Riconosce tipo, brano, titolo e categoria; Paolo controlla e pubblica ---- */
+function kindOf(f){const n=f.name.toLowerCase(),t=f.type||'';
+ if(/\.(mid|midi)$/.test(n)||/midi/.test(t))return'midi';if(/\.pdf$/.test(n)||t==='application/pdf')return'pdf';
+ if(/^video\//.test(t)||/\.(mp4|mov|m4v|webm|mkv)$/.test(n))return'video';if(/^audio\//.test(t)||/\.(mp3|m4a|wav|aac|flac|ogg|aif|aiff)$/.test(n))return'audio';return null}
+function cleanName(s){return String(s).replace(/\.[a-z0-9]{2,4}$/i,'').replace(/^(y2mate\.com|ytmp3\.cc|savefrom\.net|ssyoutube\.com)\s*-\s*/i,'')
+ .replace(/[_]+/g,' ').replace(/\[[^\]]*\]/g,'').replace(/\((official[^)]*|audio|video|hd|hq|lyrics?|remaster(ed)?[^)]*)\)/ig,'').replace(/\b(1080p|720p|480p|360p|4k|hd)\b/ig,'').replace(/\s{2,}/g,' ').replace(/^[\s\-–·]+|[\s\-–·]+$/g,'').trim()}
+function guessCat(k,txt){const s=' '+words(txt).join(' ')+' ';
+ if(k==='pdf')return'Partitura';if(k==='midi')return'MIDI';
+ if(k==='audio')return/ (live|concert|concerto|festival) /.test(s)?'Registrazione live':'Registrazione';
+ if(/ (tutorial|tuto|lesson|lezione|lezioni|how to|learn|cours|masterclass|breakdown|analysis|analisi|play like|come suonare|tutoriel|lecon) /.test(s))return/ (masterclass|lesson|lezione|cours|lecon) /.test(s)&&!/ tutorial /.test(s)?'Lezione':'Tutorial';
+ if(/ (interview|intervista|entretien|talks|talking) /.test(s))return'Intervista';
+ if(/ (live|concert|concerto|festival|fest|tiny desk|session|sessions|performance|performs|tv|show|jazzfest) /.test(s))return'Live';return'Video'}
+function guessBrano(cat,txt){const w=' '+words(txt).join(' ')+' ';let best=null,bl=0;
+ for(const id in cat){const tw=words(cat[id].t).join(' ');if(tw&&w.includes(' '+tw+' ')&&tw.length>bl){best=id;bl=tw.length}}return best}
+/* titolo e artista dai tag ID3 degli MP3 */
+async function id3(file){try{const b=new Uint8Array(await file.slice(0,262144).arrayBuffer());if(String.fromCharCode(b[0],b[1],b[2])!=='ID3')return{};
+ const v=b[3],sz=(b[6]<<21)|(b[7]<<14)|(b[8]<<7)|b[9];let p=10;const out={};
+ const txt=(a)=>{const e=a[0],d=a.subarray(1);try{return(e===1||e===2?new TextDecoder('utf-16'+(e===2?'be':'')):e===3?new TextDecoder('utf-8'):new TextDecoder('latin1')).decode(d).replace(/\0/g,'').trim()}catch(e){return''}};
+ while(p+10<Math.min(b.length,sz+10)){const id=String.fromCharCode(b[p],b[p+1],b[p+2],b[p+3]);if(!/^[A-Z0-9]{4}$/.test(id))break;
+  const fs=v===4?(b[p+4]<<21)|(b[p+5]<<14)|(b[p+6]<<7)|b[p+7]:(b[p+4]<<24)|(b[p+5]<<16)|(b[p+6]<<8)|b[p+7];const fr=b.subarray(p+10,p+10+fs);
+  if(id==='TIT2')out.t=txt(fr);if(id==='TPE1')out.a=txt(fr);if(id==='TALB')out.al=txt(fr);if(id==='TYER'||id==='TDRC')out.y=txt(fr).slice(0,4);p+=10+fs}return out}catch(e){return{}}}
+async function ytInfo(u){try{const r=await fetch('https://noembed.com/embed?url='+encodeURIComponent(u));const j=await r.json();return j&&j.title?{t:j.title,a:j.author_name}:{} }catch(e){return{}}}
+function ascUpload(c,bid,cat){const items=[];let nid=0;
+ const opts=sel=>Object.keys(cat).sort((a,b)=>cat[a].t.localeCompare(cat[b].t)).map(k=>`<option value="${k}" ${k===sel?'selected':''}>${esc(cat[k].t)}${cat[k].a?' · '+esc(cat[k].a):''}</option>`).join('');
+ $('#app').innerHTML=`<section class="chero"><div class="wrap"><div class="eyebrow">Ascolti consigliati</div><h1 class="nt">${bid?esc(cat[bid].t):'Carica file'}</h1><p>${bid?'Aggiungi file a questo brano':'Riconosco da solo brano, titolo e categoria'}</p></div></section><div class="wrap">
+ <form class="af" id="up"><label class="drop"><input type="file" multiple accept="audio/*,video/*,.mp3,.m4a,.wav,.mp4,.mov,.pdf,.mid,.midi"><b>＋ Scegli i file</b><small>Registrazioni, video (live, tutorial…), spartiti PDF, MIDI · anche più file insieme</small></label>
+ <div class="two2"><input type="text" id="ytu" placeholder="Oppure incolla un link YouTube" inputmode="url"><button type="button" class="btn sm" id="yta">Aggiungi</button></div>
+ <div id="items"></div>${tokHTML()}<button class="go" type="submit" disabled>Pubblica</button><div class="note" id="upm"></div></form>
+ <div class="row"><button class="btn sm" data-go="${c.id}-ascolti${bid?'-'+bid:''}">‹ Annulla</button></div><div class="foot"></div></div>`;window.scrollTo(0,0);
+ const f=$('#up'),say=m=>$('#upm').textContent=m;
+ function draw(){$('#items').innerHTML=items.map(it=>`<div class="ui" data-i="${it.n}"><div class="rh"><span class="ri">${KIND[it.k]}</span><div class="rt"><b>${esc(it.name)}</b><small>${it.size?(it.size/1e6).toFixed(1)+' MB':'link'}${it.guess?' · riconosciuto: '+esc(it.guess):''}</small></div><button type="button" class="ed" data-rm="${it.n}">✕</button></div>
+  <label>Titolo<input type="text" data-f="t" value="${esc(it.t)}"></label>
+  <div class="two"><label>Categoria<select data-f="c">${CATS[it.k].filter(k=>k!=='Trascrizione automatica').map(k=>`<option ${k===it.c?'selected':''}>${k}</option>`).join('')}</select></label>
+  ${bid?'':`<label>Brano<select data-f="b"><option value="__new" ${it.b==='__new'?'selected':''}>＋ Nuovo brano</option>${opts(it.b)}</select></label>`}</div>
+  ${!bid&&it.b==='__new'?`<div class="two"><label>Titolo del nuovo brano<input type="text" data-f="nt" value="${esc(it.nt||'')}"></label><label>Artista<input type="text" data-f="na" list="artisti" value="${esc(it.na||'')}"></label></div>`:''}
+  ${it.k==='audio'?`<div class="opts"><label class="opt"><input type="radio" name="tp${it.n}" data-f="tipo" value="solo" ${it.tipo!=='band'?'checked':''}><span><b>Piano solo</b><small>Si ascolta così com'è</small></span></label><label class="opt"><input type="radio" name="tp${it.n}" data-f="tipo" value="band" ${it.tipo==='band'?'checked':''}><span><b>Più strumenti</b><small>Separa batteria, basso, piano, voce, altro</small></span></label></div>
+  <label class="opt chk"><input type="checkbox" data-f="midi_auto" ${it.midi_auto?'checked':''}><span><b>MIDI automatico sulla tastiera</b><small>Le note del piano ricavate dall'audio</small></span></label>
+  <label class="opt chk"><input type="checkbox" data-f="pdf_auto" ${it.pdf_auto?'checked':''}><span><b>Partitura PDF automatica (bozza)</b><small>Due pentagrammi, metro e tonalità riconosciuti: da controllare</small></span></label>`:''}
+  ${it.k==='video'&&it.size>90e6?'<div class="rst e">Troppo grande (massimo 90 MB): per i video lunghi incolla il link YouTube.</div>':''}</div>`).join('')+`<datalist id="artisti">${ASC.disco.map(d=>`<option value="${esc(d.a)}">`).join('')}</datalist>`;
+  f.querySelector('.go').disabled=!items.length;f.querySelector('.go').textContent=items.length?`Pubblica ${items.length} ${items.length===1?'elemento':'elementi'}`:'Pubblica';
+  $('#items').querySelectorAll('[data-i]').forEach(box=>{const it=items.find(x=>x.n===+box.dataset.i);
+   box.querySelectorAll('[data-f]').forEach(inp=>inp.onchange=inp.oninput=()=>{const k=inp.dataset.f;it[k]=inp.type==='checkbox'?inp.checked:inp.value;if(k==='b'&&inp.type!=='text')draw()})});
+  $('#items').querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{items.splice(items.findIndex(x=>x.n===+b.dataset.rm),1);draw()})}
+ async function add(k,o){const txt=[o.name,o.tag&&o.tag.t,o.tag&&o.tag.a].filter(Boolean).join(' ');
+  const b=bid||guessBrano(cat,txt),c0=guessCat(k,txt);let t=cleanName(o.tag&&o.tag.t?o.tag.t:o.name);
+  if(b){const tw=words(cat[b].t).join(' ');t=t.split(/\s+[-–·|:]\s+|\s*[|·]\s*/).filter(p=>{const pw=words(p).join(' ');return pw&&pw!==tw&&!(cat[b].a&&normA(p)===normA(cat[b].a))}).join(' · ');
+   const tr=words(t),tt=words(cat[b].t);if(tt.length&&tr.slice(0,tt.length).join(' ')===tt.join(' ')){t=t.replace(new RegExp('^\\W*'+tt.map(w=>w+'\\W*').join(''),'i'),'')}
+   t=cleanName(t.replace(/[()]/g,' '))||({audio:'Registrazione',pdf:'Spartito',midi:'MIDI'}[k]||c0)}
+  if(/^(score|sheet( music)?|spartito|partitura|transcription|trascrizione)$/i.test(t))t='Spartito';
+  const it={n:nid++,k,name:o.name,size:o.size,file:o.file,u:o.u,t:t||o.name,c:c0,b:b||'__new',guess:b?(bid?'':cat[b].t):'',
+   nt:b?'':cleanName((o.tag&&o.tag.t)||o.name.split(/\s*[-–|]\s*/).slice(-1)[0]),na:(o.tag&&o.tag.a)||'',tipo:'solo',midi_auto:true,pdf_auto:false,al:o.tag&&o.tag.al,y:o.tag&&o.tag.y};
+  if(!b){const ps=cleanName(o.name).split(/\s+[-–]\s+/);if(o.tag&&o.tag.t){it.nt=cleanName(o.tag.t)}else if(ps.length>1){it.na=it.na||ps[0];it.nt=cleanName(ps.slice(1).join(' - ').replace(/\([^)]*\)/g,''))}
+   it.t={audio:'Registrazione',pdf:'Spartito',midi:'MIDI'}[k]||c0}
+  items.push(it);draw()}
+ f.querySelector('input[type=file]').onchange=async e=>{for(const fl of e.target.files){const k=kindOf(fl);if(!k){toast('Formato non supportato: '+fl.name);continue}
+  await add(k,{name:fl.name,size:fl.size,file:fl,tag:k==='audio'?await id3(fl):null})}e.target.value=''};
+ $('#yta').onclick=async()=>{const u=$('#ytu').value.trim();if(!ytId(u))return toast('Link YouTube non valido');say('Leggo il titolo del video…');const i=await ytInfo(u);say('');
+  await add('yt',{name:i.t?i.t+(i.a?' · '+i.a:''):u,u,tag:null});$('#ytu').value=''};
+ f.onsubmit=async e=>{e.preventDefault();const btn=f.querySelector('.go');btn.disabled=true;
+  try{const t=await needTok(f,say);if(!t){btn.disabled=false;return}
+   if(items.some(it=>it.size>90e6))throw new Error('C\'è un file oltre i 90 MB: per i video lunghi usa un link YouTube.');
+   const files=[],adds=[],stamp=Date.now().toString(36);
+   for(const it of items){let b=bid||it.b;if(b==='__new'){const nt=(it.nt||it.t).trim();b=Object.keys(cat).find(k=>normA(cat[k].t)===normA(nt))||slug(nt);it.newB={t:nt,a:(it.na||'').trim(),al:it.al||'',anno:it.y||''}}
+    const rid='r'+stamp+it.n,r={id:rid,k:it.k,c:it.c,t:(it.t||'').trim()||it.name};let ext=(it.name.match(/\.([a-z0-9]{2,4})$/i)||[,'bin'])[1].toLowerCase();
+    if(it.k==='yt'){Object.assign(r,{u:it.u,st:'pronto'})}
+    else{say('Cifro «'+it.name+'»…');const u8=await encBytes(new Uint8Array(await it.file.arrayBuffer()));
+     if(it.k==='audio'||it.k==='video'){files.push({path:`ascolti/${b}/${rid}/originale.${ext}.enc`,label:'«'+it.name+'»',u8});Object.assign(r,{st:'elaborazione'},it.k==='audio'?{tipo:it.tipo,midi_auto:!!it.midi_auto,pdf_auto:!!it.pdf_auto}:{})}
+     else{const fn=it.k==='pdf'?'spartito.pdf.enc':'brano.mid.enc';files.push({path:`ascolti/${b}/${rid}/${fn}`,label:'«'+it.name+'»',u8});Object.assign(r,{f:rid+'/'+fn,st:'pronto'})}}
+    adds.push([b,r,it.newB])}
+   const out=await ghCommit(t,files,cat=>{for(const [b,r,nb] of adds){if(!cat[b])cat[b]=Object.assign({r:[]},nb);cat[b].r=cat[b].r||[];cat[b].r.push(r)}},
+    'Ascolti: '+adds.map(([b,r])=>r.t).join(', ').slice(0,120)+' (dal sito)',say);
+   CAT=Promise.resolve(out);const bs=[...new Set(adds.map(a=>a[0]))];
+   toast(adds.some(a=>a[1].st==='elaborazione')?'✓ Pubblicato. Audio e video si preparano in 5–15 minuti.':'✓ Pubblicato');
+   bs.forEach(b=>{const r=adds.find(a=>a[0]===b)[1];ASCTAB[b]=r.k==='audio'?'ascolto':r.k==='video'||r.k==='yt'?'video':'spartiti'});go(c.id+'-ascolti'+(bs.length===1?'-'+bs[0]:''))}
+  catch(err){btn.disabled=false;say(ghErr(err))}};
+ draw()}
+
+/* ---- modifica di una risorsa: titolo, categoria, trascrizione automatica, elimina ---- */
+function resEdit(c,id,x,r){const sh=document.createElement('div');sh.className='modal';
+ sh.innerHTML=`<form class="af box"><div class="lbl">${KIND[r.k]} ${esc(r.c||'')}</div>
+ <label>Titolo<input type="text" name="t" value="${esc(r.t)}"></label>
+ <label>Categoria<select name="c">${[...new Set([...(CATS[r.k]||[]),r.c].filter(Boolean))].map(k=>`<option ${k===r.c?'selected':''}>${k}</option>`).join('')}</select></label>
+ ${r.k==='audio'&&r.st==='pronto'?`<div class="lbl">Trascrizione automatica</div>
+ <label class="opt chk"><input type="checkbox" name="midi_auto" ${r.midi_auto?'checked':''}><span><b>MIDI sulla tastiera</b></span></label>
+ <label class="opt chk"><input type="checkbox" name="pdf_auto" ${r.pdf_auto?'checked':''}><span><b>Partitura PDF (bozza)</b></span></label>
+ <label class="opt chk"><input type="checkbox" name="rifai"><span><b>Rifalla adesso</b><small>Se togli una spunta, quella trascrizione viene eliminata</small></span></label>`:''}
+ ${ghTok()?'':tokHTML()}
+ <button class="go" type="submit">Salva</button><div class="row2"><button type="button" class="btn sm" data-x>Annulla</button><button type="button" class="btn sm del" data-del>🗑 Elimina</button></div><div class="note" data-m></div></form>`;
+ $('#app').appendChild(sh);const f=sh.querySelector('form'),say=m=>sh.querySelector('[data-m]').textContent=m,close=()=>sh.remove();
+ sh.onclick=e=>{if(e.target===sh)close()};sh.querySelector('[data-x]').onclick=close;
+ const files=q=>[q.f,q.poster,...(q.stems||[]).map(s=>q.id+'/'+s+'.mp3.enc')].filter(Boolean).map(p=>'ascolti/'+id+'/'+p);
+ const run=async(change,msg)=>{f.querySelectorAll('button').forEach(b=>b.disabled=true);try{const t=await needTok(f,say);if(!t){f.querySelectorAll('button').forEach(b=>b.disabled=false);return}
+  CAT=Promise.resolve(await ghCommit(t,[],change,msg,say));close();renderAscolti(c,id)}catch(err){f.querySelectorAll('button').forEach(b=>b.disabled=false);say(ghErr(err))}};
+ sh.querySelector('[data-del]').onclick=()=>{if(!confirm('Eliminare «'+r.t+'»?'))return;
+  run(cat=>{const y=cat[id];if(!y)return[];const del=y.r.filter(q=>q.id===r.id||q.da===r.id);y.r=y.r.filter(q=>!del.includes(q));return del.flatMap(files)},'Ascolti: eliminato «'+r.t+'»')};
+ f.onsubmit=e=>{e.preventDefault();const E=f.elements;
+  run(cat=>{const q=(cat[id]&&cat[id].r||[]).find(z=>z.id===r.id);if(!q)return[];q.t=E.t.value.trim()||q.t;q.c=E.c.value;let gone=[];
+   if(E.midi_auto){q.midi_auto=E.midi_auto.checked;q.pdf_auto=E.pdf_auto.checked;
+    if(E.rifai.checked){q.rifai=true;q.st='elaborazione';delete q.err}
+    else{const drop=cat[id].r.filter(z=>z.da===q.id&&((z.k==='midi'&&!q.midi_auto)||(z.k==='pdf'&&!q.pdf_auto)));cat[id].r=cat[id].r.filter(z=>!drop.includes(z));gone=drop.flatMap(files)}}
+   return gone},'Ascolti: modificato «'+r.t+'»')}}
+
+/* ---- scheda del brano: titolo, artista, storia, perché studiarlo ---- */
+function ascForm(c,id,x,cat){const isNew=!id;
+ $('#app').innerHTML=`<section class="chero"><div class="wrap"><div class="eyebrow">Ascolti consigliati</div><h1 class="nt">${isNew?'Nuovo brano':esc(x.t)}</h1><p>La scheda del brano</p></div></section><div class="wrap">
  <form class="af" id="af">
- <div class="lbl">Il brano</div>
  <label>Titolo<input type="text" name="t" required value="${esc(x.t||'')}" placeholder="Es. Dorothy"></label>
  <label>Artista<input type="text" name="a" list="artisti" value="${esc(x.a||'')}" placeholder="Es. Dr. John"></label><datalist id="artisti">${ASC.disco.map(d=>`<option value="${esc(d.a)}">`).join('')}</datalist>
  <div class="two"><label>Album<input type="text" name="al" value="${esc(x.al||'')}"></label><label>Anno<input type="text" name="anno" inputmode="numeric" value="${esc(x.anno||'')}"></label></div>
- <div class="lbl">Audio</div>
- <label class="file">${x.stato&&x.stato!=='attesa'?'Sostituisci l\'MP3 (facoltativo)':'MP3 del brano'}<input type="file" name="mp3" accept="audio/mpeg,audio/*,.mp3,.m4a,.wav"></label>
- <div class="opts"><label class="opt"><input type="radio" name="tipo" value="solo" ${x.tipo!=='band'?'checked':''}><span><b>Piano solo</b><small>Si ascolta così com'è</small></span></label>
- <label class="opt"><input type="radio" name="tipo" value="band" ${x.tipo==='band'?'checked':''}><span><b>Più strumenti</b><small>Separa le tracce: batteria, basso, piano, voce, altro</small></span></label></div>
- <label class="opt chk"><input type="checkbox" name="trascrivi" ${x.trascrivi!==false?'checked':''}><span><b>Trascrizione automatica del piano</b><small>Crea un MIDI e una partitura in bozza (se non carichi già i tuoi)</small></span></label>
- <div class="lbl">Partitura e MIDI · facoltativi</div>
- <label class="file">Partitura PDF${x.pdf&&!x.pdf.auto?' (sostituisce quella attuale)':''}<input type="file" name="pdf" accept="application/pdf,.pdf"></label>
- <label class="file">File MIDI${x.midi&&!x.midi.auto?' (sostituisce quello attuale)':''}<input type="file" name="mid" accept="audio/midi,audio/x-midi,.mid,.midi"></label>
- <div class="lbl">La scheda</div>
- <label>La storia del brano<textarea name="storia" rows="6" placeholder="Lascia vuoto e chiedi a Claude di scriverla">${esc(x.storia||'')}</textarea></label>
+ <label>La storia del brano<textarea name="storia" rows="7" placeholder="Lascia vuoto e chiedi a Claude di scriverla">${esc(x.storia||'')}</textarea></label>
  <label>Perché studiarlo · una cosa per riga<textarea name="studio" rows="4">${esc((x.studio||[]).join('\n'))}</textarea></label>
  <label>Caratteristiche · separate da virgola<input type="text" name="tag" value="${esc((x.tag||[]).join(', '))}" placeholder="Es. Piano solo, Gospel, Rumba"></label>
- <details class="ghk" ${tok?'':'open'}><summary>${tok?'✓ Chiave GitHub salvata su questo dispositivo':'Chiave GitHub · serve una volta sola'}</summary>
- <p class="note">Serve per pubblicare dal sito. Si crea qui: <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">https://github.com/settings/personal-access-tokens/new</a> · nome «Scuola», scadenza a scelta, <b>Only select repositories → scuola</b>, permesso <b>Contents: Read and write</b>. Resta salvata solo su questo dispositivo.</p>
- <input type="password" name="tok" placeholder="github_pat_…" autocomplete="off" value=""></details>
- <button class="go" type="submit">${isNew?'Aggiungi e pubblica':'Salva e pubblica'}</button>
- <div class="note" id="afm"></div></form>
+ ${tokHTML()}<button class="go" type="submit">${isNew?'Crea il brano':'Salva la scheda'}</button><div class="note" id="afm"></div></form>
  <div class="row"><button class="btn sm" data-go="${c.id}-ascolti${id?'-'+id:''}">‹ Annulla</button></div><div class="foot"></div></div>`;window.scrollTo(0,0);
- $('#af').onsubmit=async e=>{e.preventDefault();const f=e.target,btn=f.querySelector('.go'),say=m=>$('#afm').textContent=m,v=n=>f.elements[n].value.trim();
-  const t=f.elements.tok.value.trim()||ghTok();if(!t){f.querySelector('.ghk').open=true;return say('Inserisci la chiave GitHub (vedi sopra).')}
-  if(!v('t'))return say('Scrivi il titolo.');
-  btn.disabled=true;
-  try{say('Controllo la chiave GitHub…');await gh('',{},t);if(f.elements.tok.value.trim())LS.set('gh',t);
-   const cur=await ascCat(true);let tid=id;if(!tid){tid=slug(v('t'));let n=2;while(cur[tid])tid=slug(v('t'))+(n++)}
-   const ch={t:v('t'),a:v('a'),al:v('al'),anno:v('anno'),tipo:f.elements.tipo.value,trascrivi:f.elements.trascrivi.checked,storia:f.elements.storia.value.trim(),
-    studio:f.elements.studio.value.split('\n').map(s=>s.trim()).filter(Boolean),tag:v('tag').split(',').map(s=>s.trim()).filter(Boolean)};
-   const big=f.elements.mp3.files[0];if(big&&big.size>90e6)throw new Error('L\'MP3 è troppo grande (massimo 90 MB).');
-   const files=[],up=async(inp,name,label)=>{const fl=f.elements[inp].files[0];if(!fl)return false;say('Cifro '+label+'…');files.push({path:'ascolti/'+tid+'/'+name,label,u8:await encBytes(new Uint8Array(await fl.arrayBuffer()))});return true};
-   const hasMp3=await up('mp3','originale.mp3.enc','l\'MP3'),hasPdf=await up('pdf','partitura.pdf.enc','la partitura'),hasMid=await up('mid','trascrizione.mid.enc','il MIDI');
-   const cat=await ghCommit(t,files,cat=>{const y=Object.assign(cat[tid]||{},ch);
-     if(hasPdf)y.pdf={f:'partitura.pdf.enc',auto:false};if(hasMid)y.midi={f:'trascrizione.mid.enc',auto:false};
-     if(hasMp3){y.stato='elaborazione';delete y.errore}else if(!y.stato)y.stato='attesa';cat[tid]=y},
-    (isNew?'Ascolti: nuovo brano «':'Ascolti: aggiornato «')+ch.t+'» (dal sito)',say);
-   CAT=Promise.resolve(cat);toast(hasMp3?'✓ Pubblicato. Ora il sito prepara il brano (5–15 minuti).':'✓ Pubblicato');go(c.id+'-ascolti-'+tid)}
-  catch(err){btn.disabled=false;say(/^401|^403|^404/.test(err.message)?'La chiave GitHub non funziona: controlla che abbia «Contents: Read and write» sul repository scuola.':'Errore: '+err.message)}}}
+ $('#af').onsubmit=async e=>{e.preventDefault();const f=e.target,btn=f.querySelector('.go'),say=m=>$('#afm').textContent=m,v=n=>f.elements[n].value.trim();btn.disabled=true;
+  try{const t=await needTok(f,say);if(!t){btn.disabled=false;return}
+   let tid=id||Object.keys(cat).find(k=>normA(cat[k].t)===normA(v('t')))||slug(v('t'));
+   const ch={t:v('t'),a:v('a'),al:v('al'),anno:v('anno'),storia:f.elements.storia.value.trim(),studio:f.elements.studio.value.split('\n').map(s=>s.trim()).filter(Boolean),tag:v('tag').split(',').map(s=>s.trim()).filter(Boolean)};
+   CAT=Promise.resolve(await ghCommit(t,[],cat=>{cat[tid]=Object.assign(cat[tid]||{r:[]},ch)},(isNew?'Ascolti: nuovo brano «':'Ascolti: scheda «')+ch.t+'» (dal sito)',say));
+   ASCTAB[tid]='scheda';toast('✓ Pubblicato');go(c.id+'-ascolti-'+tid)}
+  catch(err){btn.disabled=false;say(ghErr(err))}}}
 
 /* ---- stem player: un <audio> per traccia (streaming, poca memoria; velocita' senza cambiare intonazione), volumi via Web Audio ---- */
 let ASCP=null;
@@ -771,7 +945,7 @@ async function stemPlayer(el,id,info){
   el.querySelectorAll('[data-pre]').forEach(b=>b.onclick=()=>{const p=b.dataset.pre;st.solo=null;
    info.stems.forEach(k=>st.on[k]=p==='all'?true:p==='p'?k==='piano':p==='np'?k!=='piano':p==='bd'?(k==='bass'||k==='drums'):k!=='vocals');save();applyGains();drawStems()})}
  async function load(){if(st.ready)return;ac();msg('Carico le tracce…');
-  const urls=await Promise.all(keys.map(k=>mediaURL('ascolti/'+id+'/'+k+'.mp3.enc','audio/mpeg')));if(st.dead)return;
+  const urls=await Promise.all(keys.map(k=>mediaURL(id+'/'+k+'.mp3.enc','audio/mpeg')));if(st.dead)return;
   keys.forEach((k,i)=>{const a=new Audio();a.preload='auto';a.setAttribute('playsinline','');a.src=urls[i];a.preservesPitch=true;a.webkitPreservesPitch=true;a.mozPreservesPitch=true;
    try{const s=AC.createMediaElementSource(a),g=AC.createGain();s.connect(g);g.connect(MASTER);if(k!=='mix')st.gains[k]=g}catch(e){}st.els[k]=a});
   st.ready=true;applyGains();msg('')}

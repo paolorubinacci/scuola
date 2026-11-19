@@ -4,9 +4,6 @@
   "a": "Dr. John",
   "al": "Dr. John Plays Mac Rebennack",
   "anno": 1981,
-  "tipo": "solo",
-  "stato": "attesa",
-  "trascrivi": true,
   "tag": [
    "Piano solo",
    "Ballad in stile gospel",
@@ -32,29 +29,22 @@
   "acquista": {
    "t": "Partitura su Musicnotes (piano solo, Master Keyz)",
    "u": "https://www.musicnotes.com/sheetmusic/dorothy/107862"
-  }
- },
- "dorothy2": {
-  "t": "Dorothy",
-  "a": "Dr. John",
-  "al": "",
-  "anno": "",
-  "tipo": "solo",
-  "trascrivi": true,
-  "storia": "",
-  "studio": [],
-  "tag": [],
-  "stato": "pronto",
-  "stems": [],
-  "dur": 201.53,
-  "midi": {
-   "f": "auto.mid.enc",
-   "auto": true
   },
-  "pdf": {
-   "f": "auto.pdf.enc",
-   "auto": true
-  },
-  "agg": "2026-11-19"
+  "r": [
+   {
+    "id": "r1",
+    "k": "audio",
+    "c": "Registrazione",
+    "t": "Registrazione originale (1981)",
+    "f": "r1/mix.mp3.enc",
+    "tipo": "solo",
+    "stems": [],
+    "dur": 201.53,
+    "st": "elaborazione",
+    "rifai": true,
+    "midi_auto": true,
+    "pdf_auto": true
+   }
+  ]
  }
 }
