@@ -198,6 +198,29 @@ textarea,input[type=text],input[type=password],input[type=number]{width:100%;bac
 .presets{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px}
 .stp .row2{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px}
 .stp .note{font-size:12px;color:var(--nmuted);margin:8px 0 0}
+.badge{flex:none;font:700 11px var(--font);padding:5px 9px;border-radius:999px;background:var(--paper);border:1px solid var(--nline);color:var(--nmuted);white-space:nowrap}
+.badge.p{background:#fff6e0;border-color:var(--gold2);color:var(--gold)}.badge.e{background:#fdecea;border-color:#e2a49c;color:#a3352a}
+.addb{all:unset;box-sizing:border-box;width:100%;display:flex;gap:12px;align-items:center;margin:20px 0 4px;padding:14px 16px;border:1.5px dashed var(--gold2);background:var(--paper);cursor:pointer;color:var(--navy)}
+.addb b{flex:none;width:40px;height:40px;border-radius:50%;background:var(--wine);color:#fff;display:flex;align-items:center;justify-content:center;font:700 20px var(--font)}
+.addb strong{display:block;font:700 16px var(--font)}.addb small{display:block;font:500 13px var(--font);color:var(--nmuted)}
+.atext p{margin:0 0 12px;font-size:16.5px;line-height:1.65;color:var(--nink)}
+.aul{margin:0;padding-left:20px;display:grid;gap:8px;font-size:16px;line-height:1.55;color:var(--nink)}.aul.src{font-size:14px}
+.pdfv{background:#fff;border:1px solid var(--nline);display:grid;gap:8px;padding:8px;margin:10px 0;max-height:80vh;overflow:auto}
+.pdfv canvas{width:100%;height:auto;display:block;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.pending code{display:block;margin-top:8px;font-size:12px;white-space:pre-wrap;word-break:break-word}
+.af{display:grid;gap:12px;margin:18px 0;font-family:var(--font)}
+.af label{display:grid;gap:6px;font:600 14px var(--font);color:var(--navy)}
+.af .two{display:grid;grid-template-columns:1fr 110px;gap:10px}
+.af .file input{font:14px var(--font);padding:10px;border:1px dashed var(--nline);background:var(--paper)}
+.af .opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.af .opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--nline);background:var(--paper);padding:12px;cursor:pointer}
+.af .opt input{margin-top:3px;accent-color:var(--wine);width:18px;height:18px;flex:none}
+.af .opt b{display:block;font:700 14px var(--font)}.af .opt small{display:block;font:500 12.5px/1.4 var(--font);color:var(--nmuted)}
+.af .ghk{border:1px solid var(--nline);background:var(--paper);padding:10px 12px}.af .ghk summary{cursor:pointer;font:700 14px var(--font);color:var(--navy)}
+.af .ghk input{margin-top:8px}
+.af .note{font-size:13px}
+.t-nola .af .go{background:var(--wine);box-shadow:none;border-radius:0}
+@media(max-width:520px){.af .opts{grid-template-columns:1fr}}
 /* gate */
 #gate{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(90% 60% at 100% 0%,#dbe9ff,transparent 60%),radial-gradient(70% 50% at 0% 100%,#ffe3dc,transparent 60%),#fff}
 #gate .box{width:100%;max-width:360px;text-align:center}
@@ -272,8 +295,8 @@ function boot(){$('#gate').remove();render()}
 function progress(){return LS.get('done',{})}
 function render(){
  ascStop();
- const h=location.hash.slice(1),am=h.match(/^(.+?)-ascolti(?:-([a-z0-9]+))?$/);
- if(am){const ac_=DATA.courses.find(x=>x.id===am[1]);if(ac_)return renderAscolti(ac_,am[2])}
+ const h=location.hash.slice(1),am=h.match(/^(.+?)-ascolti(?:-([a-z0-9]+)(-modifica)?)?$/);
+ if(am){const ac_=DATA.courses.find(x=>x.id===am[1]);if(ac_)return renderAscolti(ac_,am[2],!!am[3])}
  const [cid,lid]=h.split('-l');const c=DATA.courses.find(x=>x.id===cid);
  if(c&&lid)return renderLesson(c,c.lessons.find(l=>String(l.n)===lid));
  if(c)return renderCourse(c);
@@ -384,7 +407,7 @@ function initKb(el){
   for(const m of whites){const on=st.on.get(m);ctx.fillStyle=on?(on==='R'?'#2f7bf6':'#ff6a4d'):'#fff';ctx.fillRect(pos[m]+.5,0,ww-1,H);ctx.strokeStyle='#cfd8e6';ctx.strokeRect(pos[m]+.5,0,ww-1,H);
    if(m%12===0){ctx.fillStyle=on?'#fff':'#8a94a6';ctx.font=Math.max(8,Math.min(11,ww*.55))+'px sans-serif';ctx.textAlign='center';ctx.fillText('C'+(Math.floor(m/12)-1),pos[m]+ww/2,H-8)}}
   for(let m=a;m<=z;m++)if(isBlack(m)){const x=pos[m-1]+ww*.71,on=st.on.get(m);ctx.fillStyle=on?(on==='R'?'#2f7bf6':'#ff6a4d'):'#1d2433';ctx.fillRect(x,0,ww*.58,H*.6)}}
- function upd(){el.querySelector('.kbpm').textContent=Math.round(base*st.sp)+' bpm';el.querySelector('.kn').textContent=keyName()+(st.tr?` (${st.tr>0?'+':''}${st.tr})`:'');draw()}
+ function upd(){el.querySelector('.kbpm').textContent=Math.round(base*st.sp)+' bpm';el.querySelector('.kn').textContent=b.key===null?(st.tr?(st.tr>0?'+':'')+st.tr+' st':'Originale'):keyName()+(st.tr?` (${st.tr>0?'+':''}${st.tr})`:'');draw()}
  function bpm(){return base*st.sp}
  function stop(){st.playing=false;clearInterval(st.timer);cancelAnimationFrame(st.raf);st.on.clear();el.querySelector('.play').classList.remove('on');el.querySelector('.play').textContent='▶';el.querySelector('.prog i').style.width='0';draw();if(kbActive===stop)kbActive=null}
  async function start(){if(kbActive)kbActive();stopMetro();stopRhythm();ac();const pb=el.querySelector('.play');
@@ -555,32 +578,163 @@ function paneRhythm(){const r=RHY[R.id];
 /* ================= ascolti consigliati ================= */
 const isNola=c=>/nola/.test(c&&c.theme||'');
 const nolaCourse=()=>DATA.courses.find(isNola);
-/* Ascolti consigliati: SOLO quelli indicati dal corso (PDF lezione 1). Niente aggiunte didattiche non richieste.
-   tracks: brani di cui Paolo ha mandato l'MP3 -> {id,t:titolo,a:indice artista in disco,al:album}. Audio in ascolti/<id>/ (tools/ascolti.py) */
-const ASC={tracks:[],
- disco:[{a:'Dr. John',n:'tutto; per iniziare:',al:['Gumbo','Dr. John Plays Mac Rebennack (vol. 1 e 2)','Desitively Bonnaroo','In the Right Place']},
+/* Artisti e album: SOLO quelli indicati dal corso (PDF lezione 1). Niente aggiunte didattiche non richieste.
+   I brani stanno in ascolti/catalog.json: Paolo li aggiunge dal sito (modulo «Aggiungi un brano»),
+   GitHub Actions li elabora (tools/elabora.py: tracce separate, trascrizione), i file sono cifrati come il resto. */
+const ASC={disco:[{a:'Dr. John',n:'tutto; per iniziare:',al:['Gumbo','Dr. John Plays Mac Rebennack (vol. 1 e 2)','Desitively Bonnaroo','In the Right Place']},
  {a:'James Booker',n:'tutto;',al:['Junco Partner','New Orleans Piano Wizard: Live','Piano Prince of New Orleans','Blues & Ragtime from New Orleans','Classified','Lost Paramount Tapes']},
  {a:'Professor Longhair',n:'tutto;',al:['Crawfish Fiesta','New Orleans Piano',"Rock 'n' Roll Gumbo",'Tipitina (raccolta dei primi singoli)']},
  {a:'Henry Butler',al:['PiaNOLA Live']},{a:'Jon Cleary',al:['Mo Hippa Live','GoGo Juice']},
  {a:'Huey «Piano» Smith'},{a:'Champion Jack Dupree'},{a:'Fats Domino'},{a:'Tuts Washington'},
  {a:'Jelly Roll Morton',n:'tutto, comprese le interviste delle registrazioni Library of Congress'}]};
-let ASCIDX=null;
-function ascIndex(){return ASCIDX=ASCIDX||fetch('ascolti/index.json',{cache:'no-store'}).then(r=>r.ok?r.json():{}).catch(()=>({}))}
+const GHR='https://api.github.com/repos/PaoloRubinacci/scuola';
+const ghTok=()=>LS.get('gh',null);
+let CAT=null;
+/* catalogo: con la chiave GitHub lo legge direttamente dal repository (subito aggiornato), altrimenti dal sito */
+function ascCat(force){if(force)CAT=null;return CAT=CAT||(async()=>{const t=ghTok();
+ if(t&&navigator.onLine!==false){try{const r=await fetch(GHR+'/contents/ascolti/catalog.json?ref=main&t='+Date.now(),{headers:{Authorization:'Bearer '+t,Accept:'application/vnd.github.raw+json'}});if(r.ok)return await r.json()}catch(e){}}
+ try{const r=await fetch('ascolti/catalog.json',{cache:'no-store'});return r.ok?await r.json():{}}catch(e){return {}}})()}
 const STN={drums:'Batteria',bass:'Basso',piano:'Piano',vocals:'Voce',other:'Altro'};
-function trackHTML(c,x,idx){const has=!!idx[x.id];return`<div class="atr ${has?'has':''}" data-go="${c.id}-ascolti-${x.id}"><div class="h"><span class="pl">${has?'▶':'♪'}</span><div><div class="tt">${esc(x.t)}</div><div class="ar">${esc(ASC.disco[x.a]?.a||'')}${x.al?' · '+esc(x.al):''}</div></div></div></div>`}
-async function renderAscolti(c,tid){
- theme(c.theme?'t-'+c.theme.replace(/^.*\s/,''):'');updStreak();const idx=await ascIndex();
- const x=tid&&ASC.tracks.find(t=>t.id===tid);
- if(x){$('#crumb').textContent=c.title+' · Ascolti';
-  $('#app').innerHTML=`<section class="chero"><div class="wrap"><div class="eyebrow">Ascolti consigliati</div><h1 class="nt">${esc(x.t)}</h1><p>${esc(ASC.disco[x.a]?.a||'')}${x.al?' · '+esc(x.al):''}</p></div></section><div class="wrap">
-  ${idx[x.id]?'<div id="stp"></div>':`<div class="pending">L'MP3 di questo brano non è ancora stato caricato.</div>`}
-  <div class="row"><button class="btn sm" data-go="${c.id}-ascolti">‹ Tutti gli ascolti</button></div><div class="foot"></div></div>`;window.scrollTo(0,0);
-  if(idx[x.id])stemPlayer($('#stp'),x.id,idx[x.id]);return}
- $('#crumb').textContent=c.title+' · Ascolti';
- $('#app').innerHTML=`<section class="chero"><div class="wrap"><div class="eyebrow">${esc(c.title)} · dal PDF della lezione 1</div><h1 class="nt">Ascolti consigliati</h1><p>Ascoltali qui e isola il piano, il basso o la batteria</p></div></section><div class="wrap">
- ${ASC.disco.map((d,i)=>{const tr=ASC.tracks.filter(t=>t.a===i);return`<div class="asec">${esc(d.a)}</div>${d.n||d.al?`<p class="adisc">${d.n?esc(d.n)+' ':''}${(d.al||[]).map(a=>`<i>${esc(a)}</i>`).join(', ')}</p>`:''}${tr.length?`<div class="alist">${tr.map(t=>trackHTML(c,t,idx)).join('')}</div>`:''}`}).join('')}
- ${ASC.tracks.length?'':'<div class="pending">Nessun brano caricato per ora: qui compariranno i brani man mano che arrivano gli MP3.</div>'}
+const STATO={attesa:["Manca l'MP3",'w'],elaborazione:['In elaborazione','p'],errore:['Errore','e']};
+const normA=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[^a-z]/g,'');
+function cardHTML(c,id,x){const ok=x.stato==='pronto',s=STATO[x.stato];
+ const ch=[ok?(x.stems&&x.stems.length?'Tracce separate':'Ascolto'):'',x.pdf?'Partitura':'',x.midi?'MIDI':'',x.storia?'Storia':''].filter(Boolean);
+ return`<div class="atr ${ok?'has':''}" data-go="${c.id}-ascolti-${id}"><div class="h"><span class="pl">${ok?'▶':'♪'}</span><div style="flex:1;min-width:0"><div class="tt">${esc(x.t)}</div><div class="ar">${esc(x.a||'')}${x.al?' · '+esc(x.al):''}${x.anno?' · '+esc(x.anno):''}</div></div>${s?`<span class="badge ${s[1]}">${s[0]}</span>`:''}</div>${ch.length?`<div class="chips">${ch.map(t=>`<span class="chip s">${t}</span>`).join('')}</div>`:''}</div>`}
+async function renderAscolti(c,tid,edit){
+ theme(c.theme?'t-'+c.theme.replace(/^.*\s/,''):'');updStreak();$('#crumb').textContent=c.title+' · Ascolti';
+ const cat=await ascCat();
+ if(tid==='nuovo')return ascForm(c,null,{});
+ if(tid&&cat[tid])return edit?ascForm(c,tid,cat[tid]):ascTrack(c,tid,cat[tid]);
+ const ids=Object.keys(cat),used=new Set();
+ const sec=ASC.disco.map(d=>{const tr=ids.filter(k=>normA(cat[k].a)===normA(d.a));tr.forEach(k=>used.add(k));
+  return`<div class="asec">${esc(d.a)}</div>${d.n||d.al?`<p class="adisc">${d.n?esc(d.n)+' ':''}${(d.al||[]).map(a=>`<i>${esc(a)}</i>`).join(', ')}</p>`:''}${tr.length?`<div class="alist">${tr.map(k=>cardHTML(c,k,cat[k])).join('')}</div>`:''}`}).join('');
+ const altri=ids.filter(k=>!used.has(k));
+ $('#app').innerHTML=`<section class="chero"><div class="wrap"><div class="eyebrow">${esc(c.title)} · dal PDF della lezione 1</div><h1 class="nt">Ascolti consigliati</h1><p>Ascoltali qui, isola il piano, leggi la partitura</p></div></section><div class="wrap">
+ <button class="addb" data-go="${c.id}-ascolti-nuovo"><b>＋</b><span><strong>Aggiungi un brano</strong><small>Carica l'MP3 (e se vuoi partitura e MIDI): il resto lo fa il sito</small></span></button>
+ ${sec}${altri.length?`<div class="asec">Altri brani</div><div class="alist">${altri.map(k=>cardHTML(c,k,cat[k])).join('')}</div>`:''}
  <div class="row"><button class="btn sm" data-go="${c.id}">‹ ${esc(c.title)}</button></div><div class="foot"></div></div>`;window.scrollTo(0,0)}
+
+/* ---- pagina del brano ---- */
+function paras(s){return String(s||'').split(/\n\s*\n/).map(p=>p.trim()).filter(Boolean).map(p=>`<p>${esc(p)}</p>`).join('')}
+async function ascTrack(c,id,x){
+ const base='ascolti/'+id+'/',s=x.stato;
+ const what=[x.tipo==='band'?'separazione delle tracce':'',x.trascrivi?'trascrizione automatica':''].filter(Boolean).join(' e ');
+ const stat=s==='attesa'?`<div class="pending">Manca ancora l'MP3: caricalo da «Modifica · carica file» qui sotto.</div>`:
+  s==='elaborazione'?`<div class="pending">⏳ Il brano è in elaborazione${what?' ('+what+')':''}: di solito ci vogliono 5–15 minuti. <button class="btn sm" data-rel>↻ Controlla di nuovo</button></div>`:
+  s==='errore'?`<div class="pending">⚠️ L'elaborazione non è riuscita. Riprova a caricare l'MP3 da «Modifica · carica file», oppure manda a Claude questo messaggio: <code>${esc(x.errore||'')}</code></div>`:'';
+ const pdfL=x.pdf?(x.pdf.auto?'Bozza automatica: il computer l\'ha ricavata dall\'audio. È un punto di partenza, non è precisa: le note vanno controllate a orecchio.':'Partitura caricata da te.'):'';
+ const midL=x.midi?(x.midi.auto?'MIDI automatico (bozza, ricavato dall\'audio).':'MIDI caricato da te.'):'';
+ $('#app').innerHTML=`<section class="chero"><div class="wrap"><div class="eyebrow">Ascolti consigliati</div><h1 class="nt">${esc(x.t)}</h1><p>${esc(x.a||'')}${x.al?' · '+esc(x.al):''}${x.anno?' · '+esc(x.anno):''}</p></div></section><div class="wrap">
+ ${stat}${s==='pronto'?'<div id="stp"></div>':''}
+ ${(x.avvisi||[]).map(a=>`<div class="note">${esc(a)}</div>`).join('')}
+ ${x.tag&&x.tag.length?`<div class="chips" style="margin-top:14px">${x.tag.map(t=>`<span class="chip s">${esc(t)}</span>`).join('')}</div>`:''}
+ ${x.storia?`<div class="asec">La storia</div><div class="atext">${paras(x.storia)}</div>`:''}
+ ${x.studio&&x.studio.length?`<div class="asec">Perché studiarlo</div><ul class="aul">${x.studio.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:''}
+ <div class="asec">Partitura</div>
+ ${x.pdf?`<p class="note">${pdfL}</p><div class="pdfv" id="pdfv"><div class="note">Carico la partitura…</div></div><div class="row2"><button class="btn sm" data-pdfo>Apri a tutto schermo</button></div>`:
+  `<p class="atext">Ancora nessuna partitura.${x.acquista?` Una trascrizione pubblicata è in vendita: <a href="${esc(x.acquista.u)}" target="_blank" rel="noopener">${esc(x.acquista.t)}</a>. Se la compri, caricala da «Modifica · carica file».`:''}</p>`}
+ ${x.midi?`<div class="asec">MIDI sulla tastiera</div><p class="note">${midL}</p><div id="midv"><div class="note">Carico il MIDI…</div></div><div class="row2"><button class="btn sm" data-midd>⬇︎ Scarica il file MIDI</button></div>`:''}
+ ${x.fonti&&x.fonti.length?`<div class="asec">Fonti</div><ul class="aul src">${x.fonti.map(f=>`<li><a href="${esc(f.u)}" target="_blank" rel="noopener">${esc(f.t)}</a></li>`).join('')}</ul>`:''}
+ <div class="row"><button class="btn sm" data-go="${c.id}-ascolti">‹ Tutti gli ascolti</button><button class="btn sm gold" data-go="${c.id}-ascolti-${id}-modifica">✎ Modifica · carica file</button></div><div class="foot"></div></div>`;window.scrollTo(0,0);
+ const rel=$('[data-rel]');if(rel)rel.onclick=async()=>{rel.textContent='…';const cat=await ascCat(true);if(location.hash.endsWith('-ascolti-'+id))renderAscolti(c,id)};
+ if(s==='pronto')stemPlayer($('#stp'),id,{stems:x.stems||[],dur:x.dur||0});
+ if(x.pdf){const u=base+x.pdf.f;$('[data-pdfo]').onclick=async()=>{const w=window.open('','_blank');try{const b=await mediaURL(u,'application/pdf');if(w)w.location=b;else location.href=b}catch(e){if(w)w.close();toast('Partitura non disponibile: il sito si sta aggiornando, riprova tra un minuto.')}};
+  mediaURL(u,'application/pdf').then(b=>showPDF($('#pdfv'),b)).catch(()=>{const v=$('#pdfv');if(v)v.innerHTML='<div class="note">Partitura non ancora disponibile: il sito si sta aggiornando, riprova tra un minuto.</div>'})}
+ if(x.midi){const u=base+x.midi.f;
+  $('[data-midd]').onclick=async()=>{try{const b=await mediaURL(u,'audio/midi');const a=document.createElement('a');a.href=b;a.download=id+'.mid';document.body.appendChild(a);a.click();a.remove()}catch(e){toast('MIDI non disponibile, riprova tra un minuto.')}};
+  mediaURL(u,'audio/midi').then(b=>fetch(b)).then(r=>r.arrayBuffer()).then(buf=>{const v=$('#midv');if(!v)return;const kb=midiToKb(buf,x.t);
+   v.innerHTML=kbHTML(kb);initKb(v.querySelector('.kb'))}).catch(()=>{const v=$('#midv');if(v)v.innerHTML='<div class="note">MIDI non ancora disponibile: riprova tra un minuto.</div>'})}}
+
+/* ---- PDF dentro la pagina (PDF.js, Mozilla, Apache 2.0) ---- */
+let PDFJS=null;
+async function showPDF(el,url){if(!el)return;
+ if(!PDFJS){PDFJS=await import('./vendor/pdfjs/pdf.min.mjs');PDFJS.GlobalWorkerOptions.workerSrc='vendor/pdfjs/pdf.worker.min.mjs'}
+ const data=new Uint8Array(await (await fetch(url)).arrayBuffer());const doc=await PDFJS.getDocument({data}).promise;el.innerHTML='';
+ const dpr=Math.min(3,window.devicePixelRatio||1),W=el.clientWidth||600;
+ for(let p=1;p<=doc.numPages;p++){if(!el.isConnected)return;const pg=await doc.getPage(p),v0=pg.getViewport({scale:1}),vp=pg.getViewport({scale:W/v0.width*dpr});
+  const cv=document.createElement('canvas');cv.width=vp.width;cv.height=vp.height;el.appendChild(cv);await pg.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise}}
+
+/* ---- MIDI -> tastiera (tracce 1 e 2 = mano destra e sinistra; se c'e' una traccia sola si divide al Do centrale) ---- */
+function midiToKb(buf,title){const d=new DataView(buf);let p=0;
+ const str=n=>{let s='';for(let i=0;i<n;i++)s+=String.fromCharCode(d.getUint8(p+i));p+=n;return s};
+ const vlq=()=>{let v=0,b;do{b=d.getUint8(p++);v=v*128+(b&127)}while(b&128);return v};
+ if(str(4)!=='MThd')throw new Error('MIDI non valido');const hl=d.getUint32(p);p+=4;const nt=d.getUint16(p+2),div=d.getUint16(p+4)||480;p+=hl;
+ let tempo=0;const tracks=[];
+ for(let t=0;t<nt&&p<d.byteLength-8;t++){const id=str(4),len=d.getUint32(p);p+=4;const end=p+len;if(id!=='MTrk'){p=end;continue}
+  let tick=0,run=0;const on={},notes=[];
+  while(p<end){tick+=vlq();let st=d.getUint8(p);if(st&128){p++;if(st<0xf0)run=st}else st=run;const ty=st&0xf0;
+   if(st===0xff){const mt=d.getUint8(p++),l=vlq();if(mt===0x51&&!tempo)tempo=(d.getUint8(p)<<16)|(d.getUint8(p+1)<<8)|d.getUint8(p+2);p+=l}
+   else if(st===0xf0||st===0xf7){p+=vlq()}
+   else if(ty===0x90||ty===0x80){const n=d.getUint8(p),v=d.getUint8(p+1);p+=2;const k=(st&15)*128+n;
+    if(ty===0x90&&v>0)(on[k]=on[k]||[]).push([tick,v]);else{const s=(on[k]||[]).shift();if(s)notes.push([s[0],tick-s[0],n,s[1]])}}
+   else if(ty===0xc0||ty===0xd0)p+=1;else p+=2}
+  p=end;if(notes.length)tracks.push(notes)}
+ const bpm=Math.round(60e6/(tempo||500000)),two=tracks.length===2,out=[];
+ tracks.forEach((ns,i)=>ns.forEach(([s,l,m,v])=>out.push([s/div,Math.max(.05,l/div),m,two?(i===0?'R':'L'):(m>=60?'R':'L'),Math.max(.25,v/127)])));
+ out.sort((a,b)=>a[0]-b[0]);if(!out.length)throw new Error('MIDI vuoto');
+ return {title:(title||'')+' · MIDI',notes:out,bpm,beats:4,key:null,length:Math.max(...out.map(n=>n[0]+n[1]))}}
+
+/* ---- modulo: aggiungi / modifica un brano, carica MP3, PDF, MIDI ---- */
+const slug=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g,'').slice(0,40)||'brano';
+function u2b(u){let s='';for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s)}
+let ENCK=null;
+async function encBytes(u8){if(!ENCK){const salt=b2u($('#enc').textContent.trim()).slice(0,16);const k0=await crypto.subtle.importKey('raw',new TextEncoder().encode(PW),'PBKDF2',false,['deriveKey']);
+  ENCK={salt,key:await crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:200000,hash:'SHA-256'},k0,{name:'AES-GCM',length:256},false,['encrypt'])}}
+ const iv=crypto.getRandomValues(new Uint8Array(12)),ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},ENCK.key,u8)),o=new Uint8Array(28+ct.length);o.set(ENCK.salt);o.set(iv,16);o.set(ct,28);return o}
+async function gh(path,opt,tok){opt=opt||{};const r=await fetch(GHR+path,Object.assign({},opt,{headers:Object.assign({Authorization:'Bearer '+tok,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'},opt.body?{'Content-Type':'application/json'}:{})}));
+ if(!r.ok){const e=new Error(r.status+' '+(await r.text()).slice(0,200));e.status=r.status;throw e}return r.json()}
+/* un solo commit con tutti i file + catalogo aggiornato (riletto dal repository subito prima, cosi' non si perdono modifiche) */
+async function ghCommit(tok,files,change,msg,say){const tree0=[];
+ for(const f of files){say('Invio '+f.label+'…');const b=await gh('/git/blobs',{method:'POST',body:JSON.stringify({content:u2b(f.u8),encoding:'base64'})},tok);tree0.push({path:f.path,mode:'100644',type:'blob',sha:b.sha})}
+ for(let i=0;i<4;i++){say('Pubblico…');const head=(await gh('/git/ref/heads/main',{},tok)).object.sha,com=await gh('/git/commits/'+head,{},tok);
+  let cat={};const r=await fetch(GHR+'/contents/ascolti/catalog.json?ref='+head,{headers:{Authorization:'Bearer '+tok,Accept:'application/vnd.github.raw+json'}});if(r.ok)cat=await r.json();
+  change(cat);const cb=await gh('/git/blobs',{method:'POST',body:JSON.stringify({content:JSON.stringify(cat,null,1)+'\n',encoding:'utf-8'})},tok);
+  const tr=await gh('/git/trees',{method:'POST',body:JSON.stringify({base_tree:com.tree.sha,tree:tree0.concat([{path:'ascolti/catalog.json',mode:'100644',type:'blob',sha:cb.sha}])})},tok);
+  const nc=await gh('/git/commits',{method:'POST',body:JSON.stringify({message:msg,tree:tr.sha,parents:[head]})},tok);
+  try{await gh('/git/refs/heads/main',{method:'PATCH',body:JSON.stringify({sha:nc.sha})},tok);return cat}catch(e){if(e.status!==422)throw e}}
+ throw new Error('Il repository è stato aggiornato nello stesso momento: riprova.')}
+function ascForm(c,id,x){const isNew=!id,tok=ghTok();
+ $('#app').innerHTML=`<section class="chero"><div class="wrap"><div class="eyebrow">Ascolti consigliati</div><h1 class="nt">${isNew?'Aggiungi un brano':esc(x.t)}</h1><p>${isNew?'Carica l\'MP3: il sito lo prepara da solo':'Modifica la scheda o carica nuovi file'}</p></div></section><div class="wrap">
+ <form class="af" id="af">
+ <div class="lbl">Il brano</div>
+ <label>Titolo<input type="text" name="t" required value="${esc(x.t||'')}" placeholder="Es. Dorothy"></label>
+ <label>Artista<input type="text" name="a" list="artisti" value="${esc(x.a||'')}" placeholder="Es. Dr. John"></label><datalist id="artisti">${ASC.disco.map(d=>`<option value="${esc(d.a)}">`).join('')}</datalist>
+ <div class="two"><label>Album<input type="text" name="al" value="${esc(x.al||'')}"></label><label>Anno<input type="text" name="anno" inputmode="numeric" value="${esc(x.anno||'')}"></label></div>
+ <div class="lbl">Audio</div>
+ <label class="file">${x.stato&&x.stato!=='attesa'?'Sostituisci l\'MP3 (facoltativo)':'MP3 del brano'}<input type="file" name="mp3" accept="audio/mpeg,audio/*,.mp3,.m4a,.wav"></label>
+ <div class="opts"><label class="opt"><input type="radio" name="tipo" value="solo" ${x.tipo!=='band'?'checked':''}><span><b>Piano solo</b><small>Si ascolta così com'è</small></span></label>
+ <label class="opt"><input type="radio" name="tipo" value="band" ${x.tipo==='band'?'checked':''}><span><b>Più strumenti</b><small>Separa le tracce: batteria, basso, piano, voce, altro</small></span></label></div>
+ <label class="opt chk"><input type="checkbox" name="trascrivi" ${x.trascrivi!==false?'checked':''}><span><b>Trascrizione automatica del piano</b><small>Crea un MIDI e una partitura in bozza (se non carichi già i tuoi)</small></span></label>
+ <div class="lbl">Partitura e MIDI · facoltativi</div>
+ <label class="file">Partitura PDF${x.pdf&&!x.pdf.auto?' (sostituisce quella attuale)':''}<input type="file" name="pdf" accept="application/pdf,.pdf"></label>
+ <label class="file">File MIDI${x.midi&&!x.midi.auto?' (sostituisce quello attuale)':''}<input type="file" name="mid" accept="audio/midi,audio/x-midi,.mid,.midi"></label>
+ <div class="lbl">La scheda</div>
+ <label>La storia del brano<textarea name="storia" rows="6" placeholder="Lascia vuoto e chiedi a Claude di scriverla">${esc(x.storia||'')}</textarea></label>
+ <label>Perché studiarlo · una cosa per riga<textarea name="studio" rows="4">${esc((x.studio||[]).join('\n'))}</textarea></label>
+ <label>Caratteristiche · separate da virgola<input type="text" name="tag" value="${esc((x.tag||[]).join(', '))}" placeholder="Es. Piano solo, Gospel, Rumba"></label>
+ <details class="ghk" ${tok?'':'open'}><summary>${tok?'✓ Chiave GitHub salvata su questo dispositivo':'Chiave GitHub · serve una volta sola'}</summary>
+ <p class="note">Serve per pubblicare dal sito. Si crea qui: <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">https://github.com/settings/personal-access-tokens/new</a> · nome «Scuola», scadenza a scelta, <b>Only select repositories → scuola</b>, permesso <b>Contents: Read and write</b>. Resta salvata solo su questo dispositivo.</p>
+ <input type="password" name="tok" placeholder="github_pat_…" autocomplete="off" value=""></details>
+ <button class="go" type="submit">${isNew?'Aggiungi e pubblica':'Salva e pubblica'}</button>
+ <div class="note" id="afm"></div></form>
+ <div class="row"><button class="btn sm" data-go="${c.id}-ascolti${id?'-'+id:''}">‹ Annulla</button></div><div class="foot"></div></div>`;window.scrollTo(0,0);
+ $('#af').onsubmit=async e=>{e.preventDefault();const f=e.target,btn=f.querySelector('.go'),say=m=>$('#afm').textContent=m,v=n=>f.elements[n].value.trim();
+  const t=f.elements.tok.value.trim()||ghTok();if(!t){f.querySelector('.ghk').open=true;return say('Inserisci la chiave GitHub (vedi sopra).')}
+  if(!v('t'))return say('Scrivi il titolo.');
+  btn.disabled=true;
+  try{say('Controllo la chiave GitHub…');await gh('',{},t);if(f.elements.tok.value.trim())LS.set('gh',t);
+   const cur=await ascCat(true);let tid=id;if(!tid){tid=slug(v('t'));let n=2;while(cur[tid])tid=slug(v('t'))+(n++)}
+   const ch={t:v('t'),a:v('a'),al:v('al'),anno:v('anno'),tipo:f.elements.tipo.value,trascrivi:f.elements.trascrivi.checked,storia:f.elements.storia.value.trim(),
+    studio:f.elements.studio.value.split('\n').map(s=>s.trim()).filter(Boolean),tag:v('tag').split(',').map(s=>s.trim()).filter(Boolean)};
+   const big=f.elements.mp3.files[0];if(big&&big.size>90e6)throw new Error('L\'MP3 è troppo grande (massimo 90 MB).');
+   const files=[],up=async(inp,name,label)=>{const fl=f.elements[inp].files[0];if(!fl)return false;say('Cifro '+label+'…');files.push({path:'ascolti/'+tid+'/'+name,label,u8:await encBytes(new Uint8Array(await fl.arrayBuffer()))});return true};
+   const hasMp3=await up('mp3','originale.mp3.enc','l\'MP3'),hasPdf=await up('pdf','partitura.pdf.enc','la partitura'),hasMid=await up('mid','trascrizione.mid.enc','il MIDI');
+   const cat=await ghCommit(t,files,cat=>{const y=Object.assign(cat[tid]||{},ch);
+     if(hasPdf)y.pdf={f:'partitura.pdf.enc',auto:false};if(hasMid)y.midi={f:'trascrizione.mid.enc',auto:false};
+     if(hasMp3){y.stato='elaborazione';delete y.errore}else if(!y.stato)y.stato='attesa';cat[tid]=y},
+    (isNew?'Ascolti: nuovo brano «':'Ascolti: aggiornato «')+ch.t+'» (dal sito)',say);
+   CAT=Promise.resolve(cat);toast(hasMp3?'✓ Pubblicato. Ora il sito prepara il brano (5–15 minuti).':'✓ Pubblicato');go(c.id+'-ascolti-'+tid)}
+  catch(err){btn.disabled=false;say(/^401|^403|^404/.test(err.message)?'La chiave GitHub non funziona: controlla che abbia «Contents: Read and write» sul repository scuola.':'Errore: '+err.message)}}}
 
 /* ---- stem player: un <audio> per traccia (streaming, poca memoria; velocita' senza cambiare intonazione), volumi via Web Audio ---- */
 let ASCP=null;
@@ -593,7 +747,7 @@ async function stemPlayer(el,id,info){
  const keys=['mix',...info.stems];
  el.innerHTML=`<div class="stp"><div class="tr"><button class="pp" data-pp>▶</button><input type="range" data-seek min="0" max="${info.dur}" step="0.1" value="0"><span class="time" data-time>0:00 / ${fmt(info.dur)}</span></div>
  <div class="ab" data-ab></div>
- <div class="modes"><button data-mode="mix">Originale</button><button data-mode="stems">Tracce separate</button></div>
+ ${info.stems.length?'<div class="modes"><button data-mode="mix">Originale</button><button data-mode="stems">Tracce separate</button></div>':''}
  <div data-stems></div>
  <div class="row2"><button class="btn sm" data-back>⟲ 5 s</button><button class="btn sm" data-a>A</button><button class="btn sm" data-b>B</button><button class="btn sm" data-loop>Loop A-B</button>
  <span class="seg">${[.5,.7,.85,1].map(r=>`<button data-rate="${r}" class="${r===1?'on':''}">${r===1?'100%':Math.round(r*100)+'%'}</button>`).join('')}</span></div>
@@ -606,7 +760,7 @@ async function stemPlayer(el,id,info){
  function applyGains(){info.stems.forEach(k=>{const v=audible(k)?st.vol[k]:0;if(st.gains[k])st.gains[k].gain.value=v;else if(st.els[k])st.els[k].muted=v===0})}
  function drawStems(){
   el.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('on',b.dataset.mode===st.mode));
-  q('[data-stems]').innerHTML=st.mode==='mix'?'<div class="note">Il brano com\'è. Passa a «Tracce separate» per isolare gli strumenti.</div>':
+  q('[data-stems]').innerHTML=!info.stems.length?'':st.mode==='mix'?'<div class="note">Il brano com\'è. Passa a «Tracce separate» per isolare gli strumenti.</div>':
   `<div class="presets">${[['Tutto','all'],...(info.stems.includes('piano')?[['Solo piano','p'],['Senza piano · suoni tu','np']]:[]),['Basso + batteria','bd'],['Senza voce','nv']].map(([n,k])=>`<button class="chip" data-pre="${k}">${n}</button>`).join('')}</div>
   <div class="stems">${info.stems.map(k=>`<div class="stem ${audible(k)?'':'off'}"><button class="nm" data-tog="${k}"><i></i>${STN[k]}</button><input type="range" data-vol="${k}" min="0" max="1.5" step="0.05" value="${st.vol[k]}"><button class="so ${st.solo===k?'on':''}" data-solo="${k}">S</button></div>`).join('')}</div>
   ${info.stems.includes('piano')?'':'<div class="note">In questo brano il piano non è separato: lo trovi dentro «Altro».</div>'}

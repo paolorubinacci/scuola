@@ -1,0 +1,61 @@
+# Ascolti consigliati: quando dal sito si carica un MP3, separa le tracce, trascrive e pubblica (tools/elabora.py).
+# Serve il segreto SCUOLA_PW (Settings > Secrets and variables > Actions) con la password della Scuola.
+name: Ascolti - elabora i brani caricati
+on:
+  push:
+    branches: [main]
+    paths: ['ascolti/**/originale.mp3.enc']
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+concurrency:
+  group: ascolti
+  cancel-in-progress: false
+jobs:
+  elabora:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Strumenti (ffmpeg, MuseScore)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg musescore3 > /dev/null
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.cache/torch
+          key: ascolti-v1
+      - name: Separazione tracce (Demucs) e trascrizione (Basic Pitch)
+        run: |
+          python -m venv ~/demucs && ~/demucs/bin/pip install -q torch==2.5.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cpu
+          ~/demucs/bin/pip install -q demucs==4.0.1 soundfile "numpy<2"
+          python -m venv ~/bp && ~/bp/bin/pip install -q basic-pitch==0.4.0
+          pip install -q cryptography
+      - name: Elabora
+        env:
+          SCUOLA_PW: ${{ secrets.SCUOLA_PW }}
+          DEMUCS_PY: /home/runner/demucs/bin/python
+          BP_PY: /home/runner/bp/bin/python
+          MSCORE: mscore3
+        run: |
+          test -n "$SCUOLA_PW" || { echo "Manca il segreto SCUOLA_PW"; exit 1; }
+          python tools/elabora.py
+          python tools/pwa.py
+      - name: Pubblica
+        run: |
+          git config user.name "Scuola bot"
+          git config user.email "scuola-bot@users.noreply.github.com"
+          git add -A ascolti sw.js
+          git diff --cached --quiet && exit 0
+          git commit -q -m "Ascolti: brani elaborati"
+          for i in 1 2 3; do git pull -q --rebase && git push -q && break; sleep 5; done
+      - name: Aggiorna il sito
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X POST repos/${{ github.repository }}/pages/builds || true

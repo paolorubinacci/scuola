@@ -1,0 +1,37 @@
+{
+ "dorothy": {
+  "t": "Dorothy",
+  "a": "Dr. John",
+  "al": "Dr. John Plays Mac Rebennack",
+  "anno": 1981,
+  "tipo": "solo",
+  "stato": "attesa",
+  "trascrivi": true,
+  "tag": [
+   "Piano solo",
+   "Ballad in stile gospel",
+   "Tempo libero (rubato)",
+   "Brano originale di Mac Rebennack"
+  ],
+  "storia": "«Dorothy» è un brano originale di Mac Rebennack (Dr. John) e apre il suo primo disco di piano solo, «Dr. John Plays Mac Rebennack», uscito nel 1981 per la piccola etichetta Clean Cuts: è proprio uno degli album indicati nel corso.\n\nLe sessioni erano essenziali: un pianoforte a coda piccolo e un registratore a due piste, in un piccolo studio di New York. Dr. John raccontava di essersi preparato pochissimo.\n\nIl titolo è il nome di sua madre, Dorothy Cronin Rebennack: il brano è scritto per lei. Lo suonava ancora trent'anni dopo, per esempio nel 2010 in una sessione per la radio americana NPR.",
+  "studio": [
+   "È tutto piano: quello che senti è solo la mano di Dr. John, senza bisogno di separare le tracce.",
+   "È il lato lirico di Dr. John: una ballad in stile gospel, da suonare con tempo libero, accanto ai boogie e alle rumba dello stesso disco (subito dopo c'è «Mac's Boogie»).",
+   "La trascrizione pubblicata su Musicnotes (arrangiamento Master Keyz) è in Do maggiore, con l'indicazione «Freely, in a Gospel style» e un riferimento di circa 100 bpm."
+  ],
+  "fonti": [
+   {
+    "t": "NPR · Dr. John: The Old Soul of New Orleans (2010)",
+    "u": "https://www.npr.org/2010/10/21/130719937/dr-john-the-old-soul-of-new-orleans"
+   },
+   {
+    "t": "Rubber City Review · Dr. John Plays Mac Rebennack",
+    "u": "https://rubbercityreview.com/?p=11010"
+   }
+  ],
+  "acquista": {
+   "t": "Partitura su Musicnotes (piano solo, Master Keyz)",
+   "u": "https://www.musicnotes.com/sheetmusic/dorothy/107862"
+  }
+ }
+}

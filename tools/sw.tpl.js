@@ -1,6 +1,6 @@
 /* Scuola offline — generato da tools/pwa.py, non modificare a mano */
 const V='scuola-__VERSION__',FILES=__FILES__,FONTS='scuola-fonts';
-const NET_FIRST=u=>u.endsWith('/')||u.endsWith('index.html')||u.endsWith('ascolti/index.json');
+const NET_FIRST=u=>u.endsWith('/')||u.endsWith('index.html')||u.endsWith('ascolti/catalog.json');
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(V).then(async c=>{
   let ok=0;for(const f of FILES){try{await c.add(new Request(f,{cache:'reload'}));ok++}catch(err){}}
   await c.put('__complete',new Response(JSON.stringify({ok,total:FILES.length})))}))});
