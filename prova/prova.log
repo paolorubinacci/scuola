@@ -1,0 +1,186 @@
+da elaborare: [('valzer', 'r1'), ('valzer', 'rv'), ('rifai', 'r1')]
+$ ffmpeg -loglevel error -y -i /tmp/asc-6yigb3cj/in.mp3 -vn -ar 44100 -ac 2 /tmp/asc-6yigb3cj/brano.wav
+$ ffmpeg -loglevel error -y -i /tmp/asc-6yigb3cj/brano.wav -c:a libmp3lame -b:a 160k /tmp/asc-6yigb3cj/mix.mp3
+$ /home/runner/tr/bin/python /tmp/tmp.k5qz1NMLjC/tools/trascrivi.py /tmp/asc-6yigb3cj/brano.wav /tmp/asc-6yigb3cj/auto.mid /tmp/asc-6yigb3cj/auto.musicxml --titolo Valzer di prova
+will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  checkpoint = torch.load(path, map_location = device)
+/home/runner/tr/lib/python3.11/site-packages/torch/_dynamo/eval_frame.py:632: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.5 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/home/runner/tr/lib/python3.11/site-packages/torch/utils/checkpoint.py:87: UserWarning: None of the inputs have requires_grad=True. Gradients will be None
+  warnings.warn(
+Downloading: "https://cloud.cp.jku.at/public.php/dav/files/7ik4RrBKTS273gp/final0.ckpt" to /home/runner/.cache/torch/hub/checkpoints/beat_this-final0.ckpt
+
+  0%|          | 0.00/77.3M [00:00<?, ?B/s]
+  0%|          | 128k/77.3M [00:00<03:21, 402kB/s]
+  0%|          | 256k/77.3M [00:00<02:10, 618kB/s]
+  1%|          | 512k/77.3M [00:00<01:14, 1.09MB/s]
+  1%|▏         | 1.00M/77.3M [00:00<00:39, 2.03MB/s]
+  3%|▎         | 2.00M/77.3M [00:00<00:20, 3.92MB/s]
+  5%|▌         | 4.00M/77.3M [00:00<00:10, 7.65MB/s]
+  9%|▉         | 7.12M/77.3M [00:01<00:05, 12.8MB/s]
+ 14%|█▍        | 11.0M/77.3M [00:01<00:03, 17.7MB/s]
+ 19%|█▉        | 14.5M/77.3M [00:01<00:03, 20.2MB/s]
+ 23%|██▎       | 17.9M/77.3M [00:01<00:02, 21.7MB/s]
+ 28%|██▊       | 21.4M/77.3M [00:01<00:02, 23.0MB/s]
+ 32%|███▏      | 25.0M/77.3M [00:01<00:02, 23.9MB/s]
+ 37%|███▋      | 28.5M/77.3M [00:01<00:02, 24.5MB/s]
+ 42%|████▏     | 32.1M/77.3M [00:02<00:01, 24.8MB/s]
+ 46%|████▌     | 35.8M/77.3M [00:02<00:01, 25.3MB/s]
+ 51%|█████     | 39.2M/77.3M [00:02<00:01, 25.5MB/s]
+ 55%|█████▌    | 42.9M/77.3M [00:02<00:01, 25.8MB/s]
+ 60%|█████▉    | 46.4M/77.3M [00:02<00:01, 25.9MB/s]
+ 65%|██████▍   | 49.9M/77.3M [00:02<00:01, 25.8MB/s]
+ 69%|██████▉   | 53.4M/77.3M [00:02<00:00, 25.8MB/s]
+ 74%|███████▍  | 57.4M/77.3M [00:03<00:00, 26.7MB/s]
+ 79%|███████▊  | 60.8M/77.3M [00:03<00:00, 26.2MB/s]
+ 83%|████████▎ | 64.4M/77.3M [00:03<00:00, 26.1MB/s]
+ 88%|████████▊ | 67.9M/77.3M [00:03<00:00, 25.7MB/s]
+ 92%|█████████▏| 71.1M/77.3M [00:03<00:00, 24.9MB/s]
+ 96%|█████████▋| 74.5M/77.3M [00:03<00:00, 24.7MB/s]
+100%|██████████| 77.3M/77.3M [00:03<00:00, 20.8MB/s]
+$ mscore3 -o /tmp/asc-6yigb3cj/auto.pdf /tmp/asc-6yigb3cj/auto.musicxml
+convert </tmp/asc-6yigb3cj/auto.musicxml>...
+Error at line 30 col 47: no instrument found for part 'Pe58ba31e7f2c71c1c974b9f2764c84a3'
+	to </tmp/asc-6yigb3cj/auto.pdf>
+... success!
+ok valzer r1 {'stems': [], 'dur': 42.43, 'avvisi': None}
+$ ffmpeg -loglevel error -y -i /tmp/asc-hmfupp33/in.mp4 -vf scale='min(1280,iw)':-2 -c:v libx264 -preset veryfast -crf 26 -pix_fmt yuv420p -c:a aac -b:a 128k -movflags +faststart /tmp/asc-hmfupp33/video.mp4
+$ ffmpeg -loglevel error -y -ss 0.9 -i /tmp/asc-hmfupp33/video.mp4 -frames:v 1 -vf scale=640:-2 -q:v 5 /tmp/asc-hmfupp33/poster.jpg
+ok valzer rv {'stems': None, 'dur': 6.01, 'avvisi': None}
+$ ffmpeg -loglevel error -y -i /tmp/asc-9bjgqep4/in.mp3 -vn -ar 44100 -ac 2 /tmp/asc-9bjgqep4/brano.wav
+$ /home/runner/tr/bin/python /tmp/tmp.k5qz1NMLjC/tools/trascrivi.py /tmp/asc-9bjgqep4/brano.wav /tmp/asc-9bjgqep4/auto.mid --titolo Rifai
+/home/runner/tr/lib/python3.11/site-packages/transkun/transcribe.py:49: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  checkpoint = torch.load(path, map_location = device)
+/home/runner/tr/lib/python3.11/site-packages/torch/_dynamo/eval_frame.py:632: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.5 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/home/runner/tr/lib/python3.11/site-packages/torch/utils/checkpoint.py:87: UserWarning: None of the inputs have requires_grad=True. Gradients will be None
+  warnings.warn(
+ok rifai r1 {'stems': [], 'dur': 40, 'avvisi': None}
+== catalogo
+{
+ "valzer": {
+  "t": "Valzer di prova",
+  "r": [
+   {
+    "id": "r1",
+    "k": "audio",
+    "c": "Registrazione",
+    "t": "Registrazione",
+    "tipo": "solo",
+    "st": "pronto",
+    "midi_auto": true,
+    "pdf_auto": true,
+    "stems": [],
+    "dur": 42.43,
+    "f": "r1/mix.mp3.enc"
+   },
+   {
+    "id": "rv",
+    "k": "video",
+    "c": "Live",
+    "t": "Video di prova",
+    "st": "pronto",
+    "f": "rv/video.mp4.enc",
+    "poster": "rv/poster.jpg.enc",
+    "dur": 6.01
+   },
+   {
+    "id": "r1-mid",
+    "k": "midi",
+    "c": "Trascrizione automatica",
+    "t": "MIDI automatico da «Registrazione»",
+    "f": "r1/auto.mid.enc",
+    "auto": true,
+    "da": "r1",
+    "st": "pronto",
+    "info": {
+     "contrasto": {
+      "2/4": 1.01,
+      "3/4": 1.48,
+      "4/4": 1.2
+     },
+     "metro": "3/4",
+     "bpm": 107,
+     "griglia": "1/4",
+     "note": 196,
+     "battiti": "beat_this",
+     "tonalita": "C maggiore"
+    }
+   },
+   {
+    "id": "r1-pdf",
+    "k": "pdf",
+    "c": "Trascrizione automatica",
+    "t": "Partitura automatica da «Registrazione»",
+    "f": "r1/auto.pdf.enc",
+    "auto": true,
+    "da": "r1",
+    "st": "pronto",
+    "info": {
+     "contrasto": {
+      "2/4": 1.01,
+      "3/4": 1.48,
+      "4/4": 1.2
+     },
+     "metro": "3/4",
+     "bpm": 107,
+     "griglia": "1/4",
+     "note": 196,
+     "battiti": "beat_this",
+     "tonalita": "C maggiore"
+    }
+   }
+  ],
+  "agg": "2026-11-19"
+ },
+ "rifai": {
+  "t": "Rifai",
+  "r": [
+   {
+    "id": "r1",
+    "k": "audio",
+    "c": "Registrazione",
+    "t": "Reg",
+    "tipo": "solo",
+    "st": "pronto",
+    "f": "r1/mix.mp3.enc",
+    "stems": [],
+    "dur": 40,
+    "midi_auto": true,
+    "pdf_auto": false
+   },
+   {
+    "id": "r1-mid",
+    "k": "midi",
+    "c": "Trascrizione automatica",
+    "t": "MIDI automatico da «Reg»",
+    "f": "r1/auto.mid.enc",
+    "auto": true,
+    "da": "r1",
+    "st": "pronto",
+    "info": {
+     "contrasto": {
+      "2/4": 1.01,
+      "3/4": 1.48,
+      "4/4": 1.2
+     },
+     "metro": "3/4",
+     "bpm": 107,
+     "griglia": "1/4",
+     "note": 196,
+     "battiti": "beat_this"
+    }
+   }
+  ],
+  "agg": "2026-11-19"
+ }
+}
+== file
+/tmp/tmp.k5qz1NMLjC/ascolti/rifai/r1/auto.mid.enc 1792
+/tmp/tmp.k5qz1NMLjC/ascolti/rifai/r1/mix.mp3.enc 850113
+/tmp/tmp.k5qz1NMLjC/ascolti/valzer/rv/poster.jpg.enc 11113
+/tmp/tmp.k5qz1NMLjC/ascolti/valzer/rv/video.mp4.enc 159104
+/tmp/tmp.k5qz1NMLjC/ascolti/valzer/r1/auto.mid.enc 1792
+/tmp/tmp.k5qz1NMLjC/ascolti/valzer/r1/auto.pdf.enc 22718
+/tmp/tmp.k5qz1NMLjC/ascolti/valzer/r1/mix.mp3.enc 850113
+/tmp/tmp.k5qz1NMLjC/ascolti/catalog.json 2141
