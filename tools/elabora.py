@@ -10,8 +10,10 @@ Le risorse con st "elaborazione" vengono preparate qui; i file caricati sono in 
          Transkun + Beat This!) -> nuove risorse "Trascrizione automatica" (MIDI e/o partitura MuseScore).
          "rifai": rifa' solo la trascrizione dall'audio gia' pubblicato.
   video: H.264 720p con ffmpeg (avvio rapido in streaming) + immagine di copertina.
+  pdf / img (partitura caricata da Paolo, PDF o pagine in foto/screenshot) con "omr": "attesa":
+         lettura ottica (tools/omr.py: Audiveris + music21) -> risorsa MIDI "<id>-omr" da suonare sulla tastiera.
 Tutto resta cifrato con la password della Scuola; i file in chiaro non vengono MAI scritti nel repository (e' pubblico).
-Comandi esterni: ffmpeg, python con demucs (DEMUCS_PY), python con transkun/beat_this (TR_PY), mscore3 (MSCORE)."""
+Comandi esterni: Audiveris (AUDIVERIS) e python con music21 (OMR_PY) per le partiture, ffmpeg, python con demucs (DEMUCS_PY), python con transkun/beat_this (TR_PY), mscore3 (MSCORE)."""
 import sys, os, json, shutil, subprocess, tempfile, traceback, datetime
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
@@ -24,6 +26,7 @@ KEY = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=SALT, iterations=200
 DEMUCS_PY = os.environ.get('DEMUCS_PY', sys.executable)
 TR_PY = os.environ.get('TR_PY', sys.executable)
 MSCORE = os.environ.get('MSCORE', 'mscore3')
+OMR_PY = os.environ.get('OMR_PY', sys.executable)
 CAT = os.path.join(ROOT, 'ascolti', 'catalog.json')
 
 
@@ -170,12 +173,43 @@ def video(bid, x, r, tmp):
     os.remove(src)
 
 
-def da_fare(cat):
+def partitura_midi(bid, x, r, tmp):
+    """partitura caricata (PDF o immagini) -> MIDI per la tastiera, risorsa derivata <id>-omr"""
+    d = os.path.join(ROOT, 'ascolti', bid)
+    fs = r['f'] if isinstance(r['f'], list) else [r['f']]
+    ins = []
+    for i, f in enumerate(fs):
+        ext = f[:-4].rsplit('.', 1)[-1]  # p1.jpg.enc -> jpg
+        p = os.path.join(tmp, 'pagina%03d.%s' % (i + 1, ext))
+        open(p, 'wb').write(dec(open(os.path.join(d, f), 'rb').read()))
+        ins.append(p)
+    mid = os.path.join(tmp, 'omr.mid')
+    cmd = [OMR_PY, os.path.join(ROOT, 'tools', 'omr.py'), mid] + ins
+    print('$', ' '.join(cmd), flush=True)
+    p = subprocess.run(cmd, capture_output=True, text=True, timeout=3000)
+    sys.stderr.write(p.stderr[-4000:])
+    if p.returncode:
+        righe = [l for l in p.stderr.strip().splitlines() if l.strip()]
+        raise RuntimeError(righe[-1] if righe else 'lettura della partitura non riuscita')
+    info = json.loads(p.stdout.strip().splitlines()[-1])
+    enc_file(mid, os.path.join(d, r['id'], 'omr.mid.enc'))
+    rid = r['id'] + '-omr'
+    q = next((q for q in x['r'] if q['id'] == rid), None)
+    if not q:
+        q = {'id': rid}
+        x['r'].insert(x['r'].index(r) + 1, q)
+    q.update({'k': 'midi', 'c': 'MIDI', 't': 'MIDI da «' + r.get('t', 'partitura') + '»', 'f': r['id'] + '/omr.mid.enc',
+              'da': r['id'], 'omr': True, 'st': 'pronto', 'info': info})
+
+
+def da_fare(cat, quale=None):
     out = []
     for bid, x in cat.items():
         d = os.path.join(ROOT, 'ascolti', bid)
         for r in x.get('r', []):
-            if r.get('st') == 'elaborazione' and (originale(d, r['id']) or (r.get('rifai') and r.get('k') == 'audio')):
+            if quale != 'omr' and r.get('st') == 'elaborazione' and (originale(d, r['id']) or (r.get('rifai') and r.get('k') == 'audio')):
+                out.append((bid, r['id']))
+            elif quale != 'audio' and r.get('omr') == 'attesa' and r.get('k') in ('pdf', 'img') and r.get('f'):
                 out.append((bid, r['id']))
     return out
 
@@ -188,6 +222,21 @@ def main():
         x = cat[bid]
         r = next(q for q in x['r'] if q['id'] == rid)
         tmp = tempfile.mkdtemp(prefix='asc-')
+        if r.get('omr') == 'attesa' and r['k'] in ('pdf', 'img'):
+            try:
+                partitura_midi(bid, x, r, tmp)
+                r['omr'] = 'fatto'
+                r.pop('omr_err', None)
+                print('ok', bid, rid, 'MIDI dalla partitura', flush=True)
+            except Exception as e:
+                traceback.print_exc()
+                r['omr'] = 'errore'
+                r['omr_err'] = str(e)[-300:]
+            finally:
+                shutil.rmtree(tmp, ignore_errors=True)
+            x['agg'] = datetime.date.today().isoformat()
+            json.dump(cat, open(CAT, 'w'), ensure_ascii=False, indent=1)
+            continue
         try:
             r.pop('avvisi', None)
             (video if r['k'] == 'video' else audio)(bid, x, r, tmp)
@@ -209,5 +258,7 @@ def main():
 if __name__ == '__main__':
     if '--controlla' in sys.argv:  # per GitHub Actions: c'e' qualcosa da fare?
         print('si' if da_fare(json.load(open(CAT))) else 'no')
+    elif '--controlla-audio' in sys.argv or '--controlla-omr' in sys.argv:  # quali strumenti installare
+        print('si' if da_fare(json.load(open(CAT)), 'audio' if '--controlla-audio' in sys.argv else 'omr') else 'no')
     else:
         main()
