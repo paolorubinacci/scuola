@@ -1,0 +1,121 @@
+da elaborare: ['valzer', 'rifai']
+$ ffmpeg -loglevel error -y -i /tmp/asc-dh3ntnsk/originale.mp3 -ar 44100 -ac 2 /tmp/asc-dh3ntnsk/brano.wav
+$ ffmpeg -loglevel error -y -i /tmp/asc-dh3ntnsk/brano.wav -c:a libmp3lame -b:a 160k /tmp/asc-dh3ntnsk/mix.mp3
+$ /home/runner/tr/bin/python /tmp/tmp.SiAypA07Ff/tools/trascrivi.py /tmp/asc-dh3ntnsk/brano.wav /tmp/asc-dh3ntnsk/auto.mid /tmp/asc-dh3ntnsk/auto.musicxml --titolo Valzer di prova
+s possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  checkpoint = torch.load(path, map_location = device)
+/home/runner/tr/lib/python3.11/site-packages/torch/_dynamo/eval_frame.py:632: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.5 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/home/runner/tr/lib/python3.11/site-packages/torch/utils/checkpoint.py:87: UserWarning: None of the inputs have requires_grad=True. Gradients will be None
+  warnings.warn(
+Downloading: "https://cloud.cp.jku.at/public.php/dav/files/7ik4RrBKTS273gp/final0.ckpt" to /home/runner/.cache/torch/hub/checkpoints/beat_this-final0.ckpt
+
+  0%|          | 0.00/77.3M [00:00<?, ?B/s]
+  0%|          | 128k/77.3M [00:00<02:50, 473kB/s]
+  0%|          | 384k/77.3M [00:00<01:14, 1.08MB/s]
+  1%|          | 896k/77.3M [00:00<00:34, 2.34MB/s]
+  2%|▏         | 1.75M/77.3M [00:00<00:18, 4.40MB/s]
+  4%|▍         | 3.38M/77.3M [00:00<00:09, 8.19MB/s]
+  8%|▊         | 6.00M/77.3M [00:00<00:05, 14.0MB/s]
+ 12%|█▏        | 9.62M/77.3M [00:00<00:03, 20.6MB/s]
+ 16%|█▌        | 12.2M/77.3M [00:01<00:03, 22.6MB/s]
+ 20%|██        | 15.6M/77.3M [00:01<00:02, 25.8MB/s]
+ 25%|██▍       | 19.2M/77.3M [00:01<00:02, 28.5MB/s]
+ 30%|██▉       | 23.0M/77.3M [00:01<00:01, 30.6MB/s]
+ 34%|███▍      | 26.5M/77.3M [00:01<00:01, 31.6MB/s]
+ 39%|███▉      | 30.0M/77.3M [00:01<00:01, 32.2MB/s]
+ 43%|████▎     | 33.5M/77.3M [00:01<00:01, 32.6MB/s]
+ 48%|████▊     | 37.1M/77.3M [00:01<00:01, 33.2MB/s]
+ 53%|█████▎    | 40.6M/77.3M [00:01<00:01, 33.4MB/s]
+ 58%|█████▊    | 44.5M/77.3M [00:02<00:01, 34.2MB/s]
+ 63%|██████▎   | 48.4M/77.3M [00:02<00:00, 34.8MB/s]
+ 67%|██████▋   | 51.9M/77.3M [00:02<00:00, 34.4MB/s]
+ 72%|███████▏  | 55.9M/77.3M [00:02<00:00, 35.2MB/s]
+ 79%|███████▉  | 61.2M/77.3M [00:02<00:00, 38.3MB/s]
+ 84%|████████▍ | 65.0M/77.3M [00:02<00:00, 37.4MB/s]
+ 90%|████████▉ | 69.2M/77.3M [00:02<00:00, 37.8MB/s]
+ 95%|█████████▍| 73.4M/77.3M [00:02<00:00, 37.8MB/s]
+100%|█████████▉| 77.0M/77.3M [00:02<00:00, 36.9MB/s]
+100%|██████████| 77.3M/77.3M [00:02<00:00, 27.7MB/s]
+$ mscore3 -o /tmp/asc-dh3ntnsk/auto.pdf /tmp/asc-dh3ntnsk/auto.musicxml
+convert </tmp/asc-dh3ntnsk/auto.musicxml>...
+Error at line 30 col 47: no instrument found for part 'P93ef0bd1042ac24b96c9fbeae2170419'
+	to </tmp/asc-dh3ntnsk/auto.pdf>
+... success!
+ok valzer {'stems': [], 'dur': 42.43, 'midi': {'f': 'auto.mid.enc', 'auto': True}, 'pdf': {'f': 'auto.pdf.enc', 'auto': True}, 'avvisi': None}
+$ ffmpeg -loglevel error -y -i /tmp/asc-qqjvmwja/mix.mp3 -ar 44100 -ac 2 /tmp/asc-qqjvmwja/brano.wav
+$ /home/runner/tr/bin/python /tmp/tmp.SiAypA07Ff/tools/trascrivi.py /tmp/asc-qqjvmwja/brano.wav /tmp/asc-qqjvmwja/auto.mid --titolo Rifai (solo MIDI)
+/home/runner/tr/lib/python3.11/site-packages/transkun/transcribe.py:49: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  checkpoint = torch.load(path, map_location = device)
+/home/runner/tr/lib/python3.11/site-packages/torch/_dynamo/eval_frame.py:632: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.5 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/home/runner/tr/lib/python3.11/site-packages/torch/utils/checkpoint.py:87: UserWarning: None of the inputs have requires_grad=True. Gradients will be None
+  warnings.warn(
+ok rifai {'stems': [], 'dur': 40, 'midi': {'f': 'auto.mid.enc', 'auto': True}, 'pdf': None, 'avvisi': None}
+== catalogo
+{
+ "valzer": {
+  "t": "Valzer di prova",
+  "tipo": "solo",
+  "stato": "pronto",
+  "midi_auto": true,
+  "pdf_auto": true,
+  "stems": [],
+  "dur": 42.43,
+  "trascr": {
+   "contrasto": {
+    "2/4": 1.01,
+    "3/4": 1.18,
+    "4/4": 1.03
+   },
+   "metro": "4/4",
+   "bpm": 107,
+   "griglia": "1/4",
+   "note": 196,
+   "battiti": "beat_this",
+   "tonalita": "C maggiore"
+  },
+  "midi": {
+   "f": "auto.mid.enc",
+   "auto": true
+  },
+  "pdf": {
+   "f": "auto.pdf.enc",
+   "auto": true
+  },
+  "agg": "2026-11-19"
+ },
+ "rifai": {
+  "t": "Rifai (solo MIDI)",
+  "tipo": "solo",
+  "stato": "pronto",
+  "stems": [],
+  "dur": 40,
+  "midi_auto": true,
+  "pdf_auto": false,
+  "trascr": {
+   "contrasto": {
+    "2/4": 1.01,
+    "3/4": 1.18,
+    "4/4": 1.03
+   },
+   "metro": "4/4",
+   "bpm": 107,
+   "griglia": "1/4",
+   "note": 196,
+   "battiti": "beat_this"
+  },
+  "midi": {
+   "f": "auto.mid.enc",
+   "auto": true
+  },
+  "agg": "2026-11-19"
+ }
+}
+== file
+/tmp/tmp.SiAypA07Ff/ascolti/rifai/auto.mid.enc 1792
+/tmp/tmp.SiAypA07Ff/ascolti/rifai/mix.mp3.enc 850113
+/tmp/tmp.SiAypA07Ff/ascolti/valzer/auto.mid.enc 1792
+/tmp/tmp.SiAypA07Ff/ascolti/valzer/auto.pdf.enc 21710
+/tmp/tmp.SiAypA07Ff/ascolti/valzer/mix.mp3.enc 850113
+/tmp/tmp.SiAypA07Ff/ascolti/catalog.json 932
