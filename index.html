@@ -207,6 +207,27 @@ textarea,input[type=text],input[type=password],input[type=number]{width:100%;bac
 .aul{margin:0;padding-left:20px;display:grid;gap:8px;font-size:16px;line-height:1.55;color:var(--nink)}.aul.src{font-size:14px}
 .pdfv{background:#fff;border:1px solid var(--nline);display:grid;gap:8px;padding:8px;margin:10px 0;max-height:80vh;overflow:auto}
 .pdfv canvas{width:100%;height:auto;display:block;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.imgv{background:#fff;border:1px solid var(--nline);display:grid;gap:12px;padding:8px;margin:10px 0;max-height:80vh;overflow:auto}
+.imgv figure{margin:0}.imgv img{width:100%;height:auto;display:block;min-height:80px;background:#fafafa;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.imgv figcaption{font-size:11px;color:var(--muted);text-align:center;margin-top:4px}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin:10px 0}
+.thumbs>div{position:relative;border:1px solid var(--nline);background:#fff;display:flex;flex-direction:column}
+.thumbs img{width:100%;height:128px;object-fit:contain;display:block;background:#fff}
+.thumbs i{position:absolute;top:3px;left:3px;font:700 12px system-ui;background:var(--ink);color:#fff;border-radius:9px;padding:0 7px;font-style:normal}
+.thumbs .tb{display:flex;border-top:1px solid var(--nline)}.thumbs .tb button{flex:1;border:0;background:#f4f4f4;padding:6px 0;font-size:14px;cursor:pointer;color:var(--ink)}
+.thumbs .tb button:disabled{opacity:.3}
+.leg{position:fixed;inset:0;z-index:400;background:#1f1f1f;display:flex;flex-direction:column}
+.leg header{display:flex;align-items:center;gap:8px;padding:8px 10px;padding-top:max(8px,env(safe-area-inset-top));color:#fff;font:600 14px system-ui}
+.leg header b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.leg header button{background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:8px;padding:8px 12px;font:600 15px system-ui;cursor:pointer}
+.leg .lg-c{color:#ddd;font:600 14px system-ui;white-space:nowrap}
+.lg-s{flex:1;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:env(safe-area-inset-bottom);background:#fff}
+.lg-s::-webkit-scrollbar{display:none}
+.lg-p{flex:0 0 100%;width:100%;height:100%;scroll-snap-align:start;scroll-snap-stop:always;overflow:auto;display:flex;align-items:center;justify-content:center;background:#fff}
+.lg-p img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.leg.fw .lg-p{align-items:flex-start}.leg.fw .lg-p img{max-height:none;width:100%;height:auto}
+.lg-a{position:absolute;top:50%;transform:translateY(-50%);width:38px;height:60px;border:0;border-radius:10px;background:rgba(0,0,0,.16);color:#fff;font-size:28px;cursor:pointer}
+.lg-a.l{left:6px}.lg-a.r{right:6px}.lg-a:disabled{display:none}
 .pending code{display:block;margin-top:8px;font-size:12px;white-space:pre-wrap;word-break:break-word}
 .af{display:grid;gap:12px;margin:18px 0;font-family:var(--font)}
 .af label{display:grid;gap:6px;font:600 14px var(--font);color:var(--navy)}
@@ -639,12 +660,12 @@ const STN={drums:'Batteria',bass:'Basso',piano:'Piano',vocals:'Voce',other:'Altr
 const normA=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[^a-z0-9]/g,'');
 const words=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').split(/[^a-z0-9]+/).filter(Boolean);
 /* le quattro sezioni di un brano */
-const SEZ=[['ascolto','Ascolto',r=>r.k==='audio'],['spartiti','Spartiti e MIDI',r=>r.k==='pdf'||r.k==='midi'],['video','Video',r=>r.k==='video'||r.k==='yt'],['scheda','Scheda',()=>false]];
+const SEZ=[['ascolto','Ascolto',r=>r.k==='audio'],['spartiti','Spartiti e MIDI',r=>r.k==='pdf'||r.k==='midi'||r.k==='img'],['video','Video',r=>r.k==='video'||r.k==='yt'],['scheda','Scheda',()=>false]];
 const VCAT=['Live','Tutorial','Lezione','Intervista','Video'];
-const CATS={audio:['Registrazione','Registrazione live'],video:VCAT,yt:VCAT,pdf:['Partitura','Trascrizione automatica'],midi:['MIDI','Trascrizione automatica']};
+const CATS={audio:['Registrazione','Registrazione live'],video:VCAT,yt:VCAT,pdf:['Partitura','Trascrizione automatica'],img:['Partitura'],midi:['MIDI','Trascrizione automatica']};
 const VHINT={Live:'Esecuzioni dal vivo: guarda le mani e come cambia il brano rispetto al disco.',Tutorial:'Spiegazioni passo per passo: rallenta il video e suona insieme, un pezzo alla volta.',
  Lezione:'Lezioni e masterclass sul brano o sullo stile.',Intervista:'Il musicista racconta il brano.',Video:''};
-const KIND={audio:'♫',video:'▶',yt:'▶',pdf:'𝄞',midi:'⌨'};
+const KIND={audio:'♫',video:'▶',yt:'▶',pdf:'𝄞',img:'𝄞',midi:'⌨'};
 function count(x,k){return x.r.filter(SEZ.find(s=>s[0]===k)[2]).length}
 function busy(x){return x.r.some(r=>r.st==='elaborazione')}
 function cardHTML(c,id,x){const n=[['ascolto','registrazion','e','i'],['spartiti','spartit','o','i'],['video','video','','']].map(([k,w,s1,sn])=>{const m=count(x,k);return m?`${m} ${w}${m===1?s1:sn}`:''}).filter(Boolean);
@@ -700,16 +721,20 @@ function tabAscolto(el,c,id,x,list,base){
  el.querySelectorAll('[data-pick]').forEach(d=>d.onclick=()=>play(d.dataset.pick));bindEd(el,c,id,x);if(cur)play(cur)}
 function tabSpartiti(el,c,id,x,list,base){
  const own=list.filter(r=>!r.auto),auto=list.filter(r=>r.auto);
- const card=r=>`<div class="res" data-open="${r.id}">${resHead(c,id,r,r.auto?' · bozza':'')}${stato(r)}${r.auto?`<div class="rst">Ricavata dall'audio dal computer: un punto di partenza da controllare a orecchio. ${infoTr(r.info)}</div>`:''}<div class="rv"></div></div>`;
+ const card=r=>`<div class="res" data-open="${r.id}">${resHead(c,id,r,r.auto?' · bozza':r.k==='img'?' · '+[].concat(r.f).length+' pagine':'')}${stato(r)}${r.auto?`<div class="rst">Ricavata dall'audio dal computer: un punto di partenza da controllare a orecchio. ${infoTr(r.info)}</div>`:''}<div class="rv"></div></div>`;
  el.innerHTML=(own.length?`<div class="sub">I tuoi spartiti</div>${own.map(card).join('')}`:'')+(auto.length?`<div class="sub">Trascrizioni automatiche</div>${auto.map(card).join('')}`:'')+
-  (!own.some(r=>r.k==='pdf')?`<div class="empty">${own.length||auto.length?'':'Ancora nessuno spartito. '}${x.acquista?`Una trascrizione pubblicata è in vendita: <a href="${esc(x.acquista.u)}" target="_blank" rel="noopener">${esc(x.acquista.t)}</a>. `:''}Puoi caricare un PDF o un MIDI con «Aggiungi file», oppure chiedere la trascrizione automatica dal ✎ di una registrazione.</div>`:'')+
+  (!own.some(r=>r.k==='pdf'||r.k==='img')?`<div class="empty">${own.length||auto.length?'':'Ancora nessuno spartito. '}${x.acquista?`Una trascrizione pubblicata è in vendita: <a href="${esc(x.acquista.u)}" target="_blank" rel="noopener">${esc(x.acquista.t)}</a>. `:''}Puoi caricare un PDF, le foto o gli screenshot delle pagine, o un MIDI con «Aggiungi file», oppure chiedere la trascrizione automatica dal ✎ di una registrazione.</div>`:'')+
   `<p class="hint">Tocca uno spartito per aprirlo; il MIDI si suona sulla tastiera, anche rallentato, con una mano sola o trasposto.</p>`;
  bindEd(el,c,id,x);
  el.querySelectorAll('[data-open]').forEach(d=>d.onclick=async e=>{if(e.target.closest('.rv,.ed'))return;const r=list.find(q=>q.id===d.dataset.open),v=d.querySelector('.rv');
   if(d.classList.contains('open')){d.classList.remove('open');v.innerHTML='';return}
   el.querySelectorAll('[data-open].open').forEach(o=>{o.classList.remove('open');o.querySelector('.rv').innerHTML=''});
   if(r.st!=='pronto')return;d.classList.add('open');v.innerHTML='<div class="note">Carico…</div>';const u=base+r.f;
-  try{if(r.k==='pdf'){const b=await mediaURL(u,'application/pdf');v.innerHTML='<div class="pdfv"></div><div class="row2"><button class="btn sm" data-pdfo>Apri a tutto schermo</button></div>';
+  try{if(r.k==='img'){const fs=[].concat(r.f);
+    v.innerHTML=`<div class="imgv">${fs.map((_,i)=>`<figure><img alt="Pagina ${i+1}"><figcaption>${i+1} / ${fs.length}</figcaption></figure>`).join('')}</div><div class="row2"><button class="btn sm" data-leg>⛶ Leggio a tutto schermo</button></div>`;
+    const urls=await Promise.all(fs.map(f=>mediaURL(base+f,'image/jpeg')));if(!v.isConnected)return;
+    v.querySelectorAll('.imgv img').forEach((im,i)=>im.src=urls[i]);v.querySelector('[data-leg]').onclick=()=>leggio(urls,r.t)}
+   else if(r.k==='pdf'){const b=await mediaURL(u,'application/pdf');v.innerHTML='<div class="pdfv"></div><div class="row2"><button class="btn sm" data-pdfo>Apri a tutto schermo</button></div>';
     v.querySelector('[data-pdfo]').onclick=()=>{location.href=b};await showPDF(v.querySelector('.pdfv'),b)}
    else{const b=await mediaURL(u,'audio/midi');const kb=midiToKb(await (await fetch(b)).arrayBuffer(),r.t);v.innerHTML=kbHTML(kb)+'<div class="row2"><button class="btn sm" data-midd>⬇︎ Scarica il MIDI</button></div>';
     initKb(v.querySelector('.kb'));v.querySelector('[data-midd]').onclick=()=>{const a=document.createElement('a');a.href=b;a.download=id+'.mid';document.body.appendChild(a);a.click();a.remove()}}}
@@ -772,6 +797,51 @@ function midiToKb(buf,title){const d=new DataView(buf);let p=0;
  out.sort((a,b)=>a[0]-b[0]);if(!out.length)throw new Error('MIDI vuoto');
  return {title:title||'MIDI',notes:out,bpm,beats:tsig||4,key:null,length:Math.max(...out.map(n=>n[0]+n[1]))}}
 
+/* ---- leggio: pagine a tutto schermo, scorri col dito o con le frecce; doppio tocco = adatta alla larghezza ---- */
+function leggio(urls,title){const L=document.createElement('div');L.className='leg';let n=0,wl=null;
+ L.innerHTML=`<header><b>${esc(title)}</b><span class="lg-c"></span><button data-fw title="Adatta alla larghezza">↔︎</button><button data-x>✕</button></header>
+ <div class="lg-s">${urls.map((u,i)=>`<div class="lg-p"><img src="${u}" alt="Pagina ${i+1}"></div>`).join('')}</div><button class="lg-a l">‹</button><button class="lg-a r">›</button>`;
+ document.body.appendChild(L);document.documentElement.style.overflow='hidden';
+ const sc=L.querySelector('.lg-s'),cnt=L.querySelector('.lg-c'),pl=L.querySelector('.lg-a.l'),pr=L.querySelector('.lg-a.r');
+ const upd=()=>{n=Math.round(sc.scrollLeft/Math.max(1,sc.clientWidth));cnt.textContent=(n+1)+' / '+urls.length;pl.disabled=n<=0;pr.disabled=n>=urls.length-1};
+ const to=i=>{i=Math.max(0,Math.min(urls.length-1,i));sc.scrollTo({left:i*sc.clientWidth,behavior:'smooth'})};
+ sc.addEventListener('scroll',upd,{passive:true});pl.onclick=()=>to(n-1);pr.onclick=()=>to(n+1);
+ const fw=()=>{L.classList.toggle('fw');L.querySelectorAll('.lg-p').forEach(p=>p.scrollTop=0);requestAnimationFrame(()=>sc.scrollLeft=n*sc.clientWidth)};
+ L.querySelector('[data-fw]').onclick=fw;sc.addEventListener('dblclick',fw);
+ const key=e=>{if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){e.preventDefault();to(n+1)}else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();to(n-1)}else if(e.key==='Escape')close()};
+ const rs=()=>{sc.scrollLeft=n*sc.clientWidth};
+ function close(){document.removeEventListener('keydown',key);removeEventListener('resize',rs);document.documentElement.style.overflow='';try{wl&&wl.release()}catch(e){}
+  try{if(document.fullscreenElement)document.exitFullscreen()}catch(e){}L.remove()}
+ L.querySelector('[data-x]').onclick=close;document.addEventListener('keydown',key);addEventListener('resize',rs);upd();
+ try{navigator.wakeLock&&navigator.wakeLock.request('screen').then(w=>wl=w).catch(()=>{})}catch(e){}  // lo schermo non si spegne mentre leggi
+ try{const q=L.requestFullscreen||L.webkitRequestFullscreen;q&&Promise.resolve(q.call(L)).catch(()=>{})}catch(e){}}
+
+/* ---- spartiti in immagini: ritaglio automatico della pagina (toglie barre e cornici degli screenshot) e JPEG leggero ---- */
+function loadImg(file){return new Promise((ok,ko)=>{const u=URL.createObjectURL(file),im=new Image();im.onload=()=>{ok(im);setTimeout(()=>URL.revokeObjectURL(u),1000)};im.onerror=()=>{URL.revokeObjectURL(u);ko(new Error('Immagine non leggibile: '+file.name))};im.src=u})}
+function runsOf(a,len){const o=[];let s=-1;for(let i=0;i<=a.length;i++){const v=i<a.length&&a[i];if(v&&s<0)s=i;if(!v&&s>=0){if(i-s>=len)o.push([s,i]);s=-1}}return o}
+function pageBox(im){const W0=im.naturalWidth,H0=im.naturalHeight,k=Math.min(1,1000/Math.max(W0,H0)),W=Math.round(W0*k),H=Math.round(H0*k);
+ const cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d',{willReadFrequently:true});x.imageSmoothingEnabled=false;x.drawImage(im,0,0,W,H);
+ const d=x.getImageData(0,0,W,H).data,g=new Uint8Array(W*H);for(let i=0;i<W*H;i++)g[i]=(d[i*4]*299+d[i*4+1]*587+d[i*4+2]*114)/1000|0;
+ const ya=H*.3|0,yb=H*.9|0,ew=Math.max(3,W/50|0),hist=new Uint32Array(256);let tot=0;
+ for(let y=ya;y<yb;y++)for(let i=0;i<ew;i++){hist[g[y*W+i]]++;hist[g[y*W+W-1-i]]++;tot+=2}
+ let bg=0;for(let v=1;v<256;v++)if(hist[v]>hist[bg])bg=v;
+ if(bg>253||bg<200||hist[bg]<tot*.5)return null;   // nessuno sfondo grigio uniforme attorno alla pagina: non ritaglio
+ const isBg=i=>Math.abs(g[i]-bg)<=1,col=new Array(W).fill(false);
+ for(let xx=0;xx<W;xx++){let c=0;for(let y=ya;y<yb;y++)if(isBg(y*W+xx))c++;col[xx]=c/(yb-ya)<.9}
+ const cr=runsOf(col,W*.4|0).sort((a,b)=>(b[1]-b[0])-(a[1]-a[0]))[0];if(!cr)return null;const [x0,x1]=cr;
+ const row=new Array(H).fill(false);for(let y=0;y<H;y++){let c=0;for(let xx=x0;xx<x1;xx++)if(isBg(y*W+xx))c++;row[y]=c/(x1-x0)<.9}
+ const rr=runsOf(row,H*.2|0).sort((a,b)=>(b[1]-b[0])-(a[1]-a[0]))[0];if(!rr)return null;const [y0,y1]=rr;
+ const m=Math.max(3,W/250|0);let ix0=1e9,iy0=1e9,ix1=-1,iy1=-1;   // dentro la pagina: solo la parte scritta, senza i margini bianchi
+ for(let y=y0+m;y<y1-m;y++)for(let xx=x0+m;xx<x1-m;xx++)if(g[y*W+xx]<190){if(xx<ix0)ix0=xx;if(xx>ix1)ix1=xx;if(y<iy0)iy0=y;if(y>iy1)iy1=y}
+ if(ix1<0)return null;const pad=(ix1-ix0)*.035;
+ const bx0=Math.max(x0+1,ix0-pad),by0=Math.max(y0+1,iy0-pad),bx1=Math.min(x1-1,ix1+pad),by1=Math.min(y1-1,iy1+pad);
+ return {x:bx0/k,y:by0/k,w:(bx1-bx0)/k,h:(by1-by0)/k}}
+async function prepPage(file,auto){const im=await loadImg(file);let b=auto?pageBox(im):null;const cropped=!!b;b=b||{x:0,y:0,w:im.naturalWidth,h:im.naturalHeight};
+ const s=Math.min(1,2400/Math.max(b.w,b.h)),cv=document.createElement('canvas');cv.width=Math.round(b.w*s);cv.height=Math.round(b.h*s);
+ const x=cv.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,cv.width,cv.height);x.imageSmoothingQuality='high';x.drawImage(im,b.x,b.y,b.w,b.h,0,0,cv.width,cv.height);
+ const blob=await new Promise(ok=>cv.toBlob(ok,'image/jpeg',.9));if(!blob)throw new Error('Impossibile preparare '+file.name);
+ return {blob,url:URL.createObjectURL(blob),cropped}}
+
 /* ---- pubblicazione su GitHub: un solo commit con file + catalogo (riletto subito prima, cosi' non si perde niente) ---- */
 const slug=s=>words(s).join('').slice(0,40)||'brano';
 function u2b(u){let s='';for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s)}
@@ -804,6 +874,7 @@ const ghErr=err=>/^40[134]/.test(err.message)?'La chiave GitHub non funziona: co
 /* ---- «Carica»: qualsiasi file sui brani. Riconosce tipo, brano, titolo e categoria; Paolo controlla e pubblica ---- */
 function kindOf(f){const n=f.name.toLowerCase(),t=f.type||'';
  if(/\.(mid|midi)$/.test(n)||/midi/.test(t))return'midi';if(/\.pdf$/.test(n)||t==='application/pdf')return'pdf';
+ if(/^image\//.test(t)||/\.(png|jpe?g|webp|heic|heif|gif)$/.test(n))return'img';
  if(/^video\//.test(t)||/\.(mp4|mov|m4v|webm|mkv)$/.test(n))return'video';if(/^audio\//.test(t)||/\.(mp3|m4a|wav|aac|flac|ogg|aif|aiff)$/.test(n))return'audio';return null}
 function cleanName(s){return String(s).replace(/\.[a-z0-9]{2,4}$/i,'').replace(/^(y2mate\.com|ytmp3\.cc|savefrom\.net|ssyoutube\.com)\s*-\s*/i,'')
  .replace(/[_]+/g,' ').replace(/\[[^\]]*\]/g,'').replace(/\((official[^)]*|audio|video|hd|hq|lyrics?|remaster(ed)?[^)]*)\)/ig,'').replace(/\b(1080p|720p|480p|360p|4k|hd)\b/ig,'').replace(/\s{2,}/g,' ').replace(/^[\s\-–·]+|[\s\-–·]+$/g,'').trim()}
@@ -826,7 +897,7 @@ async function ytInfo(u){try{const r=await fetch('https://noembed.com/embed?url=
 function ascUpload(c,bid,cat){const items=[];let nid=0;
  const opts=sel=>Object.keys(cat).sort((a,b)=>cat[a].t.localeCompare(cat[b].t)).map(k=>`<option value="${k}" ${k===sel?'selected':''}>${esc(cat[k].t)}${cat[k].a?' · '+esc(cat[k].a):''}</option>`).join('');
  $('#app').innerHTML=`<section class="chero"><div class="wrap"><div class="eyebrow">Ascolti consigliati</div><h1 class="nt">${bid?esc(cat[bid].t):'Carica file'}</h1><p>${bid?'Aggiungi file a questo brano':'Riconosco da solo brano, titolo e categoria'}</p></div></section><div class="wrap">
- <form class="af" id="up"><label class="drop"><input type="file" multiple accept="audio/*,video/*,.mp3,.m4a,.wav,.mp4,.mov,.pdf,.mid,.midi"><b>＋ Scegli i file</b><small>Registrazioni, video (live, tutorial…), spartiti PDF, MIDI · anche più file insieme</small></label>
+ <form class="af" id="up"><label class="drop"><input type="file" multiple accept="audio/*,video/*,image/*,.mp3,.m4a,.wav,.mp4,.mov,.pdf,.mid,.midi"><b>＋ Scegli i file</b><small>Registrazioni, video (live, tutorial…), spartiti PDF o in foto/screenshot (più pagine insieme), MIDI</small></label>
  <div class="two2"><input type="text" id="ytu" placeholder="Oppure incolla un link YouTube" inputmode="url"><button type="button" class="btn sm" id="yta">Aggiungi</button></div>
  <div id="items"></div>${tokHTML()}<button class="go" type="submit" disabled>Pubblica</button><div class="note" id="upm"></div></form>
  <div class="row"><button class="btn sm" data-go="${c.id}-ascolti${bid?'-'+bid:''}">‹ Annulla</button></div><div class="foot"></div></div>`;window.scrollTo(0,0);
@@ -839,10 +910,15 @@ function ascUpload(c,bid,cat){const items=[];let nid=0;
   ${it.k==='audio'?`<div class="opts"><label class="opt"><input type="radio" name="tp${it.n}" data-f="tipo" value="solo" ${it.tipo!=='band'?'checked':''}><span><b>Piano solo</b><small>Si ascolta così com'è</small></span></label><label class="opt"><input type="radio" name="tp${it.n}" data-f="tipo" value="band" ${it.tipo==='band'?'checked':''}><span><b>Più strumenti</b><small>Separa batteria, basso, piano, voce, altro</small></span></label></div>
   <label class="opt chk"><input type="checkbox" data-f="midi_auto" ${it.midi_auto?'checked':''}><span><b>MIDI automatico sulla tastiera</b><small>Le note del piano ricavate dall'audio</small></span></label>
   <label class="opt chk"><input type="checkbox" data-f="pdf_auto" ${it.pdf_auto?'checked':''}><span><b>Partitura PDF automatica (bozza)</b><small>Due pentagrammi, metro e tonalità riconosciuti: da controllare</small></span></label>`:''}
+  ${it.k==='img'?`<label class="opt chk"><input type="checkbox" data-f="crop" ${it.crop?'checked':''}><span><b>Ritaglia automaticamente sulla pagina</b><small>Toglie barre, menu e margini degli screenshot</small></span></label>
+  ${it.busy?'<div class="rst p">⏳ Preparo le pagine…</div>':`<p class="hint">Controlla l'ordine: ‹ › sposta una pagina, ✕ la toglie.</p><div class="thumbs">${it.pages.map((p,i)=>`<div><img src="${p.url}" alt=""><i>${i+1}</i><div class="tb"><button type="button" data-mv="${it.n}:${i}:-1" ${i?'':'disabled'}>‹</button><button type="button" data-pd="${it.n}:${i}">✕</button><button type="button" data-mv="${it.n}:${i}:1" ${i<it.pages.length-1?'':'disabled'}>›</button></div></div>`).join('')}</div>`}`:''}
   ${it.k==='video'&&it.size>90e6?'<div class="rst e">Troppo grande (massimo 90 MB): per i video lunghi incolla il link YouTube.</div>':''}</div>`).join('')+`<datalist id="artisti">${ASC.disco.map(d=>`<option value="${esc(d.a)}">`).join('')}</datalist>`;
-  f.querySelector('.go').disabled=!items.length;f.querySelector('.go').textContent=items.length?`Pubblica ${items.length} ${items.length===1?'elemento':'elementi'}`:'Pubblica';
+  f.querySelector('.go').disabled=!items.length||items.some(x=>x.busy);f.querySelector('.go').textContent=items.length?`Pubblica ${items.length} ${items.length===1?'elemento':'elementi'}`:'Pubblica';
   $('#items').querySelectorAll('[data-i]').forEach(box=>{const it=items.find(x=>x.n===+box.dataset.i);
-   box.querySelectorAll('[data-f]').forEach(inp=>inp.onchange=inp.oninput=()=>{const k=inp.dataset.f;it[k]=inp.type==='checkbox'?inp.checked:inp.value;if(k==='b'&&inp.type!=='text')draw()})});
+   box.querySelectorAll('[data-f]').forEach(inp=>inp.onchange=inp.oninput=()=>{const k=inp.dataset.f;it[k]=inp.type==='checkbox'?inp.checked:inp.value;if(k==='b'&&inp.type!=='text')draw();if(k==='crop')prepImgs(it)})});
+  $('#items').querySelectorAll('[data-mv]').forEach(b=>b.onclick=()=>{const [n,i,d]=b.dataset.mv.split(':').map(Number),it=items.find(x=>x.n===n),j=i+d;[it.pages[i],it.pages[j]]=[it.pages[j],it.pages[i]];draw()});
+  $('#items').querySelectorAll('[data-pd]').forEach(b=>b.onclick=()=>{const [n,i]=b.dataset.pd.split(':').map(Number),it=items.find(x=>x.n===n);it.pages.splice(i,1);
+   if(!it.pages.length)items.splice(items.indexOf(it),1);else{it.size=it.pages.reduce((a,p)=>a+p.file.size,0);it.name=it.pages.length+(it.pages.length===1?' pagina':' pagine')}draw()});
   $('#items').querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{items.splice(items.findIndex(x=>x.n===+b.dataset.rm),1);draw()})}
  async function add(k,o){const txt=[o.name,o.tag&&o.tag.t,o.tag&&o.tag.a].filter(Boolean).join(' ');
   const b=bid||guessBrano(cat,txt),c0=guessCat(k,txt);let t=cleanName(o.tag&&o.tag.t?o.tag.t:o.name);
@@ -855,8 +931,16 @@ function ascUpload(c,bid,cat){const items=[];let nid=0;
   if(!b){const ps=cleanName(o.name).split(/\s+[-–]\s+/);if(o.tag&&o.tag.t){it.nt=cleanName(o.tag.t)}else if(ps.length>1){it.na=it.na||ps[0];it.nt=cleanName(ps.slice(1).join(' - ').replace(/\([^)]*\)/g,''))}
    it.t={audio:'Registrazione',pdf:'Spartito',midi:'MIDI'}[k]||c0}
   items.push(it);draw()}
- f.querySelector('input[type=file]').onchange=async e=>{for(const fl of e.target.files){const k=kindOf(fl);if(!k){toast('Formato non supportato: '+fl.name);continue}
-  await add(k,{name:fl.name,size:fl.size,file:fl,tag:k==='audio'?await id3(fl):null})}e.target.value=''};
+ async function prepImgs(it){it.busy=true;draw();try{for(const p of it.pages){if(p.url)URL.revokeObjectURL(p.url);Object.assign(p,await prepPage(p.file,it.crop))}}
+  catch(err){toast(err.message)}it.busy=false;draw()}
+ f.querySelector('input[type=file]').onchange=async e=>{const imgs=[];for(const fl of e.target.files){const k=kindOf(fl);if(!k){toast('Formato non supportato: '+fl.name);continue}
+  if(k==='img'){imgs.push(fl);continue}
+  await add(k,{name:fl.name,size:fl.size,file:fl,tag:k==='audio'?await id3(fl):null})}e.target.value='';
+  if(imgs.length){imgs.sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true}));   // le pagine di una partitura diventano un solo spartito
+   let it=items.find(x=>x.k==='img');if(!it){const b=bid||guessBrano(cat,imgs.map(x=>x.name).join(' '));
+    it={n:nid++,k:'img',pages:[],t:'Trascrizione',c:'Partitura',b:b||'__new',guess:b&&!bid?cat[b].t:'',nt:'',na:'',crop:true};items.push(it)}
+   it.pages.push(...imgs.map(file=>({file})));it.size=it.pages.reduce((a,p)=>a+p.file.size,0);it.name=it.pages.length+(it.pages.length===1?' pagina':' pagine');
+   await prepImgs(it)}};
  $('#yta').onclick=async()=>{const u=$('#ytu').value.trim();if(!ytId(u))return toast('Link YouTube non valido');say('Leggo il titolo del video…');const i=await ytInfo(u);say('');
   await add('yt',{name:i.t?i.t+(i.a?' · '+i.a:''):u,u,tag:null});$('#ytu').value=''};
  f.onsubmit=async e=>{e.preventDefault();const btn=f.querySelector('.go');btn.disabled=true;
@@ -866,6 +950,9 @@ function ascUpload(c,bid,cat){const items=[];let nid=0;
    for(const it of items){let b=bid||it.b;if(b==='__new'){const nt=(it.nt||it.t).trim();b=Object.keys(cat).find(k=>normA(cat[k].t)===normA(nt))||slug(nt);it.newB={t:nt,a:(it.na||'').trim(),al:it.al||'',anno:it.y||''}}
     const rid='r'+stamp+it.n,r={id:rid,k:it.k,c:it.c,t:(it.t||'').trim()||it.name};let ext=(it.name.match(/\.([a-z0-9]{2,4})$/i)||[,'bin'])[1].toLowerCase();
     if(it.k==='yt'){Object.assign(r,{u:it.u,st:'pronto'})}
+    else if(it.k==='img'){const fs=[];for(let i=0;i<it.pages.length;i++){say(`Cifro la pagina ${i+1} di ${it.pages.length}…`);const fn=`${rid}/p${i+1}.jpg.enc`;
+      files.push({path:`ascolti/${b}/${fn}`,label:`pagina ${i+1}`,u8:await encBytes(new Uint8Array(await it.pages[i].blob.arrayBuffer()))});fs.push(fn)}
+     Object.assign(r,{f:fs,st:'pronto'})}
     else{say('Cifro «'+it.name+'»…');const u8=await encBytes(new Uint8Array(await it.file.arrayBuffer()));
      if(it.k==='audio'||it.k==='video'){files.push({path:`ascolti/${b}/${rid}/originale.${ext}.enc`,label:'«'+it.name+'»',u8});Object.assign(r,{st:'elaborazione'},it.k==='audio'?{tipo:it.tipo,midi_auto:!!it.midi_auto,pdf_auto:!!it.pdf_auto}:{})}
      else{const fn=it.k==='pdf'?'spartito.pdf.enc':'brano.mid.enc';files.push({path:`ascolti/${b}/${rid}/${fn}`,label:'«'+it.name+'»',u8});Object.assign(r,{f:rid+'/'+fn,st:'pronto'})}}
@@ -891,7 +978,7 @@ function resEdit(c,id,x,r){const sh=document.createElement('div');sh.className='
  <button class="go" type="submit">Salva</button><div class="row2"><button type="button" class="btn sm" data-x>Annulla</button><button type="button" class="btn sm del" data-del>🗑 Elimina</button></div><div class="note" data-m></div></form>`;
  $('#app').appendChild(sh);const f=sh.querySelector('form'),say=m=>sh.querySelector('[data-m]').textContent=m,close=()=>sh.remove();
  sh.onclick=e=>{if(e.target===sh)close()};sh.querySelector('[data-x]').onclick=close;
- const files=q=>[q.f,q.poster,...(q.stems||[]).map(s=>q.id+'/'+s+'.mp3.enc')].filter(Boolean).map(p=>'ascolti/'+id+'/'+p);
+ const files=q=>[...[].concat(q.f||[]),q.poster,...(q.stems||[]).map(s=>q.id+'/'+s+'.mp3.enc')].filter(Boolean).map(p=>'ascolti/'+id+'/'+p);
  const run=async(change,msg)=>{f.querySelectorAll('button').forEach(b=>b.disabled=true);try{const t=await needTok(f,say);if(!t){f.querySelectorAll('button').forEach(b=>b.disabled=false);return}
   CAT=Promise.resolve(await ghCommit(t,[],change,msg,say));close();renderAscolti(c,id)}catch(err){f.querySelectorAll('button').forEach(b=>b.disabled=false);say(ghErr(err))}};
  sh.querySelector('[data-del]').onclick=()=>{if(!confirm('Eliminare «'+r.t+'»?'))return;
