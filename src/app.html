@@ -667,7 +667,7 @@ const VHINT={Live:'Esecuzioni dal vivo: guarda le mani e come cambia il brano ri
  Lezione:'Lezioni e masterclass sul brano o sullo stile.',Intervista:'Il musicista racconta il brano.',Video:''};
 const KIND={audio:'♫',video:'▶',yt:'▶',pdf:'𝄞',img:'𝄞',midi:'⌨'};
 function count(x,k){return x.r.filter(SEZ.find(s=>s[0]===k)[2]).length}
-function busy(x){return x.r.some(r=>r.st==='elaborazione')}
+function busy(x){return x.r.some(r=>r.st==='elaborazione'||r.omr==='attesa')}
 function cardHTML(c,id,x){const n=[['ascolto','registrazion','e','i'],['spartiti','spartit','o','i'],['video','video','','']].map(([k,w,s1,sn])=>{const m=count(x,k);return m?`${m} ${w}${m===1?s1:sn}`:''}).filter(Boolean);
  const err=x.r.some(r=>r.st==='errore'),has=count(x,'ascolto')>0;
  return`<div class="atr ${has?'has':''}" data-go="${c.id}-ascolti-${id}"><div class="h"><span class="pl">${has?'▶':'♪'}</span><div style="flex:1;min-width:0"><div class="tt">${esc(x.t)}</div><div class="ar">${esc(x.a||'')}${x.al?' · '+esc(x.al):''}${x.anno?' · '+esc(x.anno):''}</div></div>
@@ -694,7 +694,8 @@ const TONI={C:'Do',D:'Re',E:'Mi',F:'Fa',G:'Sol',A:'La',B:'Si'};
 function tonIt(t){return String(t).replace(/^([A-G])(-|#)?/,(m,l,a)=>TONI[l]+(a==='-'?'♭':a==='#'?'♯':''))}
 function infoTr(i){return i?`Riconosciuto: ${esc(i.metro)}, circa ${esc(i.bpm)} bpm${i.tonalita?', '+esc(tonIt(i.tonalita)):''}.`:''}
 const ASCTAB={};
-function stato(r){return r.st==='elaborazione'?`<div class="rst p">⏳ In preparazione${r.k==='audio'?(r.tipo==='band'&&!r.rifai?' · separo le tracce':'')+(r.midi_auto||r.pdf_auto?' · trascrivo':''):''}: 5–15 minuti</div>`:
+function stato(r){return r.omr==='attesa'?'<div class="rst p">⏳ Converto la partitura in MIDI per la tastiera: 5–20 minuti</div>':
+ r.omr==='errore'?`<div class="rst e">⚠️ Conversione in MIDI non riuscita. Con ✎ puoi riprovare, o manda a Claude: <code>${esc(r.omr_err||'')}</code></div>`:r.st==='elaborazione'?`<div class="rst p">⏳ In preparazione${r.k==='audio'?(r.tipo==='band'&&!r.rifai?' · separo le tracce':'')+(r.midi_auto||r.pdf_auto?' · trascrivo':''):''}: 5–15 minuti</div>`:
  r.st==='errore'?`<div class="rst e">⚠️ Non riuscito. Ricarica il file, o manda a Claude: <code>${esc(r.err||'')}</code></div>`:''}
 async function ascTrack(c,id,x){
  const base='ascolti/'+id+'/',tabs=SEZ.map(([k,n,f])=>[k,n,x.r.filter(f)]);
@@ -910,6 +911,7 @@ function ascUpload(c,bid,cat){const items=[];let nid=0;
   ${it.k==='audio'?`<div class="opts"><label class="opt"><input type="radio" name="tp${it.n}" data-f="tipo" value="solo" ${it.tipo!=='band'?'checked':''}><span><b>Piano solo</b><small>Si ascolta così com'è</small></span></label><label class="opt"><input type="radio" name="tp${it.n}" data-f="tipo" value="band" ${it.tipo==='band'?'checked':''}><span><b>Più strumenti</b><small>Separa batteria, basso, piano, voce, altro</small></span></label></div>
   <label class="opt chk"><input type="checkbox" data-f="midi_auto" ${it.midi_auto?'checked':''}><span><b>MIDI automatico sulla tastiera</b><small>Le note del piano ricavate dall'audio</small></span></label>
   <label class="opt chk"><input type="checkbox" data-f="pdf_auto" ${it.pdf_auto?'checked':''}><span><b>Partitura PDF automatica (bozza)</b><small>Due pentagrammi, metro e tonalità riconosciuti: da controllare</small></span></label>`:''}
+  ${it.k==='pdf'||it.k==='img'?`<label class="opt chk"><input type="checkbox" data-f="omr" ${it.omr?'checked':''}><span><b>Converti in MIDI per la tastiera</b><small>Leggo la partitura e ne ricavo le note, da suonare sulla tastiera del sito</small></span></label>`:''}
   ${it.k==='img'?`<label class="opt chk"><input type="checkbox" data-f="crop" ${it.crop?'checked':''}><span><b>Ritaglia automaticamente sulla pagina</b><small>Toglie barre, menu e margini degli screenshot</small></span></label>
   ${it.busy?'<div class="rst p">⏳ Preparo le pagine…</div>':`<p class="hint">Controlla l'ordine: ‹ › sposta una pagina, ✕ la toglie.</p><div class="thumbs">${it.pages.map((p,i)=>`<div><img src="${p.url}" alt=""><i>${i+1}</i><div class="tb"><button type="button" data-mv="${it.n}:${i}:-1" ${i?'':'disabled'}>‹</button><button type="button" data-pd="${it.n}:${i}">✕</button><button type="button" data-mv="${it.n}:${i}:1" ${i<it.pages.length-1?'':'disabled'}>›</button></div></div>`).join('')}</div>`}`:''}
   ${it.k==='video'&&it.size>90e6?'<div class="rst e">Troppo grande (massimo 90 MB): per i video lunghi incolla il link YouTube.</div>':''}</div>`).join('')+`<datalist id="artisti">${ASC.disco.map(d=>`<option value="${esc(d.a)}">`).join('')}</datalist>`;
@@ -927,7 +929,7 @@ function ascUpload(c,bid,cat){const items=[];let nid=0;
    t=cleanName(t.replace(/[()]/g,' '))||({audio:'Registrazione',pdf:'Spartito',midi:'MIDI'}[k]||c0)}
   if(/^(score|sheet( music)?|spartito|partitura|transcription|trascrizione)$/i.test(t))t='Spartito';
   const it={n:nid++,k,name:o.name,size:o.size,file:o.file,u:o.u,t:t||o.name,c:c0,b:b||'__new',guess:b?(bid?'':cat[b].t):'',
-   nt:b?'':cleanName((o.tag&&o.tag.t)||o.name.split(/\s*[-–|]\s*/).slice(-1)[0]),na:(o.tag&&o.tag.a)||'',tipo:'solo',midi_auto:true,pdf_auto:false,al:o.tag&&o.tag.al,y:o.tag&&o.tag.y};
+   nt:b?'':cleanName((o.tag&&o.tag.t)||o.name.split(/\s*[-–|]\s*/).slice(-1)[0]),na:(o.tag&&o.tag.a)||'',tipo:'solo',midi_auto:true,pdf_auto:false,omr:k==='pdf',al:o.tag&&o.tag.al,y:o.tag&&o.tag.y};
   if(!b){const ps=cleanName(o.name).split(/\s+[-–]\s+/);if(o.tag&&o.tag.t){it.nt=cleanName(o.tag.t)}else if(ps.length>1){it.na=it.na||ps[0];it.nt=cleanName(ps.slice(1).join(' - ').replace(/\([^)]*\)/g,''))}
    it.t={audio:'Registrazione',pdf:'Spartito',midi:'MIDI'}[k]||c0}
   items.push(it);draw()}
@@ -938,7 +940,7 @@ function ascUpload(c,bid,cat){const items=[];let nid=0;
   await add(k,{name:fl.name,size:fl.size,file:fl,tag:k==='audio'?await id3(fl):null})}e.target.value='';
   if(imgs.length){imgs.sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true}));   // le pagine di una partitura diventano un solo spartito
    let it=items.find(x=>x.k==='img');if(!it){const b=bid||guessBrano(cat,imgs.map(x=>x.name).join(' '));
-    it={n:nid++,k:'img',pages:[],t:'Trascrizione',c:'Partitura',b:b||'__new',guess:b&&!bid?cat[b].t:'',nt:'',na:'',crop:true};items.push(it)}
+    it={n:nid++,k:'img',pages:[],t:'Trascrizione',c:'Partitura',b:b||'__new',guess:b&&!bid?cat[b].t:'',nt:'',na:'',crop:true,omr:true};items.push(it)}
    it.pages.push(...imgs.map(file=>({file})));it.size=it.pages.reduce((a,p)=>a+p.file.size,0);it.name=it.pages.length+(it.pages.length===1?' pagina':' pagine');
    await prepImgs(it)}};
  $('#yta').onclick=async()=>{const u=$('#ytu').value.trim();if(!ytId(u))return toast('Link YouTube non valido');say('Leggo il titolo del video…');const i=await ytInfo(u);say('');
@@ -952,15 +954,15 @@ function ascUpload(c,bid,cat){const items=[];let nid=0;
     if(it.k==='yt'){Object.assign(r,{u:it.u,st:'pronto'})}
     else if(it.k==='img'){const fs=[];for(let i=0;i<it.pages.length;i++){say(`Cifro la pagina ${i+1} di ${it.pages.length}…`);const fn=`${rid}/p${i+1}.jpg.enc`;
       files.push({path:`ascolti/${b}/${fn}`,label:`pagina ${i+1}`,u8:await encBytes(new Uint8Array(await it.pages[i].blob.arrayBuffer()))});fs.push(fn)}
-     Object.assign(r,{f:fs,st:'pronto'})}
+     Object.assign(r,{f:fs,st:'pronto'},it.omr?{omr:'attesa'}:{})}
     else{say('Cifro «'+it.name+'»…');const u8=await encBytes(new Uint8Array(await it.file.arrayBuffer()));
      if(it.k==='audio'||it.k==='video'){files.push({path:`ascolti/${b}/${rid}/originale.${ext}.enc`,label:'«'+it.name+'»',u8});Object.assign(r,{st:'elaborazione'},it.k==='audio'?{tipo:it.tipo,midi_auto:!!it.midi_auto,pdf_auto:!!it.pdf_auto}:{})}
-     else{const fn=it.k==='pdf'?'spartito.pdf.enc':'brano.mid.enc';files.push({path:`ascolti/${b}/${rid}/${fn}`,label:'«'+it.name+'»',u8});Object.assign(r,{f:rid+'/'+fn,st:'pronto'})}}
+     else{const fn=it.k==='pdf'?'spartito.pdf.enc':'brano.mid.enc';files.push({path:`ascolti/${b}/${rid}/${fn}`,label:'«'+it.name+'»',u8});Object.assign(r,{f:rid+'/'+fn,st:'pronto'},it.k==='pdf'&&it.omr?{omr:'attesa'}:{})}}
     adds.push([b,r,it.newB])}
    const out=await ghCommit(t,files,cat=>{for(const [b,r,nb] of adds){if(!cat[b])cat[b]=Object.assign({r:[]},nb);cat[b].r=cat[b].r||[];cat[b].r.push(r)}},
     'Ascolti: '+adds.map(([b,r])=>r.t).join(', ').slice(0,120)+' (dal sito)',say);
    CAT=Promise.resolve(out);const bs=[...new Set(adds.map(a=>a[0]))];
-   toast(adds.some(a=>a[1].st==='elaborazione')?'✓ Pubblicato. Audio e video si preparano in 5–15 minuti.':'✓ Pubblicato');
+   toast(adds.some(a=>a[1].st==='elaborazione')?'✓ Pubblicato. Audio e video si preparano in 5–15 minuti.':adds.some(a=>a[1].omr)?'✓ Pubblicato. Il MIDI dalla partitura arriva in 5–20 minuti.':'✓ Pubblicato');
    bs.forEach(b=>{const r=adds.find(a=>a[0]===b)[1];ASCTAB[b]=r.k==='audio'?'ascolto':r.k==='video'||r.k==='yt'?'video':'spartiti'});go(c.id+'-ascolti'+(bs.length===1?'-'+bs[0]:''))}
   catch(err){btn.disabled=false;say(ghErr(err))}};
  draw()}
@@ -974,6 +976,7 @@ function resEdit(c,id,x,r){const sh=document.createElement('div');sh.className='
  <label class="opt chk"><input type="checkbox" name="midi_auto" ${r.midi_auto?'checked':''}><span><b>MIDI sulla tastiera</b></span></label>
  <label class="opt chk"><input type="checkbox" name="pdf_auto" ${r.pdf_auto?'checked':''}><span><b>Partitura PDF (bozza)</b></span></label>
  <label class="opt chk"><input type="checkbox" name="rifai"><span><b>Rifalla adesso</b><small>Se togli una spunta, quella trascrizione viene eliminata</small></span></label>`:''}
+ ${(r.k==='pdf'||r.k==='img')&&!r.auto&&r.omr!=='attesa'?`<label class="opt chk"><input type="checkbox" name="omr"><span><b>${r.omr==='fatto'?'Rifai il MIDI dalla partitura':'Converti in MIDI per la tastiera'}</b><small>Leggo la partitura e ne ricavo le note: 5–20 minuti</small></span></label>`:''}
  ${ghTok()?'':tokHTML()}
  <button class="go" type="submit">Salva</button><div class="row2"><button type="button" class="btn sm" data-x>Annulla</button><button type="button" class="btn sm del" data-del>🗑 Elimina</button></div><div class="note" data-m></div></form>`;
  $('#app').appendChild(sh);const f=sh.querySelector('form'),say=m=>sh.querySelector('[data-m]').textContent=m,close=()=>sh.remove();
@@ -985,6 +988,7 @@ function resEdit(c,id,x,r){const sh=document.createElement('div');sh.className='
   run(cat=>{const y=cat[id];if(!y)return[];const del=y.r.filter(q=>q.id===r.id||q.da===r.id);y.r=y.r.filter(q=>!del.includes(q));return del.flatMap(files)},'Ascolti: eliminato «'+r.t+'»')};
  f.onsubmit=e=>{e.preventDefault();const E=f.elements;
   run(cat=>{const q=(cat[id]&&cat[id].r||[]).find(z=>z.id===r.id);if(!q)return[];q.t=E.t.value.trim()||q.t;q.c=E.c.value;let gone=[];
+   if(E.omr&&E.omr.checked){q.omr='attesa';delete q.omr_err}
    if(E.midi_auto){q.midi_auto=E.midi_auto.checked;q.pdf_auto=E.pdf_auto.checked;
     if(E.rifai.checked){q.rifai=true;q.st='elaborazione';delete q.err}
     else{const drop=cat[id].r.filter(z=>z.da===q.id&&((z.k==='midi'&&!q.midi_auto)||(z.k==='pdf'&&!q.pdf_auto)));cat[id].r=cat[id].r.filter(z=>!drop.includes(z));gone=drop.flatMap(files)}}
