@@ -4,7 +4,7 @@ name: Ascolti - elabora i brani caricati
 on:
   push:
     branches: [main]
-    paths: ['ascolti/**/originale.mp3.enc']
+    paths: ['ascolti/**/originale.mp3.enc', 'ascolti/catalog.json']
   workflow_dispatch:
 permissions:
   contents: write
@@ -21,33 +21,46 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: C'e' qualcosa da fare?
+        id: c
+        env:
+          SCUOLA_PW: ${{ secrets.SCUOLA_PW }}
+        run: |
+          pip install -q cryptography
+          echo "fare=$(python tools/elabora.py --controlla)" >> "$GITHUB_OUTPUT"
       - name: Strumenti (ffmpeg, MuseScore)
+        if: steps.c.outputs.fare == 'si'
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq ffmpeg musescore3 > /dev/null
       - uses: actions/cache@v4
+        if: steps.c.outputs.fare == 'si'
         with:
           path: |
             ~/.cache/pip
             ~/.cache/torch
           key: ascolti-v1
-      - name: Separazione tracce (Demucs) e trascrizione (Basic Pitch)
+      - name: Separazione tracce (Demucs) e trascrizione (Transkun, Beat This!)
+        if: steps.c.outputs.fare == 'si'
         run: |
           python -m venv ~/demucs && ~/demucs/bin/pip install -q torch==2.5.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cpu
           ~/demucs/bin/pip install -q demucs==4.0.1 soundfile "numpy<2"
-          python -m venv ~/bp && ~/bp/bin/pip install -q basic-pitch==0.4.0
+          python -m venv ~/tr && ~/tr/bin/pip install -q torch==2.5.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cpu
+          ~/tr/bin/pip install -q transkun "beat_this @ https://github.com/CPJKU/beat_this/archive/main.zip" soundfile soxr music21 mido librosa "numpy<2"
           pip install -q cryptography
       - name: Elabora
+        if: steps.c.outputs.fare == 'si'
         env:
           SCUOLA_PW: ${{ secrets.SCUOLA_PW }}
           DEMUCS_PY: /home/runner/demucs/bin/python
-          BP_PY: /home/runner/bp/bin/python
+          TR_PY: /home/runner/tr/bin/python
           MSCORE: mscore3
         run: |
           test -n "$SCUOLA_PW" || { echo "Manca il segreto SCUOLA_PW"; exit 1; }
           python tools/elabora.py
           python tools/pwa.py
       - name: Pubblica
+        if: steps.c.outputs.fare == 'si'
         run: |
           git config user.name "Scuola bot"
           git config user.email "scuola-bot@users.noreply.github.com"
@@ -56,6 +69,7 @@ jobs:
           git commit -q -m "Ascolti: brani elaborati"
           for i in 1 2 3; do git pull -q --rebase && git push -q && break; sleep 5; done
       - name: Aggiorna il sito
+        if: steps.c.outputs.fare == 'si'
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh api -X POST repos/${{ github.repository }}/pages/builds || true

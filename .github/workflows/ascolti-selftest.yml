@@ -1,4 +1,4 @@
-# Prova automatica della catena di elaborazione (solo sul ramo selftest-ascolti, con password di prova).
+# Prova automatica della trascrizione (solo sul ramo selftest-ascolti, con password di prova).
 name: Ascolti - prova
 on:
   push:
@@ -17,7 +17,7 @@ jobs:
       - name: Strumenti
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg musescore3 > /dev/null
+          sudo apt-get install -y -qq ffmpeg musescore3 fluidsynth fluid-soundfont-gm poppler-utils > /dev/null
       - uses: actions/cache@v4
         with:
           path: |
@@ -26,23 +26,37 @@ jobs:
           key: ascolti-v1
       - name: Installazione
         run: |
-          python -m venv ~/demucs && ~/demucs/bin/pip install -q torch==2.5.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cpu
-          ~/demucs/bin/pip install -q demucs==4.0.1 soundfile "numpy<2"
-          python -m venv ~/bp && ~/bp/bin/pip install -q basic-pitch==0.4.0
-          pip install -q cryptography
+          python -m venv ~/tr && ~/tr/bin/pip install -q torch==2.5.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cpu
+          ~/tr/bin/pip install -q transkun "beat_this @ https://github.com/CPJKU/beat_this/archive/main.zip" soundfile soxr music21 mido librosa "numpy<2"
+          pip install -q cryptography mido
       - name: Prova
         env:
           SCUOLA_PW: prova
-          DEMUCS_PY: /home/runner/demucs/bin/python
-          BP_PY: /home/runner/bp/bin/python
+          TR_PY: /home/runner/tr/bin/python
           MSCORE: mscore3
         run: |
           set -o pipefail
-          W=$(mktemp -d); mkdir -p $W/tools $W/ascolti/solo $W/ascolti/band
-          cp tools/salt.hex $W/tools/
-          # brano di prova: accordi di piano sintetici (solo) e lo stesso con batteria finta (band), 20 secondi
-          ffmpeg -loglevel error -f lavfi -i "sine=f=261.63:d=20" -f lavfi -i "sine=f=329.63:d=20" -f lavfi -i "sine=f=392:d=20" -filter_complex "amix=inputs=3,volume=2,apulsator=hz=2" -ar 44100 -ac 2 $W/solo.mp3
-          ffmpeg -loglevel error -i $W/solo.mp3 -f lavfi -i "anoisesrc=d=20:a=0.3,apulsator=hz=4:width=0.1" -filter_complex amix=inputs=2 -ar 44100 -ac 2 $W/band.mp3
+          W=$(mktemp -d); mkdir -p $W/tools $W/ascolti/valzer $W/ascolti/rifai prova
+          cp tools/salt.hex tools/trascrivi.py $W/tools/
+          # valzer di prova in 3/4 con un po' di rubato, suonato con un pianoforte General MIDI
+          python - <<'PY'
+          import mido, math
+          m = mido.MidiFile(ticks_per_beat=480); t = mido.MidiTrack(); m.tracks.append(t)
+          ev = []; T = 0.0; mel = [76, 74, 72, 74, 76, 76, 76, 74, 74, 74, 76, 79, 79, 77, 76, 74, 72, 74, 76, 76, 76, 74, 74, 76, 74, 72]
+          for i in range(72):
+              dur = 0.55 * (1 + 0.1 * math.sin(i / 6)); j = i % 3
+              if j == 0: ev += [(T, 48 if (i // 3) % 2 == 0 else 43, 85, dur * 0.9)]
+              else: ev += [(T, 52, 60, dur * 0.5), (T, 55, 60, dur * 0.5)]
+              ev += [(T + 0.01, mel[i % len(mel)], 95, dur * 0.9)]; T += dur
+          msgs = []
+          for s, n, v, d in ev: msgs += [(s, mido.Message('note_on', note=n, velocity=v)), (s + d, mido.Message('note_off', note=n, velocity=0))]
+          msgs.sort(key=lambda x: x[0]); last = 0
+          for s, msg in msgs:
+              tick = int(mido.second2tick(s, 480, 500000)); msg.time = tick - last; last = tick; t.append(msg)
+          m.save('/tmp/valzer.mid')
+          PY
+          fluidsynth -ni -F /tmp/valzer.wav -r 44100 /usr/share/sounds/sf2/FluidR3_GM.sf2 /tmp/valzer.mid > /dev/null
+          ffmpeg -loglevel error -y -i /tmp/valzer.wav -b:a 160k /tmp/valzer.mp3
           python - "$W" <<'PY'
           import sys, os, json
           from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
@@ -50,16 +64,30 @@ jobs:
           from cryptography.hazmat.primitives.ciphers.aead import AESGCM
           W = sys.argv[1]; s = bytes.fromhex(open(W + '/tools/salt.hex').read().strip())
           k = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=s, iterations=200000).derive(b'prova')
-          for t in ('solo', 'band'):
-              iv = os.urandom(12); open(f'{W}/ascolti/{t}/originale.mp3.enc', 'wb').write(s + iv + AESGCM(k).encrypt(iv, open(f'{W}/{t}.mp3', 'rb').read(), None))
-          json.dump({'solo': {'t': 'Prova solo', 'tipo': 'solo', 'stato': 'elaborazione', 'trascrivi': True},
-                     'band': {'t': 'Prova band', 'tipo': 'band', 'stato': 'elaborazione', 'trascrivi': True}}, open(W + '/ascolti/catalog.json', 'w'))
+          def enc(src, dst):
+              iv = os.urandom(12); open(dst, 'wb').write(s + iv + AESGCM(k).encrypt(iv, open(src, 'rb').read(), None))
+          enc('/tmp/valzer.mp3', W + '/ascolti/valzer/originale.mp3.enc')
+          enc('/tmp/valzer.mp3', W + '/ascolti/rifai/mix.mp3.enc')
+          json.dump({'valzer': {'t': 'Valzer di prova', 'tipo': 'solo', 'stato': 'elaborazione', 'midi_auto': True, 'pdf_auto': True},
+                     'rifai': {'t': 'Rifai (solo MIDI)', 'tipo': 'solo', 'stato': 'elaborazione', 'rifai': True, 'stems': [], 'dur': 40,
+                               'midi_auto': True, 'pdf_auto': False, 'pdf': {'f': 'auto.pdf.enc', 'auto': True}}}, open(W + '/ascolti/catalog.json', 'w'))
           PY
-          python tools/elabora.py $W 2>&1 | tee prova.log
-          { echo "== catalogo"; cat $W/ascolti/catalog.json; echo; echo "== file"; find $W/ascolti -type f -printf "%p %s\n"; } >> prova.log
+          python tools/elabora.py $W 2>&1 | tee prova/prova.log
+          { echo "== catalogo"; cat $W/ascolti/catalog.json; echo; echo "== file"; find $W/ascolti -type f -printf "%p %s\n"; } >> prova/prova.log
+          # partitura in chiaro per controllarla: decifra e converte in immagini
+          python - "$W" <<'PY'
+          import sys
+          from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+          from cryptography.hazmat.primitives import hashes
+          from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+          W = sys.argv[1]; b = open(W + '/ascolti/valzer/auto.pdf.enc', 'rb').read()
+          k = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=b[:16], iterations=200000).derive(b'prova')
+          open('/tmp/valzer.pdf', 'wb').write(AESGCM(k).decrypt(b[16:28], b[28:], None))
+          PY
+          pdftoppm -png -r 70 /tmp/valzer.pdf prova/pagina
       - name: Rapporto
         if: always()
         run: |
           git config user.name "Scuola bot"; git config user.email "scuola-bot@users.noreply.github.com"
-          mkdir -p prova && mv prova.log prova/ 2>/dev/null || echo "nessun log" > prova/prova.log
-          git add prova && git commit -q -m "Rapporto prova ascolti" && git push -q || true
+          mkdir -p prova; test -f prova/prova.log || echo "nessun log" > prova/prova.log
+          git add prova && git commit -q -m "Rapporto prova trascrizione" && git push -q || true
