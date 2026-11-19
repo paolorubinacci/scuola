@@ -1,4 +1,5 @@
 # Ascolti consigliati: quando dal sito si carica un MP3, separa le tracce, trascrive e pubblica (tools/elabora.py).
+# Le partiture caricate (PDF o foto delle pagine) diventano MIDI con Audiveris (tools/omr.py).
 # Serve il segreto SCUOLA_PW (Settings > Secrets and variables > Actions) con la password della Scuola.
 name: Ascolti - elabora i brani caricati
 on:
@@ -28,26 +29,36 @@ jobs:
         run: |
           pip install -q cryptography
           echo "fare=$(python tools/elabora.py --controlla)" >> "$GITHUB_OUTPUT"
+          echo "audio=$(python tools/elabora.py --controlla-audio)" >> "$GITHUB_OUTPUT"
+          echo "omr=$(python tools/elabora.py --controlla-omr)" >> "$GITHUB_OUTPUT"
       - name: Strumenti (ffmpeg, MuseScore)
         if: steps.c.outputs.fare == 'si'
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq ffmpeg musescore3 > /dev/null
+      - name: Lettura delle partiture (Audiveris)
+        if: steps.c.outputs.omr == 'si'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash tools/audiveris.sh
       - uses: actions/cache@v4
-        if: steps.c.outputs.fare == 'si'
+        if: steps.c.outputs.audio == 'si'
         with:
           path: |
             ~/.cache/pip
             ~/.cache/torch
           key: ascolti-v1
       - name: Separazione tracce (Demucs) e trascrizione (Transkun, Beat This!)
-        if: steps.c.outputs.fare == 'si'
+        if: steps.c.outputs.audio == 'si'
         run: |
           python -m venv ~/demucs && ~/demucs/bin/pip install -q torch==2.5.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cpu
           ~/demucs/bin/pip install -q demucs==4.0.1 soundfile "numpy<2"
           python -m venv ~/tr && ~/tr/bin/pip install -q torch==2.5.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cpu
           ~/tr/bin/pip install -q transkun "beat_this @ https://github.com/CPJKU/beat_this/archive/main.zip" soundfile soxr music21 mido librosa "numpy<2"
           pip install -q cryptography
+      - name: music21 per le partiture
+        if: steps.c.outputs.omr == 'si'
+        run: pip install -q cryptography music21 pillow
       - name: Elabora
         if: steps.c.outputs.fare == 'si'
         env:
