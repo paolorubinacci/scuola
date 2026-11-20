@@ -67,12 +67,7 @@
     "t": "How To Play Dr, John's `DOROTHY´, Blues Gospel Piano · Christian Fuchs",
     "u": "https://youtu.be/fIIpCD00rsg?is=obZaQzUEmw6fnoJh",
     "st": "pronto"
-   }
-  ],
-  "agg": "2026-11-19"
- },
- "trascrizione": {
-  "r": [
+   },
    {
     "id": "rmwo5a8y10",
     "k": "img",
@@ -106,10 +101,6 @@
     }
    }
   ],
-  "t": "Trascrizione",
-  "a": "",
-  "al": "",
-  "anno": "",
   "agg": "2026-11-19"
  },
  "streetparade": {
@@ -135,9 +126,12 @@
    }
   ],
   "t": "Street Parade",
-  "a": "Early King",
+  "a": "Earl King",
   "al": "",
   "anno": "",
-  "agg": "2026-11-20"
+  "agg": "2026-11-20",
+  "lez": [
+   2
+  ]
  }
 }

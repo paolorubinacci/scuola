@@ -14,7 +14,7 @@ Le risorse con st "elaborazione" vengono preparate qui; i file caricati sono in 
          lettura ottica (tools/omr.py: Audiveris + music21) -> risorsa MIDI "<id>-omr" da suonare sulla tastiera.
 Tutto resta cifrato con la password della Scuola; i file in chiaro non vengono MAI scritti nel repository (e' pubblico).
 Comandi esterni: Audiveris (AUDIVERIS) e python con music21 (OMR_PY) per le partiture, ffmpeg, python con demucs (DEMUCS_PY), python con transkun/beat_this (TR_PY), mscore3 (MSCORE)."""
-import sys, os, json, shutil, subprocess, tempfile, traceback, datetime
+import sys, os, re, json, shutil, subprocess, tempfile, traceback, datetime
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
@@ -202,6 +202,46 @@ def partitura_midi(bid, x, r, tmp):
               'da': r['id'], 'omr': True, 'st': 'pronto', 'info': info})
 
 
+def volume(f):
+    o = subprocess.run(['ffmpeg', '-hide_banner', '-i', f, '-af', 'volumedetect', '-f', 'null', '-'], capture_output=True, text=True).stderr
+    m = re.search(r'mean_volume:\s*(-?[\d.]+) dB', o)
+    return float(m.group(1)) if m else None
+
+
+def senza_categoria(cat):
+    """brani con una registrazione pronta ma senza libreria (Piano New Orleans / Stile New Orleans) ne' suggerimento"""
+    return [bid for bid, x in cat.items() if not x.get('cat') and not x.get('cat_sugg')
+            and any(r.get('k') == 'audio' and r.get('st') == 'pronto' for r in x.get('r', []))]
+
+
+def suggerisci_categorie(cat):
+    """piano solo -> Piano New Orleans; con piu' strumenti: guarda quanto pesa la traccia del piano rispetto al brano intero"""
+    for bid in senza_categoria(cat):
+        x = cat[bid]
+        r = next(r for r in x['r'] if r.get('k') == 'audio' and r.get('st') == 'pronto')
+        if r.get('tipo') != 'band':
+            x['cat_sugg'] = 'piano'
+            continue
+        if 'piano' not in (r.get('stems') or []):
+            x['cat_sugg'] = 'stile'
+            continue
+        tmp = tempfile.mkdtemp(prefix='cat-')
+        try:
+            d = os.path.join(ROOT, 'ascolti', bid, r['id'])
+            v = {}
+            for k in ('mix', 'piano'):
+                f = os.path.join(tmp, k + '.mp3')
+                open(f, 'wb').write(dec(open(os.path.join(d, k + '.mp3.enc'), 'rb').read()))
+                v[k] = volume(f)
+            diff = v['piano'] - v['mix'] if None not in v.values() else -99
+            x['cat_sugg'] = 'piano' if diff > -10 else 'stile'
+            print('categoria', bid, x['cat_sugg'], 'piano/brano dB:', round(diff, 1), flush=True)
+        except Exception:
+            traceback.print_exc()
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+
 def da_fare(cat, quale=None):
     out = []
     for bid, x in cat.items():
@@ -252,12 +292,16 @@ def main():
             shutil.rmtree(tmp, ignore_errors=True)
         x['agg'] = datetime.date.today().isoformat()
         json.dump(cat, open(CAT, 'w'), ensure_ascii=False, indent=1)
+    if senza_categoria(cat):
+        suggerisci_categorie(cat)
+        json.dump(cat, open(CAT, 'w'), ensure_ascii=False, indent=1)
     return todo
 
 
 if __name__ == '__main__':
     if '--controlla' in sys.argv:  # per GitHub Actions: c'e' qualcosa da fare?
-        print('si' if da_fare(json.load(open(CAT))) else 'no')
+        c = json.load(open(CAT))
+        print('si' if da_fare(c) or senza_categoria(c) else 'no')
     elif '--controlla-audio' in sys.argv or '--controlla-omr' in sys.argv:  # quali strumenti installare
         print('si' if da_fare(json.load(open(CAT)), 'audio' if '--controlla-audio' in sys.argv else 'omr') else 'no')
     else:
