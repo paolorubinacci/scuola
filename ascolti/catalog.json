@@ -111,5 +111,23 @@
   "al": "",
   "anno": "",
   "agg": "2026-11-19"
+ },
+ "streetparade": {
+  "r": [
+   {
+    "id": "rmwobjf9i0",
+    "k": "audio",
+    "c": "Registrazione",
+    "t": "Early King - Street Parade",
+    "st": "elaborazione",
+    "tipo": "band",
+    "midi_auto": false,
+    "pdf_auto": false
+   }
+  ],
+  "t": "Street Parade",
+  "a": "Early King",
+  "al": "",
+  "anno": ""
  }
 }
