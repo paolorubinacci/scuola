@@ -648,7 +648,15 @@ function iosAudio(){if(iosUnlocked)return;iosUnlocked=true;
  try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
  try{const a=IOSA=document.createElement('audio');a.setAttribute('playsinline','');a.setAttribute('x-webkit-airplay','deny');a.preload='auto';a.loop=true;
   a.src='data:audio/wav;base64,UklGRmQGAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YUAGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';a.volume=.01;const pr=a.play();if(pr)pr.catch(()=>{iosUnlocked=false})}catch(e){}}
-function ac(){iosAudio();if(!AC){AC=new (window.AudioContext||window.webkitAudioContext)();MASTER=AC.createGain();MASTER.gain.value=.9;MASTER.connect(AC.destination);
+/* iPhone/iPad: dopo il blocco dello schermo o un'altra app il contesto audio può restare «acceso» ma muto.
+   Se è stato in secondo piano e non suona niente, all'avvio del metronomo (o altro) se ne crea uno nuovo. */
+let acStale=false;
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&AC&&!(M.playing||R.playing||kbActive||PLAY.size))acStale=true});
+window.addEventListener('pageshow',e=>{if(e.persisted)acStale=true});
+function freshAC(){if(!AC)return;const idle=!(M.playing||R.playing||kbActive||PLAY.size);
+ if(idle&&(acStale||AC.state!=='running')){try{AC.close()}catch(e){}AC=null;BUSN=null;
+  try{if(IOSA){IOSA.pause();IOSA.currentTime=0}}catch(e){}}acStale=false}
+function ac(){iosAudio();freshAC();if(!AC){AC=new (window.AudioContext||window.webkitAudioContext)();MASTER=AC.createGain();MASTER.gain.value=.9;MASTER.connect(AC.destination);
  const n=AC.createBuffer(1,AC.sampleRate*.3,AC.sampleRate),d=n.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;NOISE=n}
  if(AC.state!=='running')AC.resume().catch(()=>{});
  if(!RECORDING){try{if(navigator.audioSession&&navigator.audioSession.type!=='playback')navigator.audioSession.type='playback'}catch(e){}if(IOSA&&IOSA.paused)IOSA.play().catch(()=>{})}
@@ -1286,13 +1294,13 @@ async function stemPlayer(el,id,info){
   await Promise.all(info.stems.map(async k=>{const u=await mediaURL(id+'/'+k+'.mp3.enc','audio/mpeg');const ab=await (await fetch(u)).arrayBuffer();
    bufs[k]=await new Promise((ok,ko)=>{const r=dc.decodeAudioData(ab,ok,ko);if(r&&r.then)r.then(ok,ko)});msg(`Preparo le tracce separate… ${++n}/${info.stems.length}`)}));
   if(st.dead)return;E.bufs=bufs;dur=Math.max(...Object.values(bufs).map(b=>b.duration));
-  info.stems.forEach(k=>{const g=AC.createGain();g.connect(MASTER);E.gains[k]=g});applyGains(true);msg('')})().catch(e=>{E.loading=null;msg('Non riesco a preparare le tracce: '+e.message);throw e})}
+  info.stems.forEach(k=>{const g=AC.createGain();g.connect(MASTER);E.gains[k]=g});E.ctx=AC;applyGains(true);msg('')})().catch(e=>{E.loading=null;msg('Non riesco a preparare le tracce: '+e.message);throw e})}
  function applyGains(now){info.stems.forEach(k=>{const g=E.gains[k];if(!g)return;const v=audible(k)?st.vol[k]:0;
   if(now)g.gain.value=v;else g.gain.setTargetAtTime(v,AC.currentTime,.015)})}
  function wPos(){if(!E.on)return E.off;let p=E.off+(AC.currentTime-E.t0);
   if(st.loop&&st.A!=null&&st.B!=null&&E.off<st.B&&p>=st.B)p=st.A+((p-st.A)%(st.B-st.A));return p}
  function wStop(){const p=wPos();E.srcs.forEach(s=>{try{s.onended=null;s.stop()}catch(e){}try{s.disconnect()}catch(e){}});E.srcs=[];E.on=false;E.off=p}
- function wStart(off){wStop();off=Math.max(0,Math.min(dur-.02,off));const when=AC.currentTime+.06,lp=st.loop&&st.A!=null&&st.B!=null&&off<st.B;
+ function wStart(off){wStop();if(E.ctx&&E.ctx!==AC){info.stems.forEach(k=>{const g=AC.createGain();g.connect(MASTER);E.gains[k]=g});applyGains(true)}E.ctx=AC;off=Math.max(0,Math.min(dur-.02,off));const when=AC.currentTime+.06,lp=st.loop&&st.A!=null&&st.B!=null&&off<st.B;
   info.stems.forEach(k=>{const s=AC.createBufferSource();s.buffer=E.bufs[k];if(lp){s.loop=true;s.loopStart=st.A;s.loopEnd=st.B}s.connect(E.gains[k]);s.start(when,off);E.srcs.push(s)});
   E.srcs[0].onended=()=>{if(E.on&&!st.loop){E.on=false;E.off=0;E.srcs=[];ui(false);pos=0;upd(0)}};E.t0=when;E.off=off;E.on=true}
  /* --- WAV del mix delle tracce scelte (per la velocità ridotta) --- */
@@ -1463,7 +1471,9 @@ function tempiTxt(t){const c=tempiCompact(t);if(!c.length)return'';const by={};c
  return Object.entries(by).map(([k,l])=>`${k}: ${l.map(x=>x.bpm+' bpm'+(x.sec>=60?' ('+Math.round(x.sec/60)+' min)':'')).join(' → ')}`).join(' · ')}
 function tempiMax(t){return Math.max(0,...tempiCompact(t).map(x=>x.bpm))||null}
 function timerFinish(){timerPause();dStore();const tp=tempiCompact(D.tempi);sessionModal({ms:tNow(),what:D.what||lessonWhat()||(tp.length?[...new Set(tp.map(x=>x.s))].join(' + '):''),lez:D.lez||(LESSON&&LESSON.l.n),tempi:tp,fromTimer:true})}
-function pracChanged(){drawPrac();drawMini();live();if(curTab==='diary')paneDiary();updStreak()}
+let pracWL=null;function pracWake(){try{if(D.start&&!pracWL&&navigator.wakeLock&&!document.hidden)navigator.wakeLock.request('screen').then(w=>{pracWL=w;w.addEventListener('release',()=>{pracWL=null})}).catch(()=>{});else if(!D.start&&pracWL){pracWL.release();pracWL=null}}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)pracWake()});
+function pracChanged(){pracWake();drawPrac();drawMini();live();if(curTab==='diary')paneDiary();updStreak()}
 setInterval(()=>{if(!D.start)return;tempiTick();const t=hms(tNow());document.querySelectorAll('[data-tnow]').forEach(e=>e.textContent=t);const m=$('#miniT');if(m)m.textContent=t;if(!curTab)live()},1000);
 function lessonWhat(){return LESSON?`Lezione ${LESSON.l.n} · ${LESSON.l.title}`:''}
 function drawPrac(){const run=!!D.start,has=tNow()>0;
