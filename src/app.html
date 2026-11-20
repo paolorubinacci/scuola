@@ -1126,11 +1126,16 @@ function ascForm(c,id,x,cat){const isNew=!id;
 let ASCP=null;
 function ascStop(){if(ASCP){ASCP.destroy();ASCP=null}}
 function fmt(s){s=Math.max(0,s||0);return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0')}
+/* Lettore con tracce separate.
+   · «Originale»: un solo elemento <audio> (mix.mp3), anche rallentato senza cambiare l'intonazione.
+   · «Tracce separate» al 100%: Web Audio. Tutte le tracce sono decodificate e partono nello stesso istante, sincronizzate al campione:
+     niente correzioni continue, niente salti; il loop A-B è quello nativo, senza stacchi. Accendere/spegnere una traccia è istantaneo.
+   · «Tracce separate» rallentate: le tracce scelte vengono mixate in un WAV e suonate da un solo <audio> che rallenta senza cambiare l'intonazione;
+     se cambi le tracce mentre è rallentato, il mix si rifà in un attimo e riparte dallo stesso punto. */
 async function stemPlayer(el,id,info){
- const st={mode:'mix',on:{},solo:null,vol:{},rate:1,A:null,B:null,loop:false,ready:false,els:{},gains:{},timer:null,dead:false};
+ const st={mode:'mix',on:{},solo:null,vol:{},rate:1,A:null,B:null,loop:false,dead:false,timer:null};
  const prev=LS.get('asc-'+id,{});info.stems.forEach(k=>{st.on[k]=prev.on?prev.on[k]!==false:true;st.vol[k]=prev.vol?.[k]??1});
  const save=()=>LS.set('asc-'+id,{on:st.on,vol:st.vol});
- const keys=['mix',...info.stems];
  el.innerHTML=`<div class="stp"><div class="tr"><button class="pp" data-pp>▶</button><input type="range" data-seek min="0" max="${info.dur}" step="0.1" value="0"><span class="time" data-time>0:00 / ${fmt(info.dur)}</span></div>
  <div class="ab" data-ab></div>
  ${info.stems.length?'<div class="modes"><button data-mode="mix">Originale</button><button data-mode="stems">Tracce separate</button></div>':''}
@@ -1139,11 +1144,67 @@ async function stemPlayer(el,id,info){
  <span class="seg">${[.5,.7,.85,1].map(r=>`<button data-rate="${r}" class="${r===1?'on':''}">${r===1?'100%':Math.round(r*100)+'%'}</button>`).join('')}</span></div>
  <div class="note" data-msg></div></div>`;
  const q=s=>el.querySelector(s),msg=t=>q('[data-msg]').textContent=t;
- ASCP={destroy(){st.dead=true;clearInterval(st.timer);Object.values(st.els).forEach(a=>{try{a.pause();a.removeAttribute('src');a.load()}catch(e){}})}};
- const master=()=>st.mode==='mix'?st.els.mix:st.els[info.stems[0]];
- const active=()=>st.mode==='mix'?['mix']:info.stems;
  const audible=k=>st.solo?k===st.solo:st.on[k];
- function applyGains(){info.stems.forEach(k=>{const v=audible(k)?st.vol[k]:0;if(st.gains[k])st.gains[k].gain.value=v;else if(st.els[k])st.els[k].muted=v===0})}
+ let dur=info.dur||0;
+ /* --- motore 1: elemento audio (originale, o mix delle tracce rallentato) --- */
+ const mixEl=new Audio(),slowEl=new Audio();
+ [mixEl,slowEl].forEach(a=>{a.preload='auto';a.setAttribute('playsinline','');a.preservesPitch=true;a.webkitPreservesPitch=true});
+ let mixReady=null,slowKey=null,slowURL=null;
+ const loadMix=()=>mixReady=mixReady||mediaURL(id+'/mix.mp3.enc','audio/mpeg').then(u=>{mixEl.src=u})
+ /* --- motore 2: Web Audio per le tracce al 100% --- */
+ const E={bufs:null,loading:null,srcs:[],gains:{},t0:0,off:0,on:false};
+ function loadStems(){return E.loading=E.loading||(async()=>{ac();msg('Preparo le tracce separate…');
+  let dc;try{dc=new (window.OfflineAudioContext||window.webkitOfflineAudioContext)(2,1,32000)}catch(e){dc=AC}   // 32 kHz: stessa qualità percepita, meno memoria
+  const bufs={};let n=0;
+  await Promise.all(info.stems.map(async k=>{const u=await mediaURL(id+'/'+k+'.mp3.enc','audio/mpeg');const ab=await (await fetch(u)).arrayBuffer();
+   bufs[k]=await new Promise((ok,ko)=>{const r=dc.decodeAudioData(ab,ok,ko);if(r&&r.then)r.then(ok,ko)});msg(`Preparo le tracce separate… ${++n}/${info.stems.length}`)}));
+  if(st.dead)return;E.bufs=bufs;dur=Math.max(...Object.values(bufs).map(b=>b.duration));
+  info.stems.forEach(k=>{const g=AC.createGain();g.connect(MASTER);E.gains[k]=g});applyGains(true);msg('')})().catch(e=>{E.loading=null;msg('Non riesco a preparare le tracce: '+e.message);throw e})}
+ function applyGains(now){info.stems.forEach(k=>{const g=E.gains[k];if(!g)return;const v=audible(k)?st.vol[k]:0;
+  if(now)g.gain.value=v;else g.gain.setTargetAtTime(v,AC.currentTime,.015)})}
+ function wPos(){if(!E.on)return E.off;let p=E.off+(AC.currentTime-E.t0);
+  if(st.loop&&st.A!=null&&st.B!=null&&E.off<st.B&&p>=st.B)p=st.A+((p-st.A)%(st.B-st.A));return p}
+ function wStop(){const p=wPos();E.srcs.forEach(s=>{try{s.onended=null;s.stop()}catch(e){}try{s.disconnect()}catch(e){}});E.srcs=[];E.on=false;E.off=p}
+ function wStart(off){wStop();off=Math.max(0,Math.min(dur-.02,off));const when=AC.currentTime+.06,lp=st.loop&&st.A!=null&&st.B!=null&&off<st.B;
+  info.stems.forEach(k=>{const s=AC.createBufferSource();s.buffer=E.bufs[k];if(lp){s.loop=true;s.loopStart=st.A;s.loopEnd=st.B}s.connect(E.gains[k]);s.start(when,off);E.srcs.push(s)});
+  E.srcs[0].onended=()=>{if(E.on&&!st.loop){E.on=false;E.off=0;E.srcs=[];ui(false);pos=0;upd(0)}};E.t0=when;E.off=off;E.on=true}
+ /* --- WAV del mix delle tracce scelte (per la velocità ridotta) --- */
+ function mixKey(){return info.stems.map(k=>audible(k)?st.vol[k]:0).join(',')}
+ function makeSlow(){const key=mixKey();if(key===slowKey&&slowURL)return slowURL;
+  const b0=E.bufs[info.stems[0]],n=Math.max(...Object.values(E.bufs).map(b=>b.length)),sr=b0.sampleRate,L=new Float32Array(n),R=new Float32Array(n);
+  info.stems.forEach(k=>{const g=audible(k)?st.vol[k]:0;if(!g)return;const b=E.bufs[k],c0=b.getChannelData(0),c1=b.numberOfChannels>1?b.getChannelData(1):c0;
+   for(let i=0;i<b.length;i++){L[i]+=c0[i]*g;R[i]+=c1[i]*g}});
+  const dv=new DataView(new ArrayBuffer(44+n*4)),w=(o,t)=>{for(let i=0;i<t.length;i++)dv.setUint8(o+i,t.charCodeAt(i))};
+  w(0,'RIFF');dv.setUint32(4,36+n*4,true);w(8,'WAVE');w(12,'fmt ');dv.setUint32(16,16,true);dv.setUint16(20,1,true);dv.setUint16(22,2,true);
+  dv.setUint32(24,sr,true);dv.setUint32(28,sr*4,true);dv.setUint16(32,4,true);dv.setUint16(34,16,true);w(36,'data');dv.setUint32(40,n*4,true);
+  for(let i=0,o=44;i<n;i++,o+=4){dv.setInt16(o,Math.max(-1,Math.min(1,L[i]))*32767,true);dv.setInt16(o+2,Math.max(-1,Math.min(1,R[i]))*32767,true)}
+  if(slowURL)URL.revokeObjectURL(slowURL);slowURL=URL.createObjectURL(new Blob([dv],{type:'audio/wav'}));slowKey=key;return slowURL}
+ /* --- quale motore suona adesso --- */
+ const eng=()=>st.mode==='mix'?'mix':st.rate===1?'web':'slow';
+ let cur=null,pos=0;   // cur: motore che sta suonando (null = fermo)
+ const el2=k=>k==='mix'?mixEl:slowEl;
+ function time(){return cur==='web'?wPos():cur?el2(cur).currentTime:pos}
+ function ui(on){q('[data-pp]').textContent=on?'❚❚':'▶';clearInterval(st.timer);if(on)st.timer=setInterval(tick,60);else{cur=null}}
+ function stopAll(){pos=time();if(cur==='web')wStop();mixEl.pause();slowEl.pause();ui(false)}
+ async function startAt(t){if(kbActive)kbActive();ac();if(AC.state!=='running'){try{await AC.resume()}catch(e){}}
+  const k=eng();pos=t;
+  if(k==='mix'){await loadMix();if(st.dead)return;mixEl.playbackRate=st.rate;try{mixEl.currentTime=t}catch(e){}await mixEl.play().catch(()=>{});cur='mix'}
+  else{await loadStems();if(st.dead||!E.bufs)return;
+   if(k==='web'){wStart(t);cur='web'}
+   else{msg('Preparo il mix rallentato…');await new Promise(r=>setTimeout(r,20));const u=makeSlow();msg('');if(slowEl.src!==u){slowEl.src=u;await new Promise(r=>{slowEl.onloadedmetadata=r;setTimeout(r,1500)})}
+    slowEl.playbackRate=st.rate;slowEl.preservesPitch=true;slowEl.webkitPreservesPitch=true;try{slowEl.currentTime=t}catch(e){}await slowEl.play().catch(()=>{});cur='slow'}}
+  ui(true)}
+ async function restart(){if(!cur){return}const t=time();stopAll();await startAt(t)}
+ function seek(t){t=Math.max(0,Math.min(dur-.05,t));if(!cur){pos=t;upd(t);return}
+  if(cur==='web')wStart(t);else try{el2(cur).currentTime=t}catch(e){}}
+ function upd(t){q('[data-seek]').max=dur;q('[data-seek]').value=t;q('[data-time]').textContent=fmt(t)+' / '+fmt(dur)}
+ function tick(){if(st.dead)return;let t=time();
+  if(cur&&cur!=='web'){const a=el2(cur);if(st.loop&&st.A!=null&&st.B!=null&&t>=st.B){a.currentTime=st.A;t=st.A}if(a.ended){stopAll();pos=0;t=0}}
+  upd(t)}
+ ASCP={destroy(){st.dead=true;clearInterval(st.timer);try{wStop()}catch(e){}[mixEl,slowEl].forEach(a=>{try{a.pause();a.removeAttribute('src');a.load()}catch(e){}});if(slowURL)URL.revokeObjectURL(slowURL);
+  Object.values(E.gains).forEach(g=>{try{g.disconnect()}catch(e){}})}};
+ /* le tracce cambiano: al 100% subito (guadagni); rallentato rifaccio il mix e riparto dallo stesso punto */
+ let reT=null;function tracksChanged(){applyGains();if(cur==='slow'){clearTimeout(reT);reT=setTimeout(restart,250)}}
  function drawStems(){
   el.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('on',b.dataset.mode===st.mode));
   q('[data-stems]').innerHTML=!info.stems.length?'':st.mode==='mix'?'<div class="note">Il brano com\'è. Passa a «Tracce separate» per isolare gli strumenti.</div>':
@@ -1151,41 +1212,27 @@ async function stemPlayer(el,id,info){
   <div class="stems">${info.stems.map(k=>`<div class="stem ${audible(k)?'':'off'}"><button class="nm" data-tog="${k}"><i></i>${STN[k]}</button><input type="range" data-vol="${k}" min="0" max="1.5" step="0.05" value="${st.vol[k]}"><button class="so ${st.solo===k?'on':''}" data-solo="${k}">S</button></div>`).join('')}</div>
   ${info.stems.includes('piano')?'':'<div class="note">In questo brano il piano non è separato: lo trovi dentro «Altro».</div>'}
   <div class="note">Separazione automatica (Demucs): nelle registrazioni vecchie gli strumenti si sentono un po\' anche nelle altre tracce.</div>`;
-  el.querySelectorAll('[data-tog]').forEach(b=>b.onclick=()=>{const k=b.dataset.tog;if(st.solo){st.solo=null}else st.on[k]=!st.on[k];save();applyGains();drawStems()});
-  el.querySelectorAll('[data-solo]').forEach(b=>b.onclick=()=>{const k=b.dataset.solo;st.solo=st.solo===k?null:k;applyGains();drawStems()});
-  el.querySelectorAll('[data-vol]').forEach(b=>b.oninput=()=>{st.vol[b.dataset.vol]=+b.value;save();applyGains()});
+  el.querySelectorAll('[data-tog]').forEach(b=>b.onclick=()=>{const k=b.dataset.tog;if(st.solo){st.solo=null}else st.on[k]=!st.on[k];save();tracksChanged();drawStems()});
+  el.querySelectorAll('[data-solo]').forEach(b=>b.onclick=()=>{const k=b.dataset.solo;st.solo=st.solo===k?null:k;tracksChanged();drawStems()});
+  el.querySelectorAll('[data-vol]').forEach(b=>b.oninput=()=>{st.vol[b.dataset.vol]=+b.value;save();tracksChanged()});
   el.querySelectorAll('[data-pre]').forEach(b=>b.onclick=()=>{const p=b.dataset.pre;st.solo=null;
-   info.stems.forEach(k=>st.on[k]=p==='all'?true:p==='p'?k==='piano':p==='np'?k!=='piano':p==='bd'?(k==='bass'||k==='drums'):k!=='vocals');save();applyGains();drawStems()})}
- async function load(){if(st.ready)return;ac();msg('Carico le tracce…');
-  const urls=await Promise.all(keys.map(k=>mediaURL(id+'/'+k+'.mp3.enc','audio/mpeg')));if(st.dead)return;
-  keys.forEach((k,i)=>{const a=new Audio();a.preload='auto';a.setAttribute('playsinline','');a.src=urls[i];a.preservesPitch=true;a.webkitPreservesPitch=true;a.mozPreservesPitch=true;
-   try{const s=AC.createMediaElementSource(a),g=AC.createGain();s.connect(g);g.connect(MASTER);if(k!=='mix')st.gains[k]=g}catch(e){}st.els[k]=a});
-  st.ready=true;applyGains();msg('')}
- function setRate(){Object.values(st.els).forEach(a=>{a.playbackRate=st.rate})}
- function seek(t){t=Math.max(0,Math.min(info.dur-.05,t));Object.values(st.els).forEach(a=>{try{a.currentTime=t}catch(e){}})}
- function playing(){const m=master();return m&&!m.paused}
- function pauseAll(){Object.values(st.els).forEach(a=>a.pause());clearInterval(st.timer);q('[data-pp]').textContent='▶'}
- async function play(){if(kbActive)kbActive();await load();if(st.dead)return;if(AC.state!=='running'){try{await AC.resume()}catch(e){}}
-  const t=master().currentTime;keys.forEach(k=>{if(!active().includes(k))st.els[k].pause()});seek(t);setRate();
-  await Promise.all(active().map(k=>st.els[k].play().catch(()=>{})));q('[data-pp]').textContent='❚❚';
-  clearInterval(st.timer);st.timer=setInterval(tick,200)}
- function tick(){const m=master();if(!m)return;let t=m.currentTime;
-  if(st.loop&&st.A!=null&&st.B!=null&&t>=st.B){seek(st.A);t=st.A}
-  if(st.mode==='stems')info.stems.slice(1).forEach(k=>{const a=st.els[k];if(Math.abs(a.currentTime-t)>.06)a.currentTime=t});
-  if(m.ended){pauseAll();seek(0);t=0}
-  q('[data-seek]').value=t;q('[data-time]').textContent=fmt(t)+' / '+fmt(info.dur)}
- function drawAB(){const ab=q('[data-ab]');ab.innerHTML=st.A!=null&&st.B!=null?`<i style="left:${st.A/info.dur*100}%;width:${(st.B-st.A)/info.dur*100}%"></i>`:'';
+   info.stems.forEach(k=>st.on[k]=p==='all'?true:p==='p'?k==='piano':p==='np'?k!=='piano':p==='bd'?(k==='bass'||k==='drums'):k!=='vocals');save();tracksChanged();drawStems()})}
+
+ function drawAB(){const ab=q('[data-ab]');ab.innerHTML=st.A!=null&&st.B!=null?`<i style="left:${st.A/dur*100}%;width:${(st.B-st.A)/dur*100}%"></i>`:'';
   q('[data-a]').classList.toggle('on',st.A!=null);q('[data-b]').classList.toggle('on',st.B!=null);q('[data-loop]').classList.toggle('on',st.loop)}
- const now=()=>st.ready?master().currentTime:+q('[data-seek]').value;
- q('[data-pp]').onclick=()=>playing()?pauseAll():play();
- q('[data-seek]').oninput=e=>{const v=+e.target.value;q('[data-time]').textContent=fmt(v)+' / '+fmt(info.dur);if(st.ready)seek(v)};
- q('[data-back]').onclick=()=>{if(st.ready)seek(now()-5)};
- q('[data-a]').onclick=()=>{st.A=now();if(st.B!=null&&st.B<=st.A)st.B=null;drawAB()};
- q('[data-b]').onclick=()=>{const t=now();if(st.A!=null&&t>st.A){st.B=t;st.loop=true}drawAB()};
- q('[data-loop]').onclick=()=>{if(st.A!=null&&st.B!=null)st.loop=!st.loop;else{st.A=null;st.B=null;st.loop=false}drawAB()};
- el.querySelectorAll('[data-rate]').forEach(b=>b.onclick=()=>{st.rate=+b.dataset.rate;setRate();el.querySelectorAll('[data-rate]').forEach(y=>y.classList.toggle('on',y===b))});
- el.querySelectorAll('[data-mode]').forEach(b=>b.onclick=async()=>{const was=playing(),t=now();st.mode=b.dataset.mode;drawStems();if(st.ready){pauseAll();seek(t);if(was)play()}});
- drawStems();drawAB()}
+ function loopChanged(){drawAB();if(cur==='web'){const t=time();wStart(st.loop&&st.A!=null&&st.B!=null&&(t<st.A||t>=st.B)?st.A:t)}}
+ q('[data-pp]').onclick=()=>cur?stopAll():startAt(pos>=dur-.1?0:pos);
+ q('[data-seek]').oninput=e=>{const v=+e.target.value;q('[data-time]').textContent=fmt(v)+' / '+fmt(dur);if(cur!=='web')seek(v)};
+ q('[data-seek]').onchange=e=>{if(cur==='web')seek(+e.target.value)};
+ q('[data-back]').onclick=()=>seek(time()-5);
+ q('[data-a]').onclick=()=>{st.A=time();if(st.B!=null&&st.B<=st.A){st.B=null;st.loop=false}loopChanged()};
+ q('[data-b]').onclick=()=>{const t=time();if(st.A!=null&&t>st.A+.2){st.B=t;st.loop=true}loopChanged()};
+ q('[data-loop]').onclick=()=>{if(st.A!=null&&st.B!=null)st.loop=!st.loop;else{st.A=null;st.B=null;st.loop=false}loopChanged()};
+ el.querySelectorAll('[data-rate]').forEach(b=>b.onclick=async()=>{const was=eng();st.rate=+b.dataset.rate;el.querySelectorAll('[data-rate]').forEach(y=>y.classList.toggle('on',y===b));
+  if(cur&&eng()!==was)return restart();if(cur==='mix'||cur==='slow')el2(cur).playbackRate=st.rate});
+ el.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{if(st.mode===b.dataset.mode)return;st.mode=b.dataset.mode;drawStems();
+  if(st.mode==='stems')loadStems().catch(()=>{});restart()});
+ drawStems();drawAB();upd(0)}
 
 /* ================= practice diary ================= */
 const D=Object.assign({start:null,acc:0},LS.get('timer',{}));let dInt=null;
