@@ -1576,6 +1576,18 @@ function sessionModal(o){const sh=document.createElement('div');sh.className='mo
    toast(blob||v.note?'✓ Salvato nel diario. Trascrizione e riassunto arrivano tra qualche minuto.':'✓ Salvato nel diario');close();afterSave()}
   catch(err){LS.set('dqueue',LS.get('dqueue',[]).concat([{v}]));btn.disabled=false;say(ghErr(err)+' La sessione resta salvata sul dispositivo.')}};
  setTimeout(()=>{const i=f.elements[o.ms?'what':'min'];if(i&&innerWidth>700)i.focus()},100)}
+/* collega GitHub su questo dispositivo e invia le sessioni rimaste solo qui */
+function syncModal(){const sh=document.createElement('div');sh.className='modal';const n=LS.get('dqueue',[]).length;
+ sh.innerHTML=`<form class="af box sess"><div class="lbl">Sincronizza il diario</div>
+ <p class="note">${n?`Su questo dispositivo ci sono <b>${n} ${n===1?'sessione':'sessioni'}</b> non ancora inviate.`:'Nessuna sessione in attesa su questo dispositivo.'} Con la chiave GitHub le invio nel diario: da lì si vedono anche dagli altri dispositivi e i messaggi vocali vengono trascritti.</p>
+ ${tokHTML().replace('<details class="ghk" ','<details class="ghk" open ')}
+ <button class="go" type="submit">Salva la chiave e sincronizza</button><div class="row2"><button type="button" class="btn sm" data-x>Chiudi</button></div><div class="note" data-m></div></form>`;
+ document.body.appendChild(sh);const f=sh.querySelector('form'),say=m=>sh.querySelector('[data-m]').textContent=m,close=()=>sh.remove();
+ sh.onclick=e=>{if(e.target===sh)close()};sh.querySelector('[data-x]').onclick=close;
+ f.onsubmit=async e=>{e.preventDefault();const btn=f.querySelector('.go');btn.disabled=true;
+  try{const t=await needTok(f,say);if(!t){btn.disabled=false;return}const k=await syncPending(say);await loadDiario(true).catch(()=>{});
+   toast(k?`✓ ${k} ${k===1?'sessione inviata':'sessioni inviate'} nel diario`:'✓ Chiave salvata: il diario è collegato');close();afterSave()}
+  catch(err){btn.disabled=false;say(ghErr(err))}}}
 function afterSave(){updStreak();drawPrac();if(curTab==='diary')paneDiary();if(location.hash==='#diario')renderDiario();else if(!location.hash)renderHome()}
 
 /* ---- pannello Strumenti › Diario: timer + ultime sessioni ---- */
@@ -1607,7 +1619,7 @@ async function renderDiario(){theme('');$('#crumb').textContent='Diario di prati
   $('#app').innerHTML=`<section class="chero"><div class="wrap"><div class="eyebrow">Scuola</div><h1>Diario di pratica</h1><p>Le tue sessioni, le note e i messaggi vocali, settimana per settimana</p></div></section><div class="wrap">
   <div class="stats"><div class="stat"><b>${weekMin()}<small style="font-size:13px;font-weight:600"> min</small></b><span>questa settimana</span></div><div class="stat"><b>${streakDays()} 🔥</b><span>giorni di fila</span></div><div class="stat"><b>${todayMin()}<small style="font-size:13px;font-weight:600"> min</small></b><span>oggi</span></div></div>
   <div class="prac" id="homePrac"></div>
-  ${pending?`<div class="note">${pending} ${pending===1?'sessione salvata':'sessioni salvate'} solo su questo dispositivo: le invio al prossimo salvataggio con la chiave GitHub.</div>`:''}
+  ${pending||!ghTok()?`<div class="note">${pending?`<b>${pending} ${pending===1?'sessione salvata':'sessioni salvate'} solo su questo dispositivo.</b> `:''}${ghTok()?'':'Questo dispositivo non è ancora collegato a GitHub. '}<button class="btn sm" id="dSync" style="margin-top:8px">🔑 ${ghTok()?'Sincronizza adesso':'Collega GitHub e sincronizza'}</button></div>`:''}
   ${Object.keys(weeks).sort().reverse().map(w=>{const l=weeks[w],tot=Math.round(l.reduce((a,v)=>a+(v.ms||0),0)/60000),rc=Dg.sett[w];
    return`<div class="dweek">Settimana ${wtxt(w)}<small>${tot} min · ${l.length} ${l.length===1?'sessione':'sessioni'}</small></div>
    <div class="drecap"><div class="lbl">${rc?'Diario di viaggio della settimana':'Riepilogo'}</div>${esc(rc?rc.testo:mech(l))}</div>
@@ -1617,7 +1629,7 @@ async function renderDiario(){theme('');$('#crumb').textContent='Diario di prati
     ${e.ordinato&&v.note?`<details class="dt"><summary>Le tue note originali</summary>${esc(v.note)}</details>`:''}</div>`}).join('')}`}).join('')||'<div class="empty">Ancora nessuna sessione. Avvia la pratica qui sopra, oppure aggiungi a mano quella che hai già fatto oggi.</div>'}
   <p class="small muted" style="margin-top:22px">Minuti registrati in automatico (metronomo, ritmi, tastiera, brani, video): oggi ${Math.round((auto[dayKey(Date.now())]||0)/60000)} min. Contano nei totali ma non compaiono come sessioni.</p>
   <div class="row"><button class="btn sm" id="dRel">↻ Aggiorna</button><button class="btn sm" data-go="home">‹ Home</button></div><div class="foot"></div></div>`;
-  drawPrac();$('#dRel').onclick=async()=>{$('#dRel').textContent='…';await loadDiario(true).catch(()=>{});if(location.hash==='#diario')draw()}};
+  drawPrac();if($('#dSync'))$('#dSync').onclick=syncModal;$('#dRel').onclick=async()=>{$('#dRel').textContent='…';await loadDiario(true).catch(()=>{});if(location.hash==='#diario')draw()}};
  draw();window.scrollTo(0,0);try{await loadDiario();if(location.hash==='#diario')draw()}catch(e){}}
 
 /* ================= tools sheet ================= */
