@@ -200,6 +200,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .rplayer .bpmrow{display:flex;align-items:center;gap:10px;margin-top:6px}
 .rplayer .bpmrow b{font:800 22px var(--font);min-width:86px;text-align:center}.rplayer .bpmrow b small{font:600 12px var(--font);color:var(--muted)}
 .rplayer .go{margin-top:12px;height:52px}
+.apr{display:flex;align-items:center;gap:8px;font:600 14px var(--font);color:var(--muted);margin:10px 0 2px;cursor:pointer}.apr input{width:20px;height:20px}.apr b{color:var(--ink)}
 .mtop{display:flex;align-items:center;gap:14px;margin:4px 0 6px}.mtop .big{flex:1;margin:0;text-align:left;font-size:58px}.mtop h3{flex:1;margin:0}
 .mtop .go{flex:none;width:auto;min-width:132px;height:56px;margin:0;padding:0 20px}.rplayer .mtop .go{height:50px;min-width:116px;margin:0}
 .grid16{display:grid;gap:3px;margin:12px 0}
@@ -669,7 +670,7 @@ const SND={click:(t,a)=>SYN.click(t,a),sub:t=>SYN.sub(t),bell:(t,v)=>SYN.bell(t,
 const M=Object.assign({bpm:90,beats:4,sub:1,swing:0,acc:[2,0,0,0],playing:false,train:false,trainStep:2,trainBars:4,trainMax:160},LS.get('metro',{}),{playing:false});
 let mTimer=null,mNext=0,mStep=0,mBar=0;
 function mSave(){const {playing,...s}=M;LS.set('metro',s)}
-function startMetro(){if(kbActive)kbActive();stopRhythm();ac();if(M.playing)return;M.playing=true;mStep=0;mBar=0;mNext=AC.currentTime+.08;mTimer=TICK.add(mTick);live();drawPrac();if(curTab==='metro')paneMetro();else if(curTab==='diary')paneDiary()}
+function startMetro(){if(kbActive)kbActive();stopRhythm();ac();if(M.playing)return;autoPrac();M.playing=true;mStep=0;mBar=0;mNext=AC.currentTime+.08;mTimer=TICK.add(mTick);live();drawPrac();if(curTab==='metro')paneMetro();else if(curTab==='diary')paneDiary()}
 function stopMetro(){if(M.playing)cutBus();M.playing=false;TICK.del(mTimer);live();drawPrac();if(curTab==='metro')paneMetro();else if(curTab==='diary')paneDiary()}
 function mTick(){const spb=60/M.bpm,stepDur=spb/M.sub;
  while(mNext<AC.currentTime+LA()){const beat=Math.floor(mStep/M.sub),s=mStep%M.sub;let t=mNext;
@@ -684,6 +685,7 @@ function paneMetro(){
  $('#pane').innerHTML=`<div class="pane">
  <div class="mtop"><div class="big" id="mBpm">${M.bpm}<small>bpm</small></div><button class="go ${M.playing?'stop':''}" id="mGo">${M.playing?'■ Stop':'▶ Avvia'}</button></div>
  <input type="range" id="mRange" min="30" max="260" value="${M.bpm}">
+ <label class="apr"><input type="checkbox" id="mAP" ${LS.get('autoPrac',true)?'checked':''}> Col metronomo parte anche la pratica ${D.start?`<b>· ⏱ <span data-tnow>${hms(tNow())}</span></b>`:''}</label>
  <div class="row"><button class="ib" data-d="-5">−5</button><button class="ib" data-d="-1">−</button><button class="btn sm" id="tap">Tap</button><button class="ib" data-d="1">+</button><button class="ib" data-d="5">+5</button></div>
  <div class="beats" id="mBeats">${M.acc.map(a=>`<i class="${a===2||a===1?'acc':''} ${a===-1?'mute':''}"></i>`).join('')}</div>
  <p class="small muted" style="text-align:center;margin:0">Tocca un pallino: accento → normale → muto.</p>
@@ -698,6 +700,7 @@ function paneMetro(){
   <span class="small">+<input type="number" id="tS" value="${M.trainStep}" style="width:62px;padding:6px;font-size:16px"> bpm ogni <input type="number" id="tB" value="${M.trainBars}" style="width:62px;padding:6px;font-size:16px"> battute, fino a <input type="number" id="tM" value="${M.trainMax}" style="width:72px;padding:6px;font-size:16px"></span></div></div>`;
  const setB=v=>{M.bpm=Math.max(30,Math.min(260,Math.round(v)));$('#mBpm').innerHTML=M.bpm+'<small>bpm</small>';$('#mRange').value=M.bpm;mSave();live()};
  $('#mRange').oninput=e=>setB(+e.target.value);
+ $('#mAP').onchange=e=>LS.set('autoPrac',e.target.checked);
  $('#pane').querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>setB(M.bpm+ +b.dataset.d));
  $('#tap').onclick=()=>{const n=performance.now();taps=taps.filter(x=>n-x<2500);taps.push(n);if(taps.length>1){const d=(taps[taps.length-1]-taps[0])/(taps.length-1);setB(60000/d)}};
  $('#pane').querySelectorAll('#mBeats i').forEach((x,k)=>x.onclick=()=>{const a=M.acc[k];M.acc[k]=a===2||a===1?0:a===0?-1:2;mSave();paneMetro()});
@@ -731,7 +734,7 @@ const R=Object.assign({id:'rumba',bpm:100,playing:false,mute:{}},LS.get('rhythm'
 let rTimer=null,rNext=0,rStep=0;
 function rSave(){const {playing,...s}=R;LS.set('rhythm',s)}
 let rTok=0;
-async function startRhythm(){if(kbActive)kbActive();stopMetro();ac();const tok=++rTok;R.playing=true;TICK.del(rTimer);live();if(curTab==='rhythm')paneRhythm();
+async function startRhythm(){if(kbActive)kbActive();stopMetro();ac();autoPrac();const tok=++rTok;R.playing=true;TICK.del(rTimer);live();if(curTab==='rhythm')paneRhythm();
  await loadDrums();if(tok!==rTok||!R.playing)return;if(AC.state!=='running'){try{await AC.resume()}catch(e){}}
  rStep=0;rNext=AC.currentTime+.08;TICK.del(rTimer);rTimer=TICK.add(rTick)}
 function stopRhythm(){rTok++;if(R.playing)cutBus();R.playing=false;TICK.del(rTimer);live();if(curTab==='rhythm')paneRhythm()}
@@ -1440,10 +1443,19 @@ function hms(ms){const s=Math.floor(ms/1000);return`${Math.floor(s/3600)?Math.fl
 function dStore(){LS.set('timer',D)}
 function timerStart(o){if(!D.start){D.start=Date.now();if(o){if(o.what&&!D.what)D.what=o.what;if(o.lez)D.lez=o.lez}}dStore();pracChanged()}
 function timerPause(){if(D.start){D.acc=tNow();D.start=null}dStore();pracChanged()}
-function timerReset(){D.start=null;D.acc=0;D.what='';D.lez=null;dStore();pracChanged()}
-function timerFinish(){timerPause();sessionModal({ms:tNow(),what:D.what||lessonWhat(),lez:D.lez||(LESSON&&LESSON.l.n),fromTimer:true})}
+function timerReset(){D.start=null;D.acc=0;D.what='';D.lez=null;D.tempi=[];dStore();pracChanged()}
+/* col metronomo (o un ritmo) parte anche la pratica, se non è già in corso; si può spegnere dal metronomo */
+function autoPrac(){if(D.start||!LS.get('autoPrac',true))return;timerStart({what:lessonWhat(),lez:LESSON&&LESSON.l.n});toast('⏱ Pratica avviata insieme al metronomo')}
+/* percorso del tempo durante la sessione: [{s:'♩'|nome ritmo, bpm, sec}] */
+function tempiTick(){if(!D.start||!(M.playing||R.playing))return;const k=M.playing?'Metronomo':RHY[R.id].name,b=M.playing?M.bpm:R.bpm;D.tempi=D.tempi||[];
+ const l=D.tempi[D.tempi.length-1];if(l&&l.s===k&&l.bpm===b)l.sec++;else D.tempi.push({s:k,bpm:b,sec:1});if(Date.now()%5000<1000)dStore()}
+function tempiCompact(t){const o=[];(t||[]).filter(x=>x.sec>=10).forEach(x=>{const l=o[o.length-1];if(l&&l.s===x.s&&l.bpm===x.bpm)l.sec+=x.sec;else o.push(Object.assign({},x))});return o}
+function tempiTxt(t){const c=tempiCompact(t);if(!c.length)return'';const by={};c.forEach(x=>(by[x.s]=by[x.s]||[]).push(x));
+ return Object.entries(by).map(([k,l])=>`${k}: ${l.map(x=>x.bpm+' bpm'+(x.sec>=60?' ('+Math.round(x.sec/60)+' min)':'')).join(' → ')}`).join(' · ')}
+function tempiMax(t){return Math.max(0,...tempiCompact(t).map(x=>x.bpm))||null}
+function timerFinish(){timerPause();dStore();const tp=tempiCompact(D.tempi);sessionModal({ms:tNow(),what:D.what||lessonWhat()||(tp.length?[...new Set(tp.map(x=>x.s))].join(' + '):''),lez:D.lez||(LESSON&&LESSON.l.n),tempi:tp,fromTimer:true})}
 function pracChanged(){drawPrac();drawMini();live();if(curTab==='diary')paneDiary();updStreak()}
-setInterval(()=>{if(!D.start)return;const t=hms(tNow());document.querySelectorAll('[data-tnow]').forEach(e=>e.textContent=t);const m=$('#miniT');if(m)m.textContent=t;if(!curTab)live()},1000);
+setInterval(()=>{if(!D.start)return;tempiTick();const t=hms(tNow());document.querySelectorAll('[data-tnow]').forEach(e=>e.textContent=t);const m=$('#miniT');if(m)m.textContent=t;if(!curTab)live()},1000);
 function lessonWhat(){return LESSON?`Lezione ${LESSON.l.n} · ${LESSON.l.title}`:''}
 function drawPrac(){const run=!!D.start,has=tNow()>0;
  const hp=$('#homePrac');if(hp){hp.innerHTML=`<div class="pt"><span data-tnow>${hms(tNow())}</span><small>${run?'pratica in corso':has?'in pausa':`oggi: ${todayMin()} min`}</small></div>
@@ -1503,7 +1515,8 @@ function sessionModal(o){const sh=document.createElement('div');sh.className='mo
  sh.innerHTML=`<form class="af box sess"><div class="lbl">${o.manual?'Aggiungi pratica a mano':'Salva la sessione di pratica'}</div>
  <div class="two"><div><label>Giorno</label><input type="date" name="day" value="${iso(today)}" max="${iso(today)}"></div><div><label>Minuti</label><input type="number" name="min" min="1" max="600" inputmode="numeric" value="${o.ms?Math.max(1,Math.round(o.ms/60000)):''}" placeholder="es. 30"></div></div>
  <label>Su cosa ti sei esercitato</label><input type="text" name="what" value="${esc(o.what||'')}" placeholder="Es. Lezione 3 · sinistra di Tipitina">
- <label>Tempo raggiunto (bpm, facoltativo)</label><input type="number" name="bpm" inputmode="numeric" value="${M.playing?M.bpm:R.playing?R.bpm:''}" placeholder="bpm">
+ <label>Tempo raggiunto (bpm, facoltativo)</label><input type="number" name="bpm" inputmode="numeric" value="${tempiMax(o.tempi)||(M.playing?M.bpm:R.playing?R.bpm:'')}" placeholder="bpm">
+ ${o.tempi&&o.tempi.length?`<p class="small muted" style="margin:6px 0 0">Percorso del tempo registrato: <b>${esc(tempiTxt(o.tempi))}</b></p>`:''}
  <label>Note: cosa hai imparato, cosa hai notato</label><textarea name="note" rows="3" placeholder="Scrivi qui, oppure registra un messaggio vocale"></textarea>
  <div class="rec"><button type="button" class="rb" data-rec>🎙 Detta le note</button><span class="rst2" data-rt></span></div>
  <p class="small muted" style="margin:6px 0 0" data-rh>Parla: il testo compare nelle note mentre parli, poi puoi correggerlo. Anche il microfono della tastiera funziona.</p>
@@ -1544,9 +1557,9 @@ function sessionModal(o){const sh=document.createElement('div');sh.className='mo
   if(srOn){srOn=false;try{sr.stop()}catch(e){}await new Promise(r=>setTimeout(r,500))}
   if(rec&&rec.state==='recording'){rec.stop();await new Promise(r=>setTimeout(r,400))}
   const [y,m,d]=E.day.value.split('-').map(Number),now=new Date(),at=(y===now.getFullYear()&&m===now.getMonth()+1&&d===now.getDate())?Date.now():new Date(y,m-1,d,20).getTime();
-  const v={id:'v'+Date.now().toString(36),at,ms:min*60000,what:E.what.value.trim(),bpm:+E.bpm.value||null,note:E.note.value.trim(),lez:o.lez||null};if(blob)v.audio=ext;
+  const v={id:'v'+Date.now().toString(36),at,ms:min*60000,what:E.what.value.trim(),bpm:+E.bpm.value||null,note:E.note.value.trim(),lez:o.lez||null};if(o.tempi&&o.tempi.length)v.tempi=o.tempi;if(blob)v.audio=ext;
   const btn=f.querySelector('.go');btn.disabled=true;
-  const l=LS.get('log',[]);l.push({id:v.id,at,ms:v.ms,what:v.what,bpm:v.bpm,note:v.note});LS.set('log',l);
+  const l=LS.get('log',[]);l.push({id:v.id,at,ms:v.ms,what:v.what,bpm:v.bpm,note:v.note,tempi:v.tempi});LS.set('log',l);
   if(o.fromTimer)timerReset();
   let t=null;try{t=E.tok&&E.tok.value.trim()?await needTok(f,say):ghTok()}catch(err){t=null}
   if(!t||navigator.onLine===false){LS.set('dqueue',LS.get('dqueue',[]).concat([{v}]));if(blob)say('');toast(blob?'✓ Salvato sul dispositivo. Il vocale si può inviare solo con la chiave GitHub.':'✓ Salvato. Lo sincronizzo appena possibile.');close();afterSave();return}
@@ -1583,8 +1596,8 @@ async function renderDiario(){theme('');$('#crumb').textContent='Diario di prati
   const auto=autoMs(),pending=LS.get('dqueue',[]).length;
   const wtxt=w=>{const l=weeks[w],d0=new Date(Math.min(...l.map(v=>v.at)));const mon=new Date(d0);mon.setDate(d0.getDate()-((d0.getDay()+6)%7));const sun=new Date(mon);sun.setDate(mon.getDate()+6);
    return`${mon.toLocaleDateString('it-IT',{day:'numeric',month:'short'})} – ${sun.toLocaleDateString('it-IT',{day:'numeric',month:'short'})}`};
-  const mech=l=>{const by={};l.forEach(v=>{const k=v.what||'Pratica';by[k]=(by[k]||0)+(v.ms||0)});
-   return Object.entries(by).sort((a,b)=>b[1]-a[1]).map(([k,ms])=>`– ${k}: ${Math.round(ms/60000)} min`).join('\n')};
+  const mech=l=>{const by={},mx={};l.forEach(v=>{const k=v.what||'Pratica';by[k]=(by[k]||0)+(v.ms||0);const b=v.bpm||tempiMax(v.tempi);if(b)mx[k]=Math.max(mx[k]||0,b)});
+   return Object.entries(by).sort((a,b)=>b[1]-a[1]).map(([k,ms])=>`– ${k}: ${Math.round(ms/60000)} min${mx[k]?' · fino a '+mx[k]+' bpm':''}`).join('\n')};
   $('#app').innerHTML=`<section class="chero"><div class="wrap"><div class="eyebrow">Scuola</div><h1>Diario di pratica</h1><p>Le tue sessioni, le note e i messaggi vocali, settimana per settimana</p></div></section><div class="wrap">
   <div class="stats"><div class="stat"><b>${weekMin()}<small style="font-size:13px;font-weight:600"> min</small></b><span>questa settimana</span></div><div class="stat"><b>${streakDays()} 🔥</b><span>giorni di fila</span></div><div class="stat"><b>${todayMin()}<small style="font-size:13px;font-weight:600"> min</small></b><span>oggi</span></div></div>
   <div class="prac" id="homePrac"></div>
@@ -1592,7 +1605,7 @@ async function renderDiario(){theme('');$('#crumb').textContent='Diario di prati
   ${Object.keys(weeks).sort().reverse().map(w=>{const l=weeks[w],tot=Math.round(l.reduce((a,v)=>a+(v.ms||0),0)/60000),rc=Dg.sett[w];
    return`<div class="dweek">Settimana ${wtxt(w)}<small>${tot} min · ${l.length} ${l.length===1?'sessione':'sessioni'}</small></div>
    <div class="drecap"><div class="lbl">${rc?'Diario di viaggio della settimana':'Riepilogo'}</div>${esc(rc?rc.testo:mech(l))}</div>
-   ${l.map(v=>{const e=Dg.elab[v.id]||{};return`<div class="dent"><div class="dh"><b>${esc(v.what||'Pratica')}</b><span>${new Date(v.at).toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'})} · ${Math.round((v.ms||0)/60000)} min${v.bpm?' · '+v.bpm+' bpm':''}${v.local?' · solo su questo dispositivo':''}</span></div>
+   ${l.map(v=>{const e=Dg.elab[v.id]||{};return`<div class="dent"><div class="dh"><b>${esc(v.what||'Pratica')}</b><span>${new Date(v.at).toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'})} · ${Math.round((v.ms||0)/60000)} min${v.bpm?' · '+v.bpm+' bpm':''}${v.local?' · solo su questo dispositivo':''}</span></div>${v.tempi&&v.tempi.length?`<div class="dw">♩ ${esc(tempiTxt(v.tempi))}</div>`:''}
     ${e.ordinato?`<div class="dx">${esc(e.ordinato)}</div>`:v.note?`<div class="dx">${esc(v.note)}</div>`:''}
     ${v.audio?(e.trascr?`<details class="dt"><summary>🎙 Messaggio vocale · trascrizione</summary>${esc(e.trascr)}</details>`:e.err?`<div class="dw">⚠️ ${esc(e.err)}</div>`:'<div class="dw">🎙 Messaggio vocale: trascrizione in arrivo (qualche minuto)</div>'):''}
     ${e.ordinato&&v.note?`<details class="dt"><summary>Le tue note originali</summary>${esc(v.note)}</details>`:''}</div>`}).join('')}`}).join('')||'<div class="empty">Ancora nessuna sessione. Avvia la pratica qui sopra, oppure aggiungi a mano quella che hai già fatto oggi.</div>'}

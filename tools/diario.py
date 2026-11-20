@@ -145,6 +145,8 @@ def descr(v, e):
     righe = ['Data: %s' % d.strftime('%d/%m/%Y'), 'Minuti di pratica: %d' % round(v.get('ms', 0) / 60000)]
     if v.get('what'): righe.append('Su cosa: ' + v['what'])
     if v.get('bpm'): righe.append('Tempo raggiunto: %s bpm' % v['bpm'])
+    if v.get('tempi'):
+        righe.append('Percorso del tempo (metronomo/ritmi): ' + ' -> '.join('%s %s bpm (%d min)' % (t.get('s', ''), t.get('bpm'), round(t.get('sec', 0) / 60)) for t in v['tempi']))
     if v.get('note'): righe.append('Note scritte: ' + v['note'])
     if e.get('trascr'): righe.append('Messaggio vocale (trascrizione automatica): ' + e['trascr'])
     return '\n'.join(righe)
