@@ -1519,27 +1519,33 @@ function sessionModal(o){const sh=document.createElement('div');sh.className='mo
  ${o.tempi&&o.tempi.length?`<p class="small muted" style="margin:6px 0 0">Percorso del tempo registrato: <b>${esc(tempiTxt(o.tempi))}</b></p>`:''}
  <label>Note: cosa hai imparato, cosa hai notato</label><textarea name="note" rows="3" placeholder="Scrivi qui, oppure registra un messaggio vocale"></textarea>
  <div class="rec"><button type="button" class="rb" data-rec>🎙 Detta le note</button><span class="rst2" data-rt></span></div>
- <p class="small muted" style="margin:6px 0 0" data-rh>Parla: il testo compare nelle note mentre parli, poi puoi correggerlo. Anche il microfono della tastiera funziona.</p>
+ <p class="small muted" style="margin:6px 0 0" data-rh>Parla: il testo compare nelle note mentre parli, poi puoi correggerlo. Funziona sempre anche il microfono 🎤 della tastiera.</p>
  ${ghTok()?'':tokHTML()}
  <button class="go" type="submit">Salva nel diario</button><div class="row2"><button type="button" class="btn sm" data-x>${o.fromTimer?'Non salvare (riprendi dopo)':'Annulla'}</button>${o.fromTimer?'<button type="button" class="btn sm del" data-zero>Azzera il timer</button>':''}</div><div class="note" data-m></div></form>`;
- document.body.appendChild(sh);const f=sh.querySelector('form'),say=m=>sh.querySelector('[data-m]').textContent=m;let rec=null,chunks=[],blob=null,ext=null,rT=null;
- let close=()=>{try{rec&&rec.state!=='inactive'&&rec.stop()}catch(e){}clearInterval(rT);sh.remove()};
+ document.body.appendChild(sh);const f=sh.querySelector('form'),say=m=>sh.querySelector('[data-m]').textContent=m;
+ const dr=LS.get('sessDraft',null);if(dr&&o.fromTimer&&Date.now()-dr.t<3*864e5){['what','bpm','note'].forEach(k=>{if(dr[k])f.elements[k].value=dr[k]})}
+ const saveDraft=()=>{if(o.fromTimer)LS.set('sessDraft',{t:Date.now(),what:f.elements.what.value,bpm:f.elements.bpm.value,note:f.elements.note.value})};
+ f.addEventListener('input',saveDraft);const dInt2=setInterval(saveDraft,3000);let rec=null,chunks=[],blob=null,ext=null,rT=null;
+ let close=()=>{try{rec&&rec.state!=='inactive'&&rec.stop()}catch(e){}clearInterval(rT);clearInterval(dInt2);sh.remove()};
  sh.onclick=e=>{if(e.target===sh)close()};sh.querySelector('[data-x]').onclick=()=>close();
- const z=sh.querySelector('[data-zero]');if(z)z.onclick=()=>{if(confirm('Azzerare il timer senza salvare?')){timerReset();close()}};
+ const z=sh.querySelector('[data-zero]');if(z)z.onclick=()=>{if(confirm('Azzerare il timer senza salvare?')){timerReset();LS.set('sessDraft',null);close()}};
  const rb=sh.querySelector('[data-rec]'),rt=sh.querySelector('[data-rt]'),rh=sh.querySelector('[data-rh]'),ta=f.elements.note;
- const SR=window.SpeechRecognition||window.webkitSpeechRecognition;let sr=null,srOn=false,base='',useRec=!SR;
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition,standalone=navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
+ let sr=null,srOn=false,base='',useRec=!SR||standalone,restarts=[],gotText=false,wd=null;
+ if(useRec){rb.textContent='🎙 Registra un messaggio vocale';rh.textContent='Registra quello che hai fatto: lo trascrivo nel diario dopo qualche minuto. Per scrivere subito, usa il microfono 🎤 della tastiera.'}
  const sess=t=>{try{if(navigator.audioSession)navigator.audioSession.type=t}catch(e){}};
- const stopAll=()=>{if(sr&&srOn){srOn=false;try{sr.stop()}catch(e){}}if(rec&&rec.state==='recording')rec.stop()};
+ const stopAll=()=>{clearTimeout(wd);if(sr&&srOn){srOn=false;try{sr.stop()}catch(e){}}if(rec&&rec.state==='recording')rec.stop()};
+ const toRec=msg=>{clearTimeout(wd);srOn=false;try{sr&&sr.abort()}catch(e){}RECORDING=false;sess('playback');useRec=true;rb.classList.remove('on');rb.textContent='🎙 Registra un messaggio vocale';rt.textContent='';rh.textContent=msg};
  /* 1) dettatura: il riconoscimento vocale del dispositivo scrive nelle note mentre parli */
  function dictate(){sr=new SR();sr.lang='it-IT';sr.continuous=true;sr.interimResults=true;base=ta.value?ta.value.replace(/\s*$/,' '):'';let fin='';
-  sr.onresult=e=>{let tmp='';for(let k=e.resultIndex;k<e.results.length;k++){const r=e.results[k];if(r.isFinal)fin+=r[0].transcript+' ';else tmp+=r[0].transcript}ta.value=(base+fin+tmp).replace(/\s+/g,' ').trimStart()};
-  sr.onerror=e=>{if(e.error!=='no-speech'&&e.error!=='aborted'){srOn=false;useRec=true;rb.classList.remove('on');rb.textContent='🎙 Registra un messaggio vocale';rt.textContent='';
-    rh.textContent='La dettatura qui non è disponibile: registra il messaggio vocale, lo trascrivo nel diario dopo qualche minuto.'}
-};
-  sr.onend=()=>{if(srOn){try{base=ta.value?ta.value.replace(/\s*$/,' '):'';fin='';sr.start();return}catch(e){}}srOn=false;RECORDING=false;sess('playback');rb.classList.remove('on');
-   if(!useRec)rb.textContent='🎙 Continua a dettare';if(!rt.textContent.startsWith('⚠️'))rt.textContent=ta.value?'✓ Testo inserito':''};
+  sr.onresult=e=>{gotText=true;clearTimeout(wd);let tmp='';for(let k=e.resultIndex;k<e.results.length;k++){const r=e.results[k];if(r.isFinal)fin+=r[0].transcript+' ';else tmp+=r[0].transcript}ta.value=(base+fin+tmp).replace(/\s+/g,' ').trimStart()};
+  sr.onerror=e=>{if(e.error!=='no-speech'&&e.error!=='aborted')toRec('La dettatura qui non funziona: registra il messaggio vocale, lo trascrivo nel diario dopo qualche minuto. Per scrivere subito usa il microfono 🎤 della tastiera.')};
+  sr.onend=()=>{const now=Date.now();restarts=restarts.filter(t=>now-t<30000);
+   if(srOn&&restarts.length<4){restarts.push(now);setTimeout(()=>{if(!srOn)return;try{base=ta.value?ta.value.replace(/\s*$/,' '):'';fin='';sr.start()}catch(e){toRec('La dettatura si è interrotta: registra il messaggio vocale, oppure usa il microfono 🎤 della tastiera.')}},300);return}srOn=false;RECORDING=false;sess('playback');rb.classList.remove('on');
+   if(!useRec)rb.textContent='🎙 Continua a dettare';if(!useRec&&!rt.textContent.startsWith('⚠️'))rt.textContent=gotText?'✓ Testo inserito':''};
   RECORDING=true;sess('play-and-record');srOn=true;try{sr.start()}catch(e){srOn=false;RECORDING=false;useRec=true;return record()}
-  rb.classList.add('on');rb.textContent='■ Fine dettatura';rt.textContent='● Ti ascolto…'}
+  rb.classList.add('on');rb.textContent='■ Fine dettatura';rt.textContent='● Ti ascolto…';gotText=false;
+  wd=setTimeout(()=>{if(srOn&&!gotText)toRec('Non arriva testo dalla dettatura: registra il messaggio vocale (lo trascrivo nel diario) oppure usa il microfono 🎤 della tastiera.')},9000)}
  /* 2) riserva: registra l'audio; la trascrizione la fa GitHub e compare nel diario */
  async function record(){if(!navigator.mediaDevices||!window.MediaRecorder){rt.textContent='⚠️ Questo browser non registra audio: usa il microfono della tastiera.';return}
   RECORDING=true;sess('play-and-record');
@@ -1560,7 +1566,7 @@ function sessionModal(o){const sh=document.createElement('div');sh.className='mo
   const v={id:'v'+Date.now().toString(36),at,ms:min*60000,what:E.what.value.trim(),bpm:+E.bpm.value||null,note:E.note.value.trim(),lez:o.lez||null};if(o.tempi&&o.tempi.length)v.tempi=o.tempi;if(blob)v.audio=ext;
   const btn=f.querySelector('.go');btn.disabled=true;
   const l=LS.get('log',[]);l.push({id:v.id,at,ms:v.ms,what:v.what,bpm:v.bpm,note:v.note,tempi:v.tempi});LS.set('log',l);
-  if(o.fromTimer)timerReset();
+  if(o.fromTimer){timerReset();LS.set('sessDraft',null)}
   let t=null;try{t=E.tok&&E.tok.value.trim()?await needTok(f,say):ghTok()}catch(err){t=null}
   if(!t||navigator.onLine===false){LS.set('dqueue',LS.get('dqueue',[]).concat([{v}]));if(blob)say('');toast(blob?'✓ Salvato sul dispositivo. Il vocale si può inviare solo con la chiave GitHub.':'✓ Salvato. Lo sincronizzo appena possibile.');close();afterSave();return}
   try{await syncPending(say);const files=[{path:`diario/voci/${v.id}.json.enc`,label:'la sessione',u8:await encJSON(v)}];
