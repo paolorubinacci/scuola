@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#ffffff">
 <title>Scuola · Paolo Rubinacci</title>
-<link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icons/icon-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Scuola"><meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icons/icon-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Nola School"><meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Tinos:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap">
 <style>
@@ -211,6 +211,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .timer{font:800 54px var(--font);letter-spacing:-.03em;text-align:center}
 /* pratica: card in home, barra nella lezione, finestra «salva sessione» */
 .prac{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin:12px 0 4px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+
 .prac .pt{font:800 30px var(--font);letter-spacing:-.02em;min-width:110px}.prac .pt small{display:block;font:600 12px var(--font);color:var(--muted);letter-spacing:0}
 .prac .pb{display:flex;gap:8px;flex-wrap:wrap;flex:1;justify-content:flex-end}
 .prac .pbig{border:0;border-radius:999px;background:var(--blue);color:#fff;font:700 16px var(--font);padding:13px 20px;cursor:pointer}.prac .pbig.on{background:var(--coral)}
@@ -377,6 +378,11 @@ textarea,input[type=text],input[type=password],input[type=number]{width:100%;bac
 #gate form{display:flex;gap:8px;margin-top:22px}
 #gate .err{color:var(--red);font-size:13px;min-height:20px;margin-top:10px}
 .foot{padding:30px 0 120px;font:500 12px var(--font);color:var(--muted);text-align:center}
+@media (max-width:600px){
+ .stats{gap:8px}.stat{padding:12px 10px}.stat b{font-size:22px}.stat b small{font-size:12px}.stat span{display:block;font-size:12px;line-height:1.3;margin-top:4px}.stat .wk{display:none}
+ .prac{display:block;padding:14px}.prac .pt{display:flex;align-items:baseline;gap:10px;font-size:34px;margin-bottom:10px}.prac .pt small{display:inline}
+ .prac .pb{display:grid!important;grid-template-columns:1fr 1fr;gap:8px}.prac .pb button{width:100%;padding:12px 6px;font-size:14px;white-space:nowrap}.prac .pb button:last-child:nth-child(even){grid-column:1/-1}.prac .pb .pbig{grid-column:1/-1;padding:14px}
+ #app{padding-bottom:96px}}
 </style>
 </head>
 <body>
@@ -443,7 +449,10 @@ let NOLA=false;
 function applyNola(root){root.querySelectorAll('.t-nola .nt, .course.nola .nt').forEach(e=>{if(!e.dataset.o)e.dataset.o=e.textContent;e.textContent=NOLA?nolaText(e.dataset.o):e.dataset.o})}
 if(document.fonts){document.fonts.load('20px NolaMardiGras').then(f=>{NOLA=f.length>0&&document.fonts.check('20px NolaMardiGras');document.body.classList.toggle('nola-on',NOLA);applyNola(document)}).catch(()=>{})}
 new MutationObserver(()=>applyNola(document)).observe(document.getElementById('app'),{childList:true});
-function boot(){$('#gate').remove();render()}
+function boot(){$('#gate').remove();
+ try{const app=navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
+  if(app&&!location.hash&&!sessionStorage.getItem('aperta')){const c=nolaCourse();if(c)history.replaceState(null,'','#'+c.id)}sessionStorage.setItem('aperta','1')}catch(e){}
+ render()}
 function progress(){return LS.get('done',{})}
 /* lezioni fatte: ora si salva il momento (conta nei giorni di fila); le vecchie spunte senza data valgono da oggi */
 (()=>{const p=LS.get('done',{});let ch=false;for(const k in p)if(p[k]===true){p[k]=Date.now();ch=true}if(ch)LS.set('done',p)})();
@@ -476,7 +485,7 @@ function renderHome(){
  pfToken++;theme('');$('#crumb').textContent='';updStreak();
  const done=progress(),goal=LS.get('goal',150),wm=weekMin(),tot=DATA.courses.reduce((a,c)=>a+c.lessons.filter(l=>done[c.id+'-'+l.n]).length,0);
  $('#app').innerHTML=`<div class="wrap"><section class="hero"><div class="eyebrow">Ciao Paolo</div><h1>La tua <em>scuola</em> di musica</h1><p>Videocorsi, esercizi e strumenti per fare pratica ogni giorno.</p></section>
- <div class="stats"><div class="stat goal" id="goalStat"><b>${wm}<small style="font-size:13px;font-weight:600"> / ${goal} min</small></b><span>pratica questa settimana · da lunedì</span><div class="meter"><i style="width:${Math.min(100,wm/goal*100)}%"></i></div></div>
+ <div class="stats"><div class="stat goal" id="goalStat"><b>${wm}<small style="font-size:13px;font-weight:600"> / ${goal} min</small></b><span>pratica questa settimana<span class="wk"> · da lunedì</span></span><div class="meter"><i style="width:${Math.min(100,wm/goal*100)}%"></i></div></div>
  <div class="stat"><b>${streakDays()} 🔥</b><span>giorni di fila</span></div><div class="stat"><b>${tot}</b><span>lezioni completate</span></div></div>
  <div class="prac" id="homePrac"></div>
  <div class="sec-t">I miei corsi</div>
