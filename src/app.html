@@ -653,10 +653,11 @@ function iosAudio(){if(iosUnlocked)return;iosUnlocked=true;
 let acStale=false;
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&AC&&!(M.playing||R.playing||kbActive||PLAY.size))acStale=true});
 window.addEventListener('pageshow',e=>{if(e.persisted)acStale=true});
-function freshAC(){if(!AC)return;const idle=!(M.playing||R.playing||kbActive||PLAY.size);
- if(idle&&(acStale||AC.state!=='running')){try{AC.close()}catch(e){}AC=null;BUSN=null;
+const IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+function freshAC(force){if(!AC)return;const idle=!(M.playing||R.playing||kbActive||PLAY.size);
+ if(idle&&(acStale||AC.state!=='running'||(force&&IOS))){try{AC.close()}catch(e){}AC=null;BUSN=null;
   try{if(IOSA){IOSA.pause();IOSA.currentTime=0}}catch(e){}}acStale=false}
-function ac(){iosAudio();freshAC();if(!AC){AC=new (window.AudioContext||window.webkitAudioContext)();MASTER=AC.createGain();MASTER.gain.value=.9;MASTER.connect(AC.destination);
+function ac(nuovo){iosAudio();freshAC(nuovo);if(!AC){AC=new (window.AudioContext||window.webkitAudioContext)();MASTER=AC.createGain();MASTER.gain.value=.9;MASTER.connect(AC.destination);
  const n=AC.createBuffer(1,AC.sampleRate*.3,AC.sampleRate),d=n.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;NOISE=n}
  if(AC.state!=='running')AC.resume().catch(()=>{});
  if(!RECORDING){try{if(navigator.audioSession&&navigator.audioSession.type!=='playback')navigator.audioSession.type='playback'}catch(e){}if(IOSA&&IOSA.paused)IOSA.play().catch(()=>{})}
@@ -687,7 +688,7 @@ const SND={click:(t,a)=>SYN.click(t,a),sub:t=>SYN.sub(t),bell:(t,v)=>SYN.bell(t,
 const M=Object.assign({bpm:90,beats:4,sub:1,swing:0,acc:[2,0,0,0],playing:false,train:false,trainStep:2,trainBars:4,trainMax:160},LS.get('metro',{}),{playing:false});
 let mTimer=null,mNext=0,mStep=0,mBar=0;
 function mSave(){const {playing,...s}=M;LS.set('metro',s)}
-function startMetro(){if(kbActive)kbActive();stopRhythm();ac();if(M.playing)return;autoPrac();M.playing=true;mStep=0;mBar=0;mNext=AC.currentTime+.08;mTimer=TICK.add(mTick);live();drawPrac();if(curTab==='metro')paneMetro();else if(curTab==='diary')paneDiary()}
+function startMetro(){if(kbActive)kbActive();stopRhythm();ac(true);if(M.playing)return;autoPrac();M.playing=true;mStep=0;mBar=0;mNext=AC.currentTime+.08;mTimer=TICK.add(mTick);live();drawPrac();if(curTab==='metro')paneMetro();else if(curTab==='diary')paneDiary()}
 function stopMetro(){if(M.playing)cutBus();M.playing=false;TICK.del(mTimer);live();drawPrac();if(curTab==='metro')paneMetro();else if(curTab==='diary')paneDiary()}
 function mTick(){const spb=60/M.bpm,stepDur=spb/M.sub;
  while(mNext<AC.currentTime+LA()){const beat=Math.floor(mStep/M.sub),s=mStep%M.sub;let t=mNext;
@@ -751,7 +752,7 @@ const R=Object.assign({id:'rumba',bpm:100,playing:false,mute:{}},LS.get('rhythm'
 let rTimer=null,rNext=0,rStep=0;
 function rSave(){const {playing,...s}=R;LS.set('rhythm',s)}
 let rTok=0;
-async function startRhythm(){if(kbActive)kbActive();stopMetro();ac();autoPrac();const tok=++rTok;R.playing=true;TICK.del(rTimer);live();if(curTab==='rhythm')paneRhythm();
+async function startRhythm(){if(kbActive)kbActive();stopMetro();ac(true);autoPrac();const tok=++rTok;R.playing=true;TICK.del(rTimer);live();if(curTab==='rhythm')paneRhythm();
  await loadDrums();if(tok!==rTok||!R.playing)return;if(AC.state!=='running'){try{await AC.resume()}catch(e){}}
  rStep=0;rNext=AC.currentTime+.08;TICK.del(rTimer);rTimer=TICK.add(rTick)}
 function stopRhythm(){rTok++;if(R.playing)cutBus();R.playing=false;TICK.del(rTimer);live();if(curTab==='rhythm')paneRhythm()}
