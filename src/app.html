@@ -806,12 +806,12 @@ const STN={drums:'Batteria',bass:'Basso',piano:'Piano',vocals:'Voce',other:'Altr
 const normA=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[^a-z0-9]/g,'');
 const words=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').split(/[^a-z0-9]+/).filter(Boolean);
 /* le quattro sezioni di un brano */
-const SEZ=[['ascolto','Ascolto',r=>r.k==='audio'||(r.k==='yt'&&r.solo_audio)],['spartiti','Spartiti e MIDI',r=>r.k==='pdf'||r.k==='midi'||r.k==='img'],['video','Video',r=>r.k==='video'||(r.k==='yt'&&!r.solo_audio)],['scheda','Scheda',()=>false]];
+const SEZ=[['ascolto','Ascolto',r=>r.k==='audio'||r.k==='sp'||(r.k==='yt'&&r.solo_audio)],['spartiti','Spartiti e MIDI',r=>r.k==='pdf'||r.k==='midi'||r.k==='img'],['video','Video',r=>r.k==='video'||(r.k==='yt'&&!r.solo_audio)],['scheda','Scheda',()=>false]];
 const VCAT=['Live','Tutorial','Lezione','Intervista','Video'];
-const CATS={audio:['Registrazione','Registrazione live'],video:VCAT,yt:VCAT,pdf:['Partitura','Trascrizione automatica'],img:['Partitura'],midi:['MIDI','Trascrizione automatica']};
+const CATS={audio:['Registrazione','Registrazione live'],sp:['Registrazione','Registrazione live'],video:VCAT,yt:VCAT,pdf:['Partitura','Trascrizione automatica'],img:['Partitura'],midi:['MIDI','Trascrizione automatica']};
 const VHINT={Live:'Esecuzioni dal vivo: guarda le mani e come cambia il brano rispetto al disco.',Tutorial:'Spiegazioni passo per passo: rallenta il video e suona insieme, un pezzo alla volta.',
  Lezione:'Lezioni e masterclass sul brano o sullo stile.',Intervista:'Il musicista racconta il brano.',Video:''};
-const KIND={audio:'♫',video:'▶',yt:'▶',pdf:'𝄞',img:'𝄞',midi:'⌨'};
+const KIND={sp:'♫',audio:'♫',video:'▶',yt:'▶',pdf:'𝄞',img:'𝄞',midi:'⌨'};
 function count(x,k){return x.r.filter(SEZ.find(s=>s[0]===k)[2]).length}
 function busy(x){return x.r.some(r=>r.st==='elaborazione'||r.omr==='attesa')}
 function cardHTML(c,id,x){const n=[['ascolto','registrazion','e','i'],['spartiti','spartit','o','i'],['video','video','','']].map(([k,w,s1,sn])=>{const m=count(x,k);return m?`${m} ${w}${m===1?s1:sn}`:''}).filter(Boolean);
@@ -850,7 +850,7 @@ async function ascTrack(c,id,x){
  <div class="lchip">${(()=>{const co=catOf(x),lz=lezOf(id,x);return`<button class="${co.s?'s':''}" data-bcat>${LCAT[co.k]}${co.s?' · suggerita':''} ⇄</button>${lz.map(n=>`<button data-go="${c.id}-l${n}">Lezione ${n} ›</button>`).join('')}`})()}</div></div></section>`;
  $('#app').innerHTML=`${head}<nav class="btabs"><div class="wrap">${tabs.map(([k,n,l])=>`<button data-tab="${k}">${n}${l.length?` <i>${l.length}</i>`:''}</button>`).join('')}</div></nav>
  <div class="wrap"><div id="tabc"></div>
- <button class="addb" data-go="${c.id}-ascolti-${id}-carica"><b>＋</b><span><strong>Aggiungi file a questo brano</strong><small>Registrazioni, video live, tutorial, spartiti, MIDI, link YouTube</small></span></button>
+ <button class="addb" data-go="${c.id}-ascolti-${id}-carica"><b>＋</b><span><strong>Aggiungi file a questo brano</strong><small>Registrazioni, video live, tutorial, spartiti, MIDI, link YouTube e Spotify</small></span></button>
  ${busy(x)?'<div class="row2"><button class="btn sm" data-rel>↻ Controlla se è pronto</button></div>':''}
  <div class="row"><button class="btn sm" data-go="${c.id}-ascolti">‹ Tutti gli ascolti</button></div><div class="foot"></div></div>`;window.scrollTo(0,0);
  const bc=$('[data-bcat]');if(bc)bc.onclick=()=>{const nw=catOf(x).k==='piano'?'stile':'piano';if(confirm(`Spostare «${x.t}» in ${LCAT[nw]}?`))catEdit(y=>{if(y[id])y[id].cat=nw},`Libreria: «${x.t}» in ${LCAT[nw]}`)};
@@ -863,10 +863,10 @@ function bindEd(el,c,id,x){el.querySelectorAll('[data-ed]').forEach(b=>b.onclick
 function tabAscolto(el,c,id,x,list,base){
  if(!list.length){el.innerHTML=`<div class="empty">Ancora nessuna registrazione. Carica un MP3 (o un altro file audio) con «Aggiungi file».</div>`;return}
  const ready=list.filter(r=>r.st==='pronto');let cur=ready[0]&&ready[0].id;
- el.innerHTML=`<p class="hint">${list.length>1?'Scegli la registrazione da ascoltare. ':''}Usa il loop A-B e la velocità per studiare un passaggio${list.some(r=>(r.stems||[]).length)?'; con «Tracce separate» isoli il piano':''}.${list.some(r=>r.k==='yt')?' Le registrazioni da YouTube si ascoltano dal video incorporato; per separare le tracce serve il file MP3 del brano.':''}</p>
+ el.innerHTML=`<p class="hint">${list.length>1?'Scegli la registrazione da ascoltare. ':''}${list.some(r=>r.k!=='sp')?'Usa il loop A-B e la velocità per studiare un passaggio'+(list.some(r=>(r.stems||[]).length)?'; con «Tracce separate» isoli il piano':'')+'.':''}${list.some(r=>r.k==='yt')?' Le registrazioni da YouTube si ascoltano dal video incorporato; per separare le tracce serve il file MP3 del brano.':''}</p>
  <div class="reclist">${list.map(r=>`<div class="res sel ${r.id===cur?'on':''}" data-pick="${r.id}">${resHead(c,id,r,(r.stems||[]).length?' · tracce separate':'')}${stato(r)}${(r.avvisi||[]).map(a=>`<div class="rst">${esc(a)}</div>`).join('')}</div>`).join('')}</div><div id="stp"></div>`;
  const play=rid=>{ascStop();const r=list.find(q=>q.id===rid);if(!r||r.st!=='pronto')return;cur=rid;el.querySelectorAll('[data-pick]').forEach(d=>d.classList.toggle('on',d.dataset.pick===rid));
-  if(r.k==='yt')ytAudio($('#stp'),r);else stemPlayer($('#stp'),base+rid,{stems:r.stems||[],dur:r.dur||0})};
+  if(r.k==='yt')ytAudio($('#stp'),r);else if(r.k==='sp')spEmbed($('#stp'),r);else stemPlayer($('#stp'),base+rid,{stems:r.stems||[],dur:r.dur||0})};
  el.querySelectorAll('[data-pick]').forEach(d=>d.onclick=()=>play(d.dataset.pick));bindEd(el,c,id,x);if(cur)play(cur)}
 function tabSpartiti(el,c,id,x,list,base){
  const own=list.filter(r=>!r.auto),auto=list.filter(r=>r.auto);
@@ -1056,7 +1056,7 @@ function cleanName(s){return String(s).replace(/\.[a-z0-9]{2,4}$/i,'').replace(/
  .replace(/[_]+/g,' ').replace(/\[[^\]]*\]/g,'').replace(/\((official[^)]*|audio|video|hd|hq|lyrics?|remaster(ed)?[^)]*)\)/ig,'').replace(/\b(1080p|720p|480p|360p|4k|hd)\b/ig,'').replace(/\s{2,}/g,' ').replace(/^[\s\-–·]+|[\s\-–·]+$/g,'').trim()}
 function guessCat(k,txt){const s=' '+words(txt).join(' ')+' ';
  if(k==='pdf')return'Partitura';if(k==='midi')return'MIDI';
- if(k==='audio')return/ (live|concert|concerto|festival) /.test(s)?'Registrazione live':'Registrazione';
+ if(k==='audio'||k==='sp')return/ (live|concert|concerto|festival) /.test(s)?'Registrazione live':'Registrazione';
  if(/ (tutorial|tuto|lesson|lezione|lezioni|how to|learn|cours|masterclass|breakdown|analysis|analisi|play like|come suonare|tutoriel|lecon) /.test(s))return/ (masterclass|lesson|lezione|cours|lecon) /.test(s)&&!/ tutorial /.test(s)?'Lezione':'Tutorial';
  if(/ (interview|intervista|entretien|talks|talking) /.test(s))return'Intervista';
  if(/ (live|concert|concerto|festival|fest|tiny desk|session|sessions|performance|performs|tv|show|jazzfest) /.test(s))return'Live';return'Video'}
@@ -1069,17 +1069,26 @@ async function id3(file){try{const b=new Uint8Array(await file.slice(0,262144).a
  while(p+10<Math.min(b.length,sz+10)){const id=String.fromCharCode(b[p],b[p+1],b[p+2],b[p+3]);if(!/^[A-Z0-9]{4}$/.test(id))break;
   const fs=v===4?(b[p+4]<<21)|(b[p+5]<<14)|(b[p+6]<<7)|b[p+7]:(b[p+4]<<24)|(b[p+5]<<16)|(b[p+6]<<8)|b[p+7];const fr=b.subarray(p+10,p+10+fs);
   if(id==='TIT2')out.t=txt(fr);if(id==='TPE1')out.a=txt(fr);if(id==='TALB')out.al=txt(fr);if(id==='TYER'||id==='TDRC')out.y=txt(fr).slice(0,4);p+=10+fs}return out}catch(e){return{}}}
+/* ---- Spotify: brano, album, playlist o podcast incorporati col lettore di Spotify ---- */
+function spParse(u){const m=String(u).match(/open\.spotify\.com\/(?:intl-[a-z-]+\/)?(?:embed\/)?(track|album|playlist|episode|show|artist)\/([A-Za-z0-9]{22})/)||String(u).match(/spotify:(track|album|playlist|episode|show|artist):([A-Za-z0-9]{22})/);return m&&{tipo:m[1],id:m[2]}}
+async function spInfo(u){const s=spParse(u);if(!s)return{};const url='https://open.spotify.com/'+s.tipo+'/'+s.id;
+ for(const api of ['https://open.spotify.com/oembed?url=','https://noembed.com/embed?url=']){try{const r=await fetch(api+encodeURIComponent(url));const j=await r.json();if(j&&j.title)return{t:j.title,a:j.author_name||''}}catch(e){}}return{}}
+function spEmbed(el,r,o={}){const s=spParse(r.u);if(!s){el.innerHTML='<div class="rst">Link Spotify non valido</div>';return}
+ const h=s.tipo==='track'||s.tipo==='episode'?152:(o.small?232:352);
+ el.innerHTML=`<div class="spw"><iframe src="https://open.spotify.com/embed/${s.tipo}/${s.id}?utm_source=generator" width="100%" height="${h}" frameborder="0" style="border-radius:12px;display:block" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe></div>
+ <p class="hint" style="margin-top:6px">Su Spotify si sente il brano intero se sei collegato al tuo account (anche in Safari); altrimenti solo un'anteprima. Velocità e loop A-B qui non ci sono: per quelli serve il file MP3.</p>`;
+ if(!o.own){ASCP={destroy(){el.innerHTML=''}}}}
 async function ytInfo(u){try{const r=await fetch('https://noembed.com/embed?url='+encodeURIComponent(u));const j=await r.json();return j&&j.title?{t:j.title,a:j.author_name}:{} }catch(e){return{}}}
 function ascUpload(c,bid,cat,o){o=o||{};const R0=o.root||$('#app'),Q=s=>R0.querySelector(s),items=[];let nid=0;
  const opts=sel=>Object.keys(cat).sort((a,b)=>cat[a].t.localeCompare(cat[b].t)).map(k=>`<option value="${k}" ${k===sel?'selected':''}>${esc(cat[k].t)}${cat[k].a?' · '+esc(cat[k].a):''}</option>`).join('');
  R0.innerHTML=(o.root?`<div class="lup-h">${bid?esc(cat[bid].t):'Aggiungi alla libreria'}<small>${bid?'Aggiungi file a questo brano':'Brano nuovo o file per un brano che hai già: riconosco brano, titolo e categoria'}${o.lez?' · collegato alla lezione '+o.lez:''}</small></div><div>`:
  `<section class="chero"><div class="wrap"><div class="eyebrow">Ascolti consigliati</div><h1 class="nt">${bid?esc(cat[bid].t):'Carica file'}</h1><p>${bid?'Aggiungi file a questo brano':'Riconosco da solo brano, titolo e categoria'}</p></div></section><div class="wrap">`)+`
  <form class="af" id="up"><label class="drop"><input type="file" multiple accept="audio/*,video/*,image/*,.mp3,.m4a,.wav,.mp4,.mov,.pdf,.mid,.midi"><b>＋ Scegli i file</b><small>Registrazioni, video (live, tutorial…), spartiti PDF o in foto/screenshot (più pagine insieme), MIDI</small></label>
- <div class="two2"><input type="text" id="ytu" placeholder="Oppure incolla un link YouTube" inputmode="url"><button type="button" class="btn sm" id="yta">Aggiungi</button></div>
+ <div class="two2"><input type="text" id="ytu" placeholder="Oppure incolla un link YouTube o Spotify" inputmode="url"><button type="button" class="btn sm" id="yta">Aggiungi</button></div>
  <div id="items"></div>${tokHTML()}<button class="go" type="submit" disabled>Pubblica</button><div class="note" id="upm"></div></form>
  <div class="row">${o.root?'<button class="btn sm" type="button" id="upX">‹ Torna alla libreria</button>':`<button class="btn sm" data-go="${c.id}-ascolti${bid?'-'+bid:''}">‹ Annulla</button>`}</div><div class="foot"></div></div>`;if(!o.root)window.scrollTo(0,0);else Q('#upX').onclick=o.onCancel;
  const f=Q('#up'),say=m=>Q('#upm').textContent=m;
- function draw(){Q('#items').innerHTML=items.map(it=>`<div class="ui" data-i="${it.n}"><div class="rh"><span class="ri">${KIND[it.k]}</span><div class="rt"><b>${esc(it.name)}</b><small>${it.size?(it.size/1e6).toFixed(1)+' MB':'link'}${it.guess?' · riconosciuto: '+esc(it.guess):''}</small></div><button type="button" class="ed" data-rm="${it.n}">✕</button></div>
+ function draw(){Q('#items').innerHTML=items.map(it=>`<div class="ui" data-i="${it.n}"><div class="rh"><span class="ri">${KIND[it.k]}</span><div class="rt"><b>${esc(it.name)}</b><small>${it.size?(it.size/1e6).toFixed(1)+' MB':it.k==='sp'?'link Spotify':'link YouTube'}${it.guess?' · riconosciuto: '+esc(it.guess):''}</small></div><button type="button" class="ed" data-rm="${it.n}">✕</button></div>
   <label>Titolo<input type="text" data-f="t" value="${esc(it.t)}"></label>
   <div class="two"><label>Categoria<select data-f="c">${CATS[it.ya?'audio':it.k].filter(k=>k!=='Trascrizione automatica').map(k=>`<option ${k===it.c?'selected':''}>${k}</option>`).join('')}</select></label>
   ${bid?'':`<label>Brano<select data-f="b"><option value="__new" ${it.b==='__new'?'selected':''}>＋ Nuovo brano</option>${opts(it.b)}</select></label>`}</div>
@@ -1104,12 +1113,12 @@ function ascUpload(c,bid,cat,o){o=o||{};const R0=o.root||$('#app'),Q=s=>R0.query
   const b=bid||guessBrano(cat,txt),c0=guessCat(k,txt);let t=cleanName(o.tag&&o.tag.t?o.tag.t:o.name);
   if(b){const tw=words(cat[b].t).join(' ');t=t.split(/\s+[-–·|:]\s+|\s*[|·]\s*/).filter(p=>{const pw=words(p).join(' ');return pw&&pw!==tw&&!(cat[b].a&&normA(p)===normA(cat[b].a))}).join(' · ');
    const tr=words(t),tt=words(cat[b].t);if(tt.length&&tr.slice(0,tt.length).join(' ')===tt.join(' ')){t=t.replace(new RegExp('^\\W*'+tt.map(w=>w+'\\W*').join(''),'i'),'')}
-   t=cleanName(t.replace(/[()]/g,' '))||({audio:'Registrazione',pdf:'Spartito',midi:'MIDI'}[k]||c0)}
+   t=cleanName(t.replace(/[()]/g,' '))||({audio:'Registrazione',sp:'Registrazione',pdf:'Spartito',midi:'MIDI'}[k]||c0)}
   if(/^(score|sheet( music)?|spartito|partitura|transcription|trascrizione)$/i.test(t))t='Spartito';
   const it={n:nid++,k,name:o.name,size:o.size,file:o.file,u:o.u,t:t||o.name,c:c0,b:b||'__new',guess:b?(bid?'':cat[b].t):'',
    nt:b?'':cleanName((o.tag&&o.tag.t)||o.name.split(/\s*[-–|]\s*/).slice(-1)[0]),na:(o.tag&&o.tag.a)||'',tipo:'solo',midi_auto:true,pdf_auto:false,omr:k==='pdf',al:o.tag&&o.tag.al,y:o.tag&&o.tag.y};
   if(!b){const ps=cleanName(o.name).split(/\s+[-–]\s+/);if(o.tag&&o.tag.t){it.nt=cleanName(o.tag.t)}else if(ps.length>1){it.na=it.na||ps[0];it.nt=cleanName(ps.slice(1).join(' - ').replace(/\([^)]*\)/g,''))}
-   it.t={audio:'Registrazione',pdf:'Spartito',midi:'MIDI'}[k]||c0}
+   it.t={audio:'Registrazione',sp:'Registrazione',pdf:'Spartito',midi:'MIDI'}[k]||c0}
   items.push(it);draw()}
  async function prepImgs(it){it.busy=true;draw();try{for(const p of it.pages){if(p.url)URL.revokeObjectURL(p.url);Object.assign(p,await prepPage(p.file,it.crop))}}
   catch(err){toast(err.message)}it.busy=false;draw()}
@@ -1121,7 +1130,9 @@ function ascUpload(c,bid,cat,o){o=o||{};const R0=o.root||$('#app'),Q=s=>R0.query
     it={n:nid++,k:'img',pages:[],t:'Trascrizione',c:'Partitura',b:b||'__new',guess:b&&!bid?cat[b].t:'',nt:'',na:'',crop:true,omr:true};items.push(it)}
    it.pages.push(...imgs.map(file=>({file})));it.size=it.pages.reduce((a,p)=>a+p.file.size,0);it.name=it.pages.length+(it.pages.length===1?' pagina':' pagine');
    await prepImgs(it)}};
- Q('#yta').onclick=async()=>{const u=Q('#ytu').value.trim();if(!ytId(u))return toast('Link YouTube non valido');say('Leggo il titolo del video…');const i=await ytInfo(u);say('');
+ Q('#yta').onclick=async()=>{const u=Q('#ytu').value.trim();if(!ytId(u)&&spParse(u)){say('Leggo il titolo da Spotify…');const i=await spInfo(u);say('');await add('sp',{name:i.t?i.t+(i.a?' · '+i.a:''):'Brano Spotify',u,tag:i.t?{t:i.t,a:i.a}:null});Q('#ytu').value='';return}
+  if(/spotify\.link|spoti\.fi/.test(u))return toast('Questo è un link breve di Spotify: in Spotify usa «Condividi → Copia link» dal brano e incollalo qui');
+  if(!ytId(u))return toast('Link YouTube o Spotify non valido');say('Leggo il titolo del video…');const i=await ytInfo(u);say('');
   await add('yt',{name:i.t?i.t+(i.a?' · '+i.a:''):u,u,tag:null});Q('#ytu').value=''};
  f.onsubmit=async e=>{e.preventDefault();const btn=f.querySelector('.go');btn.disabled=true;
   try{const t=await needTok(f,say);if(!t){btn.disabled=false;return}
@@ -1130,6 +1141,7 @@ function ascUpload(c,bid,cat,o){o=o||{};const R0=o.root||$('#app'),Q=s=>R0.query
    for(const it of items){let b=bid||it.b;if(b==='__new'){const nt=(it.nt||it.t).trim();b=Object.keys(cat).find(k=>normA(cat[k].t)===normA(nt))||slug(nt);it.newB=Object.assign({t:nt,a:(it.na||'').trim(),al:it.al||'',anno:it.y||''},it.lc?{cat:it.lc}:{})}
     const rid='r'+stamp+it.n,r={id:rid,k:it.k,c:it.c,t:(it.t||'').trim()||it.name};let ext=(it.name.match(/\.([a-z0-9]{2,4})$/i)||[,'bin'])[1].toLowerCase();
     if(it.k==='yt'){Object.assign(r,{u:it.u,st:'pronto'},it.ya?{solo_audio:true}:{})}
+    else if(it.k==='sp'){Object.assign(r,{u:it.u,st:'pronto'})}
     else if(it.k==='img'){const fs=[];for(let i=0;i<it.pages.length;i++){say(`Cifro la pagina ${i+1} di ${it.pages.length}…`);const fn=`${rid}/p${i+1}.jpg.enc`;
       files.push({path:`ascolti/${b}/${fn}`,label:`pagina ${i+1}`,u8:await encBytes(new Uint8Array(await it.pages[i].blob.arrayBuffer()))});fs.push(fn)}
      Object.assign(r,{f:fs,st:'pronto'},it.omr?{omr:'attesa'}:{})}
@@ -1142,7 +1154,7 @@ function ascUpload(c,bid,cat,o){o=o||{};const R0=o.root||$('#app'),Q=s=>R0.query
     'Ascolti: '+adds.map(([b,r])=>r.t).join(', ').slice(0,120)+' (dal sito)',say);
    CAT=Promise.resolve(out);const bs=[...new Set(adds.map(a=>a[0]))];
    toast(adds.some(a=>a[1].st==='elaborazione')?'✓ Pubblicato. Audio e video si preparano in 5–15 minuti.':adds.some(a=>a[1].omr)?'✓ Pubblicato. Il MIDI dalla partitura arriva in 5–20 minuti.':'✓ Pubblicato');
-   bs.forEach(b=>{const r=adds.find(a=>a[0]===b)[1];ASCTAB[b]=r.k==='audio'||r.solo_audio?'ascolto':r.k==='video'||r.k==='yt'?'video':'spartiti'});
+   bs.forEach(b=>{const r=adds.find(a=>a[0]===b)[1];ASCTAB[b]=r.k==='audio'||r.k==='sp'||r.solo_audio?'ascolto':r.k==='video'||r.k==='yt'?'video':'spartiti'});
    if(o.onDone)o.onDone(bs);else go(c.id+'-ascolti'+(bs.length===1?'-'+bs[0]:''))}
   catch(err){btn.disabled=false;say(ghErr(err))}};
  draw()}
@@ -1159,7 +1171,7 @@ function catOf(x){if(x.cat)return{k:x.cat,s:false};if(x.cat_sugg)return{k:x.cat_
  const a=x.r.find(r=>r.k==='audio');if(a&&a.tipo!=='band')return{k:'piano',s:true};
  if(ASC.disco.some(d=>normA(d.a)===normA(x.a)))return{k:'piano',s:true};return{k:a?'stile':'piano',s:true}}
 function lezOf(id,x){const L=(x.lez||[]).slice();if(!L.includes(1)&&ASC.disco.some(d=>normA(d.a)===normA(x.a)))L.unshift(1);return L.sort((a,b)=>a-b)}
-function readyAudio(x){return x.r.find(r=>r.k==='audio'&&r.st==='pronto'&&r.f)||x.r.find(r=>r.k==='yt'&&r.solo_audio&&r.u)}
+function readyAudio(x){return x.r.find(r=>r.k==='audio'&&r.st==='pronto'&&r.f)||x.r.find(r=>r.k==='yt'&&r.solo_audio&&r.u)||x.r.find(r=>r.k==='sp'&&r.u)}
 function openLib(tab){const L=curLesson();LIB.tab=tab||(L?'lez':LIB.tab&&LIB.tab!=='lez'?LIB.tab:'piano');LIB.view='list';
  $('#lib').classList.add('show');document.body.classList.add('p-lib');drawLib()}
 function closeLib(){$('#lib').classList.remove('show');document.body.classList.remove('p-lib')}
@@ -1178,7 +1190,7 @@ async function drawLib(){const c=nolaCourse(),L=curLesson(),body=$('#libBody');i
  ids.sort((a,b)=>String(cat[b].agg||'').localeCompare(String(cat[a].agg||''))||cat[a].t.localeCompare(cat[b].t));
  const intro={lez:L?(L.n===1?'Gli ascolti consigliati dal PDF della lezione 1 e i brani che hai collegato a questa lezione.':`I brani che hai collegato alla lezione ${L.n}. Con 📌 colleghi alla lezione anche un brano che hai già.`):'',
   piano:'Brani dove il piano è protagonista: da ascoltare, trascrivere e suonare.',stile:'Brani di New Orleans per entrare nello stile: groove, band, voce, seconde linee.'}[LIB.tab];
- body.innerHTML=`<button class="lnew" id="libAdd"><b>＋</b><span><strong>Aggiungi un brano o un file</strong><small>MP3, video, spartiti, MIDI o link YouTube${L?' · resta collegato alla lezione '+L.n:''}</small></span></button>
+ body.innerHTML=`<button class="lnew" id="libAdd"><b>＋</b><span><strong>Aggiungi un brano o un file</strong><small>MP3, video, spartiti, MIDI, link YouTube o Spotify${L?' · resta collegato alla lezione '+L.n:''}</small></span></button>
   <p class="lhint">${intro}</p>
   ${ids.map(k=>{const x=cat[k],a=readyAudio(x),co=catOf(x),lz=lezOf(k,x),pin=L&&lz.includes(L.n),wait=busy(x);
    return`<div class="litem"><button class="lp ${a?'ok':''} ${LIB.playing===k?'on':''}" data-lplay="${k}" ${a?'':'disabled'} aria-label="Ascolta">${LIB.playing===k?'■':a?'▶':wait?'⏳':'♪'}</button>
@@ -1201,6 +1213,8 @@ async function catEdit(change,msg){const t=ghTok();if(!t)return toast('Serve la 
 async function libPlay(k,cat){const P=$('#libPlay');
  if(LIB.playing===k){const a=P.querySelector('audio');if(a)a.pause();LIBYT.destroy();P.hidden=true;P.innerHTML='';LIB.playing=null;return drawLib()}
  const x=cat[k],r=readyAudio(x);if(!r)return;LIB.playing=k;drawLib();
+ if(r.k==='sp'){P.hidden=false;P.innerHTML=`<div class="r1"><b>♫ ${esc(x.t)}${x.a?' · '+esc(x.a):''}</b><button class="sx" data-lx aria-label="Chiudi">✕</button></div><div data-ly></div>`;
+  P.querySelector('[data-lx]').onclick=()=>libPlay(k,cat);spEmbed(P.querySelector('[data-ly]'),r,{small:true,own:true});return}
  if(r.k==='yt'){P.hidden=false;P.innerHTML=`<div class="r1"><b>♫ ${esc(x.t)}${x.a?' · '+esc(x.a):''}</b><button class="sx" data-lx aria-label="Chiudi">✕</button></div><div data-ly></div>`;
   P.querySelector('[data-lx]').onclick=()=>{LIBYT.destroy();libPlay(k,cat)};const keep=ASCP;ytAudio(P.querySelector('[data-ly]'),r,{small:true,own:LIBYT});ASCP=keep;return}
  P.hidden=false;P.innerHTML=`<div class="r1"><b>♫ ${esc(x.t)}${x.a?' · '+esc(x.a):''}</b><span class="seg sp">${[[.5,'50%'],[.75,'75%'],[1,'100%']].map(([v,l])=>`<button data-lr="${v}" class="${v===1?'on':''}">${l}</button>`).join('')}</span><button class="sx" data-lx aria-label="Chiudi">✕</button></div><audio controls preload="auto"></audio>`;
