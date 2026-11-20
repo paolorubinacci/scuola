@@ -1,0 +1,61 @@
+# Diario di pratica: quando dal sito si salva una sessione, trascrive il messaggio vocale e scrive i riassunti (tools/diario.py).
+# Segreti: SCUOLA_PW (obbligatorio). ANTHROPIC_API_KEY (facoltativo): senza, il diario ha le trascrizioni ma non i riassunti scritti.
+name: Diario - trascrizioni e riassunti
+on:
+  push:
+    branches: [main]
+    paths: ['diario/indice.json', 'diario/voci/**']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: diario
+  cancel-in-progress: false
+jobs:
+  diario:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: C'e' qualcosa da fare?
+        id: c
+        env:
+          SCUOLA_PW: ${{ secrets.SCUOLA_PW }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          pip install -q cryptography
+          echo "fare=$(python tools/diario.py --controlla)" >> "$GITHUB_OUTPUT"
+          echo "audio=$(python tools/diario.py --controlla-audio)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        if: steps.c.outputs.audio == 'si'
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.cache/huggingface
+          key: diario-whisper-v1
+      - name: Trascrizione (faster-whisper)
+        if: steps.c.outputs.audio == 'si'
+        run: pip install -q faster-whisper
+      - name: Elabora
+        if: steps.c.outputs.fare == 'si'
+        env:
+          SCUOLA_PW: ${{ secrets.SCUOLA_PW }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python tools/diario.py
+      - name: Pubblica
+        if: steps.c.outputs.fare == 'si'
+        run: |
+          git config user.name "Scuola bot"
+          git config user.email "scuola-bot@users.noreply.github.com"
+          git add -A diario/elab diario/settimane 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -q -m "Diario: trascrizioni e riassunti"
+          for i in 1 2 3 4; do git pull -q --rebase && git push -q && break; sleep 6; done
+      - name: Aggiorna il sito
+        if: steps.c.outputs.fare == 'si'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X POST repos/${{ github.repository }}/pages/builds || true

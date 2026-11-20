@@ -119,6 +119,7 @@ figure{margin:18px 0}figure img{width:100%;background:#fff;border:1px solid var(
 .dot{width:9px;height:9px;border-radius:50%;background:#fff;animation:pulse 1s infinite}@keyframes pulse{50%{opacity:.25}}
 /* pannelli flottanti (Strumenti a destra, Libreria a sinistra): non coprono il sito, si continua a navigare */
 .fab.fl{right:auto;left:16px}
+@media (max-width:430px){.fab:not(.fl){flex-direction:column-reverse;align-items:flex-end}}
 @media (max-width:699px){body.p-tools:not(.p-mini) .fab.fl{display:none}body.p-mini .lib{bottom:var(--minih,140px);max-height:calc(86vh - var(--minih,140px));padding-bottom:0;box-shadow:0 -6px 24px rgba(15,27,45,.18)}
  body.p-mini .fab.fl{bottom:calc(var(--minih,140px) + 12px)}body.p-mini #app{padding-bottom:calc(var(--minih,140px) + 70px)}}
 .fab .libb{background:#fff;color:var(--ink);box-shadow:0 10px 28px rgba(15,27,45,.18);border:1px solid var(--line)}
@@ -202,6 +203,36 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .grid16 .c.x{background:var(--blue)}.grid16 .c.o{background:var(--sky)}
 .grid16 .c.now{outline:2px solid var(--coral)}
 .timer{font:800 54px var(--font);letter-spacing:-.03em;text-align:center}
+/* pratica: card in home, barra nella lezione, finestra «salva sessione» */
+.prac{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin:12px 0 4px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.prac .pt{font:800 30px var(--font);letter-spacing:-.02em;min-width:110px}.prac .pt small{display:block;font:600 12px var(--font);color:var(--muted);letter-spacing:0}
+.prac .pb{display:flex;gap:8px;flex-wrap:wrap;flex:1;justify-content:flex-end}
+.prac .pbig{border:0;border-radius:999px;background:var(--blue);color:#fff;font:700 16px var(--font);padding:13px 20px;cursor:pointer}.prac .pbig.on{background:var(--coral)}
+.prac .psec{border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--ink);font:700 15px var(--font);padding:12px 16px;cursor:pointer}
+.lbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fff;border:1px solid var(--nline,var(--line));border-radius:14px;padding:10px 12px;margin:14px 0}
+.lbar b{flex:1;min-width:160px;font:600 14px var(--font);color:var(--ink)}
+.lbar button{border:0;border-radius:999px;background:var(--blue);color:#fff;font:700 15px var(--font);padding:11px 16px;cursor:pointer}.lbar button.on{background:var(--coral)}.lbar button.sec{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.t-nola .lbar button{background:var(--navy)}.t-nola .lbar button.on{background:var(--coral)}.t-nola .lbar button.sec{background:#fff;color:var(--navy)}
+.sess label{display:block;font:700 12px var(--font);color:var(--muted);margin:12px 0 4px;text-transform:uppercase;letter-spacing:.06em}
+.sess input,.sess textarea{width:100%;box-sizing:border-box;font:500 16px var(--font);padding:10px 12px;border:1px solid var(--line);border-radius:12px}
+.sess .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rec{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px}
+.rec .rb{border:0;border-radius:999px;background:#fff;border:1.5px solid var(--coral);color:var(--coral);font:700 15px var(--font);padding:11px 16px;cursor:pointer}
+.rec .rb.on{background:var(--coral);color:#fff}.rec audio{height:36px;max-width:100%}
+/* diario */
+.dweek{margin:26px 0 8px;font:800 18px var(--font)}.dweek small{font:600 13px var(--font);color:var(--muted);margin-left:6px}
+.drecap{background:#f4f8ff;border:1px solid #d9e6ff;border-radius:16px;padding:14px 16px;margin:8px 0 12px;font:500 15px/1.55 var(--font);white-space:pre-wrap}
+.drecap .lbl{margin:0 0 6px}
+.dent{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:8px 0;font:500 15px/1.5 var(--font)}
+.dent .dh{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}.dent .dh b{font-weight:800}.dent .dh span{color:var(--muted);font-size:13px}
+.dent .dx{white-space:pre-wrap;margin-top:6px}.dent .dt{margin-top:6px;color:var(--muted);font-size:14px;white-space:pre-wrap}
+.dent .dw{color:var(--muted);font-size:13px;margin-top:6px}
+/* schede informative (persone, gruppi, brani, dischi) */
+.gl{border-bottom:1.5px dotted currentColor;cursor:pointer;text-decoration:none}.gl:hover{background:rgba(47,123,246,.08)}
+.gpop{position:fixed;z-index:500;background:#fff;color:var(--ink);border-radius:16px;box-shadow:0 14px 44px rgba(15,27,45,.28);padding:14px 16px 16px;width:min(360px,calc(100vw - 24px));font:500 15px/1.5 var(--font)}
+.gpop .gh{display:flex;align-items:flex-start;gap:10px}.gpop .gh b{flex:1;font:800 17px/1.25 var(--font)}.gpop .gk{display:block;font:700 11px var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.gpop p{margin:8px 0 0}.gpop .ga{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.gpop .ga button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 12px;font:700 13px var(--font);cursor:pointer;color:var(--ink)}
+@media (max-width:699px){.gpop{left:12px!important;right:12px;width:auto;bottom:calc(12px + var(--safe-b));top:auto!important}}
 .log{list-style:none;padding:0;margin:10px 0;display:grid;gap:8px}
 .log li{background:var(--surf);border-radius:12px;padding:10px 12px;font-size:14px}.log li .d{font-size:12px;color:var(--muted)}
 textarea,input[type=text],input[type=password],input[type=number]{width:100%;background:#fff;border:1px solid var(--line);border-radius:12px;color:var(--ink);padding:12px;font:16px var(--font)}
@@ -400,8 +431,11 @@ if(document.fonts){document.fonts.load('20px NolaMardiGras').then(f=>{NOLA=f.len
 new MutationObserver(()=>applyNola(document)).observe(document.getElementById('app'),{childList:true});
 function boot(){$('#gate').remove();render()}
 function progress(){return LS.get('done',{})}
+/* lezioni fatte: ora si salva il momento (conta nei giorni di fila); le vecchie spunte senza data valgono da oggi */
+(()=>{const p=LS.get('done',{});let ch=false;for(const k in p)if(p[k]===true){p[k]=Date.now();ch=true}if(ch)LS.set('done',p)})();
 function render(){
  ascStop();
+ LESSON=null;if(location.hash==='#diario')return renderDiario();
  const h=location.hash.slice(1),am=h.match(/^(.+?)-ascolti(?:-([a-z0-9]+)(?:-(modifica|carica))?)?$/);
  if(am){const ac_=DATA.courses.find(x=>x.id===am[1]);if(ac_)return renderAscolti(ac_,am[2],am[3])}
  const [cid,lid]=h.split('-l');const c=DATA.courses.find(x=>x.id===cid);
@@ -409,8 +443,18 @@ function render(){
  if(c)return renderCourse(c);
  renderHome()}
 function dayKey(ts){const d=new Date(ts);return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
-function streakDays(){const days=new Set(LS.get('log',[]).map(e=>dayKey(e.at)));let n=0,d=new Date();if(!days.has(dayKey(d)))d.setDate(d.getDate()-1);while(days.has(dayKey(d))){n++;d.setDate(d.getDate()-1)}return n}
-function weekMin(){return Math.round(LS.get('log',[]).filter(e=>Date.now()-e.at<7*864e5).reduce((a,e)=>a+e.ms,0)/60000)}
+/* attività: sessioni salvate (questo dispositivo + diario sincronizzato), minuti registrati in automatico, lezioni segnate come fatte */
+function sessions(){const loc=LS.get('log',[]),ids=new Set(loc.map(e=>e.id).filter(Boolean));
+ return loc.concat(((DIARIO&&DIARIO.voci)||[]).filter(v=>!ids.has(v.id)))}
+function autoMs(){return LS.get('auto',{})}
+function activeDays(){const days=new Set(sessions().filter(e=>e.ms>0).map(e=>dayKey(e.at)));
+ Object.entries(autoMs()).forEach(([k,ms])=>{if(ms>=60000)days.add(k)});
+ Object.values(progress()).forEach(v=>{if(typeof v==='number')days.add(dayKey(v))});return days}
+function streakDays(){const days=activeDays();let n=0,d=new Date();if(!days.has(dayKey(d)))d.setDate(d.getDate()-1);while(days.has(dayKey(d))){n++;d.setDate(d.getDate()-1)}return n}
+function weekStart(){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getTime()}
+function weekMin(){const w0=weekStart();let ms=sessions().filter(e=>e.at>=w0).reduce((a,e)=>a+(e.ms||0),0);
+ Object.entries(autoMs()).forEach(([k,v])=>{const [y,m,d]=k.split('-').map(Number);if(new Date(y,m-1,d).getTime()>=w0)ms+=v});return Math.round(ms/60000)}
+function todayMin(){const k=dayKey(Date.now());return Math.round((sessions().filter(e=>dayKey(e.at)===k).reduce((a,e)=>a+(e.ms||0),0)+(autoMs()[k]||0))/60000)}
 function updStreak(){const s=streakDays(),el=$('#streak');el.hidden=!s;el.textContent='🔥 '+s+(s===1?' giorno':' giorni')}
 function theme(n){$('#app').className=n||''}
 function nextLesson(c){const done=progress();return c.lessons.find(l=>!done[c.id+'-'+l.n])}
@@ -418,13 +462,16 @@ function renderHome(){
  pfToken++;theme('');$('#crumb').textContent='';updStreak();
  const done=progress(),goal=LS.get('goal',150),wm=weekMin(),tot=DATA.courses.reduce((a,c)=>a+c.lessons.filter(l=>done[c.id+'-'+l.n]).length,0);
  $('#app').innerHTML=`<div class="wrap"><section class="hero"><div class="eyebrow">Ciao Paolo</div><h1>La tua <em>scuola</em> di musica</h1><p>Videocorsi, esercizi e strumenti per fare pratica ogni giorno.</p></section>
- <div class="stats"><div class="stat goal" id="goalStat"><b>${wm}<small style="font-size:13px;font-weight:600"> / ${goal} min</small></b><span>pratica questa settimana</span><div class="meter"><i style="width:${Math.min(100,wm/goal*100)}%"></i></div></div>
+ <div class="stats"><div class="stat goal" id="goalStat"><b>${wm}<small style="font-size:13px;font-weight:600"> / ${goal} min</small></b><span>pratica questa settimana · da lunedì</span><div class="meter"><i style="width:${Math.min(100,wm/goal*100)}%"></i></div></div>
  <div class="stat"><b>${streakDays()} 🔥</b><span>giorni di fila</span></div><div class="stat"><b>${tot}</b><span>lezioni completate</span></div></div>
+ <div class="prac" id="homePrac"></div>
  <div class="sec-t">I miei corsi</div>
  <div class="grid">${DATA.courses.map(c=>{const n=c.lessons.length,d=c.lessons.filter(l=>done[c.id+'-'+l.n]).length,nx=nextLesson(c);
   return`<div class="course ${esc(c.theme||'')}" data-go="${c.id}"><div class="band"><div class="eyebrow">${esc(c.kind||'Videocorso')}</div><h2 class="nt">${esc(c.title)}</h2></div><div class="body"><div class="meta">${esc(c.sub)}</div><div class="bar"><i style="width:${n?d/n*100:0}%"></i></div><div class="next"><span>${d} / ${n} lezioni</span>${nx?`<b>Continua · Lezione ${nx.n} ›</b>`:'<b>Completato ✓</b>'}</div></div></div>`}).join('')}
   <div class="course soon"><div class="eyebrow">Prossimamente</div><h2>Altri corsi in arrivo</h2><div class="meta">Qui aggiungeremo i prossimi videocorsi.</div></div></div>
  <div class="foot">Scuola · Paolo Rubinacci · area privata</div></div>`;window.scrollTo(0,0);
+ drawPrac();$('#goalStat').style.cursor='pointer';$('#goalStat').onclick=()=>go('diario');
+ if(!DIARIO&&!diarioLoading)loadDiario().then(()=>{if(!location.hash)renderHome()}).catch(()=>{});
 }
 function renderCourse(c){
  theme(c.theme?'t-'+c.theme.replace(/^.*\s/,''):'');$('#crumb').textContent=c.title;updStreak();const done=progress();
@@ -437,6 +484,7 @@ function renderLesson(c,l){
  theme(c.theme?'t-'+c.theme.replace(/^.*\s/,''):'');updStreak();
  $('#crumb').textContent=c.title+' · Lezione '+l.n;const key=c.id+'-'+l.n,done=progress()[key];
  let h=`<section class="chero"><div class="wrap"><div class="eyebrow">Lezione ${l.n} · ${esc(l.dur||'')}</div><h1 class="nt">${esc(l.title)}</h1><p>${esc(c.title)} · ${esc(c.sub.split('·')[0])}</p></div></section><div class="wrap">`;
+ h+=`<div class="lbar" id="lesPrac"></div>`;
  if(l.brief)h+=`<div class="brief"><h3 class="nt">In breve</h3>${l.brief}</div>`;
  h+=`<div class="flow">`+(l.blocks||[]).map(blockHTML).join('')+`</div>`;
  if(!l.ready)h+=`<div class="pending">Questa lezione è in preparazione: trascrizione, citazioni dal PDF del corso e partiture arrivano qui, con i passaggi suonati integrati nel testo.</div>`;
@@ -445,7 +493,8 @@ function renderLesson(c,l){
   <button class="btn sm ${done?'on':''}" id="doneBtn">${done?'✓ Completata':'Segna come fatta'}</button>
   ${next?`<button class="btn sm" data-go="${c.id}-l${next.n}">Lezione ${next.n} ›</button>`:'<span></span>'}</div><div class="foot"></div></div>`;
  $('#app').innerHTML=h;window.scrollTo(0,0);
- $('#doneBtn').onclick=()=>{const p=progress();p[key]=!p[key];LS.set('done',p);renderLesson(c,l)};
+ LESSON={c,l};drawPrac();
+ $('#doneBtn').onclick=()=>{const p=progress();if(p[key])delete p[key];else{p[key]=Date.now();toast('✓ Lezione fatta: oggi conta nei giorni di fila')}LS.set('done',p);updStreak();renderLesson(c,l)};
  document.querySelectorAll('.clip[data-src]').forEach(initClip);
  document.querySelectorAll('.kb[data-k]').forEach(initKb);
  document.querySelectorAll('img[data-enc]').forEach(async i=>{i.src=await mediaURL(i.dataset.enc,'image/png')});
@@ -516,19 +565,19 @@ function initKb(el){
   for(let m=a;m<=z;m++)if(isBlack(m)){const x=pos[m-1]+ww*.71,on=st.on.get(m);ctx.fillStyle=on?(on==='R'?'#2f7bf6':'#ff6a4d'):'#1d2433';ctx.fillRect(x,0,ww*.58,H*.6)}}
  function upd(){el.querySelector('.kbpm').textContent=Math.round(base*st.sp)+' bpm';el.querySelector('.kn').textContent=b.key===null?(st.tr?(st.tr>0?'+':'')+st.tr+' st':'Originale'):keyName()+(st.tr?` (${st.tr>0?'+':''}${st.tr})`:'');draw()}
  function bpm(){return base*st.sp}
- function stop(){st.playing=false;clearInterval(st.timer);cancelAnimationFrame(st.raf);st.on.clear();el.querySelector('.play').classList.remove('on');el.querySelector('.play').textContent='▶';el.querySelector('.prog i').style.width='0';draw();if(kbActive===stop)kbActive=null}
+ function stop(){if(st.playing)cutBus();st.playing=false;TICK.del(st.timer);cancelAnimationFrame(st.raf);st.on.clear();el.querySelector('.play').classList.remove('on');el.querySelector('.play').textContent='▶';el.querySelector('.prog i').style.width='0';draw();if(kbActive===stop)kbActive=null}
  async function start(){if(kbActive)kbActive();stopMetro();stopRhythm();ac();const pb=el.querySelector('.play');
   if(!st.ready){pb.textContent='…';await loadPiano(lo+Math.min(0,st.tr)-6,hi+Math.max(0,st.tr)+6);st.ready=true}
   kbActive=stop;st.playing=true;st.t0=AC.currentTime+.1;st.next=0;
   el.querySelector('.play').classList.add('on');el.querySelector('.play').textContent='■';
   const spb=60/bpm(),SW=x=>{if(!st.sw)return x;const k=Math.floor(x),f=x-k;return k+(f<.5?f*4/3:2/3+(f-.5)*2/3)};
   const ns=b.notes.filter(n=>!st.hand||n[3]===st.hand).map(n=>{const s=SW(n[0]),e=SW(n[0]+n[1]);return [s,Math.max(.04,e-s),n[2],n[3],n[4]]}).sort((x,y)=>x[0]-y[0]);let i=0,clickB=0;
-  st.timer=setInterval(()=>{const now=AC.currentTime,until=now+.15;
+  st.timer=TICK.add(()=>{const now=AC.currentTime,until=now+LA();
    while(i<ns.length&&st.t0+ns[i][0]*spb<until){const [s,d,m,h,v]=ns[i];const t=st.t0+s*spb,mm=m+st.tr;pianoNote(t,Math.max(.06,d*spb),mm,v||(h==='L'?.55:.7));
     setTimeout(()=>{st.on.set(mm,h);draw()},Math.max(0,(t-now)*1000));setTimeout(()=>{if(st.on.get(mm)===h){st.on.delete(mm);draw()}},Math.max(0,(t-now+Math.max(.06,d*spb)*.95)*1000));i++}
    while(st.click&&st.t0+clickB*spb<until&&clickB<len){SND.click(st.t0+clickB*spb,clickB%(b.beats||4)===0);clickB++}
-   if(now>st.t0+len*spb+.3){if(st.loop){st.t0=now+.05;i=0;clickB=0}else stop()}},25);
-  const loopf=()=>{if(!st.playing)return;const p=Math.min(1,(AC.currentTime-st.t0)/(len*60/bpm()));el.querySelector('.prog i').style.width=(p*100)+'%';st.raf=requestAnimationFrame(loopf)};loopf()}
+   if(i>=ns.length&&(!st.click||clickB>=len)){if(st.loop){if(st.t0+len*spb<until){st.t0+=len*spb;i=0;clickB=0}}else if(now>st.t0+len*spb+.3)stop()}});
+  const loopf=()=>{if(!st.playing)return;const p=Math.max(0,Math.min(1,(AC.currentTime-st.t0)/(len*60/bpm())));el.querySelector('.prog i').style.width=(p*100)+'%';st.raf=requestAnimationFrame(loopf)};loopf()}
  el.querySelector('.play').onclick=()=>st.playing?stop():start();
  el.querySelectorAll('[data-sp]').forEach(x=>x.onclick=()=>{st.sp=+x.dataset.sp;upd();el.querySelectorAll('[data-sp]').forEach(y=>y.classList.toggle('on',y===x));if(st.playing){stop();start()}});
  el.querySelectorAll('[data-tr]').forEach(x=>x.onclick=()=>{st.tr=Math.max(-6,Math.min(6,st.tr+ +x.dataset.tr));st.ready=false;upd();if(st.playing){stop();start()}});
@@ -541,6 +590,18 @@ function initKb(el){
  el.querySelector('[data-kclick]').onclick=e=>{st.click=!st.click;e.currentTarget.classList.toggle('on',st.click)};
  upd();new ResizeObserver(draw).observe(cv);
  setTimeout(()=>loadPiano(lo-6,hi+6).then(()=>{st.ready=true}),1200)}
+/* tempi solidi anche con la Scuola in secondo piano (altra scheda, YouTube, altra app):
+   · il «tic» del programmatore viene da un Web Worker, che il browser non rallenta come i timer della pagina;
+   · in secondo piano si programmano le note con più anticipo (1,2 s invece di 0,15 s), così i rallentamenti non si sentono;
+   · ogni strumento suona su un «bus»: allo stop il bus si spegne e le note già programmate in anticipo non suonano. */
+const TICK=(()=>{const fns=new Map();let id=0,w=null;
+ try{w=new Worker(URL.createObjectURL(new Blob(['let t=null;onmessage=e=>{if(e.data&&!t)t=setInterval(()=>postMessage(0),25);else if(!e.data&&t){clearInterval(t);t=null}}'],{type:'text/javascript'})));
+  w.onmessage=()=>fns.forEach(f=>{try{f()}catch(e){console.error(e)}})}catch(e){w=null}
+ return{add(f){const k=++id;fns.set(k,w?f:setInterval(f,25));if(w&&fns.size===1)w.postMessage(1);return k},
+  del(k){if(!fns.has(k))return;if(!w)clearInterval(fns.get(k));fns.delete(k);if(w&&!fns.size)w.postMessage(0)}}})();
+const LA=()=>document.hidden?1.2:.15;
+let BUSN=null;function bus(){if(!BUSN){BUSN=AC.createGain();BUSN.connect(MASTER)}return BUSN}
+function cutBus(){if(!BUSN||!AC)return;const b=BUSN;BUSN=null;try{b.gain.cancelScheduledValues(AC.currentTime);b.gain.setValueAtTime(b.gain.value,AC.currentTime);b.gain.linearRampToValueAtTime(0,AC.currentTime+.02)}catch(e){}setTimeout(()=>{try{b.disconnect()}catch(e){}},200)}
 /* real piano: Salamander Grand Piano samples (Alexander Holm, CC-BY 3.0), one every minor third, repitched */
 const PSMP={},PNAMES={0:'C',3:'Ds',6:'Fs',9:'A'};let pianoLoading=null;
 function sampleFor(m){let best=null;for(const k in PSMP){const d=Math.abs(m-k);if(best==null||d<Math.abs(m-best))best=+k}return best}
@@ -548,10 +609,10 @@ function loadPiano(lo,hi){ac();const want=[];for(let m=Math.max(24,lo-3);m<=Math
  return Promise.all(want.map(m=>fetch('piano/'+PNAMES[m%12]+(Math.floor(m/12)-1)+'.mp3').then(r=>r.ok?r.arrayBuffer():Promise.reject()).then(b=>new Promise((ok,ko)=>AC.decodeAudioData(b,ok,ko))).then(buf=>{PSMP[m]=buf}).catch(()=>{})))}
 function pianoNote(t,dur,m,v){const k=sampleFor(m);if(k==null)return synthNote(t,dur,m,v);
  const s=AC.createBufferSource(),g=AC.createGain();s.buffer=PSMP[k];s.playbackRate.value=Math.pow(2,(m-k)/12);
- s.connect(g);g.connect(MASTER);const end=t+Math.max(.12,dur);const lvl=.9*v;
+ s.connect(g);g.connect(bus());const end=t+Math.max(.12,dur);const lvl=.9*v;
  g.gain.setValueAtTime(lvl,t);g.gain.setValueAtTime(lvl,end);g.gain.exponentialRampToValueAtTime(.001,end+.35);
  s.start(t);s.stop(end+.4)}
-function synthNote(t,dur,m,v){const f=440*Math.pow(2,(m-69)/12),g=AC.createGain(),o=AC.createOscillator();o.type='triangle';o.frequency.value=f;o.connect(g);g.connect(MASTER);
+function synthNote(t,dur,m,v){const f=440*Math.pow(2,(m-69)/12),g=AC.createGain(),o=AC.createOscillator();o.type='triangle';o.frequency.value=f;o.connect(g);g.connect(bus());
  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.25*v,t+.005);g.gain.exponentialRampToValueAtTime(.0005,t+Math.max(.2,dur)+.2);o.start(t);o.stop(t+Math.max(.2,dur)+.25)}
 /* ================= audio engine ================= */
 let AC=null,MASTER=null,NOISE=null;
@@ -568,17 +629,17 @@ function env(t,g,a,dur){g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTim
 /* real drum samples (acoustic kit + OLPC Berklee clave/bass, see drums/CREDITS.txt); synth fallback */
 const DS={};let dsLoad=null;
 function loadDrums(){if(dsLoad)return dsLoad;ac();return dsLoad=Promise.all(['kick','snare','hat','clave','bass'].map(n=>fetch('drums/'+n+'.mp3').then(r=>r.ok?r.arrayBuffer():Promise.reject()).then(b=>new Promise((ok,ko)=>AC.decodeAudioData(b,ok,ko))).then(buf=>{DS[n]=buf}).catch(()=>{})))}
-function playS(n,t,v,rate){const s=AC.createBufferSource(),g=AC.createGain();s.buffer=DS[n];if(rate)s.playbackRate.value=rate;g.gain.value=v;s.connect(g);g.connect(MASTER);s.start(t)}
+function playS(n,t,v,rate){const s=AC.createBufferSource(),g=AC.createGain();s.buffer=DS[n];if(rate)s.playbackRate.value=rate;g.gain.value=v;s.connect(g);g.connect(bus());s.start(t)}
 const SYN={
- click(t,acc){const o=AC.createOscillator(),g=AC.createGain();o.frequency.value=acc?1760:1100;o.connect(g);g.connect(MASTER);env(t,g,acc?.9:.55,.05);o.start(t);o.stop(t+.06)},
- sub(t){const o=AC.createOscillator(),g=AC.createGain();o.frequency.value=880;o.connect(g);g.connect(MASTER);env(t,g,.18,.03);o.start(t);o.stop(t+.04)},
- clave(t,v=1){const o=AC.createOscillator(),g=AC.createGain(),f=AC.createBiquadFilter();o.type='square';o.frequency.value=2500;f.type='bandpass';f.frequency.value=2500;f.Q.value=8;o.connect(f);f.connect(g);g.connect(MASTER);env(t,g,.7*v,.05);o.start(t);o.stop(t+.06)},
- kick(t,v=1){const o=AC.createOscillator(),g=AC.createGain();o.frequency.setValueAtTime(140,t);o.frequency.exponentialRampToValueAtTime(45,t+.12);o.connect(g);g.connect(MASTER);env(t,g,1*v,.22);o.start(t);o.stop(t+.25)},
- snare(t,v=1){const s=AC.createBufferSource(),g=AC.createGain(),f=AC.createBiquadFilter();s.buffer=NOISE;f.type='highpass';f.frequency.value=1500;s.connect(f);f.connect(g);g.connect(MASTER);env(t,g,.55*v,.14);s.start(t);s.stop(t+.16);
-  const o=AC.createOscillator(),g2=AC.createGain();o.frequency.value=190;o.connect(g2);g2.connect(MASTER);env(t,g2,.3*v,.08);o.start(t);o.stop(t+.1)},
- hat(t,v=1){const s=AC.createBufferSource(),g=AC.createGain(),f=AC.createBiquadFilter();s.buffer=NOISE;f.type='highpass';f.frequency.value=7000;s.connect(f);f.connect(g);g.connect(MASTER);env(t,g,.28*v,.04);s.start(t);s.stop(t+.05)},
- bass(t,v=1){const o=AC.createOscillator(),g=AC.createGain();o.type='triangle';o.frequency.value=73.4;o.connect(g);g.connect(MASTER);env(t,g,.7*v,.18);o.start(t);o.stop(t+.2)},
- bell(t,v=1){const o=AC.createOscillator(),g=AC.createGain();o.type='triangle';o.frequency.value=1320;o.connect(g);g.connect(MASTER);env(t,g,.35*v,.12);o.start(t);o.stop(t+.14)}};
+ click(t,acc){const o=AC.createOscillator(),g=AC.createGain();o.frequency.value=acc?1760:1100;o.connect(g);g.connect(bus());env(t,g,acc?.9:.55,.05);o.start(t);o.stop(t+.06)},
+ sub(t){const o=AC.createOscillator(),g=AC.createGain();o.frequency.value=880;o.connect(g);g.connect(bus());env(t,g,.18,.03);o.start(t);o.stop(t+.04)},
+ clave(t,v=1){const o=AC.createOscillator(),g=AC.createGain(),f=AC.createBiquadFilter();o.type='square';o.frequency.value=2500;f.type='bandpass';f.frequency.value=2500;f.Q.value=8;o.connect(f);f.connect(g);g.connect(bus());env(t,g,.7*v,.05);o.start(t);o.stop(t+.06)},
+ kick(t,v=1){const o=AC.createOscillator(),g=AC.createGain();o.frequency.setValueAtTime(140,t);o.frequency.exponentialRampToValueAtTime(45,t+.12);o.connect(g);g.connect(bus());env(t,g,1*v,.22);o.start(t);o.stop(t+.25)},
+ snare(t,v=1){const s=AC.createBufferSource(),g=AC.createGain(),f=AC.createBiquadFilter();s.buffer=NOISE;f.type='highpass';f.frequency.value=1500;s.connect(f);f.connect(g);g.connect(bus());env(t,g,.55*v,.14);s.start(t);s.stop(t+.16);
+  const o=AC.createOscillator(),g2=AC.createGain();o.frequency.value=190;o.connect(g2);g2.connect(bus());env(t,g2,.3*v,.08);o.start(t);o.stop(t+.1)},
+ hat(t,v=1){const s=AC.createBufferSource(),g=AC.createGain(),f=AC.createBiquadFilter();s.buffer=NOISE;f.type='highpass';f.frequency.value=7000;s.connect(f);f.connect(g);g.connect(bus());env(t,g,.28*v,.04);s.start(t);s.stop(t+.05)},
+ bass(t,v=1){const o=AC.createOscillator(),g=AC.createGain();o.type='triangle';o.frequency.value=73.4;o.connect(g);g.connect(bus());env(t,g,.7*v,.18);o.start(t);o.stop(t+.2)},
+ bell(t,v=1){const o=AC.createOscillator(),g=AC.createGain();o.type='triangle';o.frequency.value=1320;o.connect(g);g.connect(bus());env(t,g,.35*v,.12);o.start(t);o.stop(t+.14)}};
 const SND={click:(t,a)=>SYN.click(t,a),sub:t=>SYN.sub(t),bell:(t,v)=>SYN.bell(t,v),
  kick:(t,v=1)=>DS.kick?playS('kick',t,1.1*v):SYN.kick(t,v),
  snare:(t,v=1)=>DS.snare?playS('snare',t,.8*v):SYN.snare(t,v),
@@ -590,10 +651,10 @@ const SND={click:(t,a)=>SYN.click(t,a),sub:t=>SYN.sub(t),bell:(t,v)=>SYN.bell(t,
 const M=Object.assign({bpm:90,beats:4,sub:1,swing:0,acc:[2,0,0,0],playing:false,train:false,trainStep:2,trainBars:4,trainMax:160},LS.get('metro',{}),{playing:false});
 let mTimer=null,mNext=0,mStep=0,mBar=0;
 function mSave(){const {playing,...s}=M;LS.set('metro',s)}
-function startMetro(){if(kbActive)kbActive();stopRhythm();ac();if(M.playing)return;M.playing=true;mStep=0;mBar=0;mNext=AC.currentTime+.08;mTimer=setInterval(mTick,25);live();if(curTab==='metro')paneMetro()}
-function stopMetro(){M.playing=false;clearInterval(mTimer);live();if(curTab==='metro')paneMetro()}
+function startMetro(){if(kbActive)kbActive();stopRhythm();ac();if(M.playing)return;M.playing=true;mStep=0;mBar=0;mNext=AC.currentTime+.08;mTimer=TICK.add(mTick);live();if(curTab==='metro')paneMetro()}
+function stopMetro(){if(M.playing)cutBus();M.playing=false;TICK.del(mTimer);live();if(curTab==='metro')paneMetro()}
 function mTick(){const spb=60/M.bpm,stepDur=spb/M.sub;
- while(mNext<AC.currentTime+.12){const beat=Math.floor(mStep/M.sub),s=mStep%M.sub;let t=mNext;
+ while(mNext<AC.currentTime+LA()){const beat=Math.floor(mStep/M.sub),s=mStep%M.sub;let t=mNext;
   if(M.sub===2&&s===1)t+=stepDur*(M.swing/100)*.667; /* swing: 0 = straight, 100 = full triplet */
   if(s===0){const a=M.acc[beat]||0;if(a!==-1)SND.click(t,a===2||a===1);flash(beat,t)}else SND.sub(t);
   mNext+=stepDur;mStep++;if(mStep>=M.beats*M.sub){mStep=0;mBar++;
@@ -653,12 +714,12 @@ const R=Object.assign({id:'rumba',bpm:100,playing:false,mute:{}},LS.get('rhythm'
 let rTimer=null,rNext=0,rStep=0;
 function rSave(){const {playing,...s}=R;LS.set('rhythm',s)}
 let rTok=0;
-async function startRhythm(){if(kbActive)kbActive();stopMetro();ac();const tok=++rTok;R.playing=true;clearInterval(rTimer);live();if(curTab==='rhythm')paneRhythm();
+async function startRhythm(){if(kbActive)kbActive();stopMetro();ac();const tok=++rTok;R.playing=true;TICK.del(rTimer);live();if(curTab==='rhythm')paneRhythm();
  await loadDrums();if(tok!==rTok||!R.playing)return;if(AC.state!=='running'){try{await AC.resume()}catch(e){}}
- rStep=0;rNext=AC.currentTime+.08;clearInterval(rTimer);rTimer=setInterval(rTick,25)}
-function stopRhythm(){rTok++;R.playing=false;clearInterval(rTimer);live();if(curTab==='rhythm')paneRhythm()}
+ rStep=0;rNext=AC.currentTime+.08;TICK.del(rTimer);rTimer=TICK.add(rTick)}
+function stopRhythm(){rTok++;if(R.playing)cutBus();R.playing=false;TICK.del(rTimer);live();if(curTab==='rhythm')paneRhythm()}
 function rTick(){const r=RHY[R.id],per=r.triplet?3:4,len=(r.triplet?12:16)*(r.bars||1),step=60/R.bpm/per;
- while(rNext<AC.currentTime+.12){const t=rNext;
+ while(rNext<AC.currentTime+LA()){const t=rNext;
   for(const [p,pat] of Object.entries(r.parts)){if(R.mute[p])continue;const c=pat[rStep%pat.length];if(c==='x')SND[p](t,1);else if(c==='o')SND[p](t,.45)}
   const s=rStep;setTimeout(()=>document.querySelectorAll('.grid16 .c').forEach(x=>x.classList.toggle('now',+x.dataset.i===s)),Math.max(0,(t-AC.currentTime)*1000));
   rNext+=step;rStep=(rStep+1)%len}}
@@ -699,7 +760,7 @@ const GHR='https://api.github.com/repos/PaoloRubinacci/scuola';
 const ghTok=()=>LS.get('gh',null);
 let CAT=null;
 /* catalogo: con la chiave GitHub lo legge dal repository (subito aggiornato), altrimenti dal sito */
-function ascCat(force){if(force)CAT=null;return CAT=CAT||(async()=>{const t=ghTok();let c=null;
+function ascCat(force){if(force){CAT=null;GRX=null}return CAT=CAT||(async()=>{const t=ghTok();let c=null;
  if(t&&navigator.onLine!==false){try{const r=await fetch(GHR+'/contents/ascolti/catalog.json?ref=main&t='+Date.now(),{headers:{Authorization:'Bearer '+t,Accept:'application/vnd.github.raw+json'}});if(r.ok)c=await r.json()}catch(e){}}
  if(!c){try{const r=await fetch('ascolti/catalog.json',{cache:'no-store'});c=r.ok?await r.json():{}}catch(e){c={}}}
  Object.values(c).forEach(x=>{x.r=x.r||[]});return c})()}
@@ -1189,7 +1250,7 @@ async function stemPlayer(el,id,info){
  let cur=null,pos=0;   // cur: motore che sta suonando (null = fermo)
  const el2=k=>k==='mix'?mixEl:slowEl;
  function time(){return cur==='web'?wPos():cur?el2(cur).currentTime:pos}
- function ui(on){q('[data-pp]').textContent=on?'❚❚':'▶';clearInterval(st.timer);if(on)st.timer=setInterval(tick,60);else{cur=null}}
+ function ui(on){q('[data-pp]').textContent=on?'❚❚':'▶';clearInterval(st.timer);if(on){st.timer=setInterval(tick,60);PLAY.add('stems')}else{cur=null;PLAY.delete('stems')}}
  function stopAll(){pos=time();if(cur==='web')wStop();mixEl.pause();slowEl.pause();ui(false)}
  async function startAt(t){if(kbActive)kbActive();ac();if(AC.state!=='running'){try{await AC.resume()}catch(e){}}
   const k=eng();pos=t;
@@ -1239,26 +1300,237 @@ async function stemPlayer(el,id,info){
   if(st.mode==='stems')loadStems().catch(()=>{});restart()});
  drawStems();drawAB();upd(0)}
 
-/* ================= practice diary ================= */
-const D=Object.assign({start:null,acc:0},LS.get('timer',{}));let dInt=null;
+/* ================= schede informative: persone, gruppi, brani, dischi, libri e film citati =================
+   Un tocco (o il mouse sopra) sul nome sottolineato apre una scheda breve. Fatti verificati, niente contenuti didattici.
+   I brani della libreria hanno anche il pulsante per aprirli. */
+const GLOSS=[
+ {n:'Professor Longhair',k:'Pianista',a:['Professor Longhair','Longhair','Fess'],d:'Henry Roeland «Roy» Byrd (1918–1980), pianista e cantante di New Orleans, detto «Fess». Ha unito rumba, mambo e calypso al blues e al boogie: il suo modo di suonare è alla base del piano di New Orleans. Brani: «Tipitina», «Mardi Gras in New Orleans», «Big Chief», «Hey Now Baby». Il locale Tipitina’s porta il nome del suo brano.'},
+ {n:'Dr. John',k:'Pianista e cantante',a:['Dr. John','Dr John','Mac Rebennack','Malcolm John Rebennack'],d:'Malcolm John «Mac» Rebennack (1941–2019), pianista, chitarrista, cantante e autore di New Orleans. Prima musicista di studio, poi «The Night Tripper» con il disco «Gris-Gris» (1968). Con «Gumbo» (1972) ha reinterpretato i classici del R&B di New Orleans; ha raccontato la sua vita nell’autobiografia «Under a Hoodoo Moon».'},
+ {n:'James Booker',k:'Pianista',a:['James Booker','Booker'],d:'James Carroll Booker III (1939–1983), pianista di New Orleans dalla tecnica eccezionale, chiamato «Piano Prince of New Orleans» e «Black Liberace». Mescolava blues, R&B, boogie, ragtime e musica classica in improvvisazioni virtuosistiche. Dischi: «Junco Partner» (1976), «New Orleans Piano Wizard: Live!» (registrato a Zurigo nel 1977), «Classified» (1982).'},
+ {n:'Jelly Roll Morton',k:'Pianista e compositore',a:['Jelly Roll Morton','Jelly Roll'],d:'Ferdinand Joseph LaMothe (1890–1941), pianista, compositore e bandleader creolo di New Orleans, tra i primi a scrivere e arrangiare il jazz. Chiamava «Spanish tinge» il ritmo dell’habanera nella sua musica. Nel 1938 raccontò la sua storia ad Alan Lomax nelle registrazioni della Library of Congress. Brani: «King Porter Stomp», «Black Bottom Stomp».'},
+ {n:'Scott Joplin',k:'Compositore e pianista',a:['Scott Joplin','Joplin'],d:'(1868 circa – 1917) compositore e pianista afroamericano, il «re del ragtime». Brani: «Maple Leaf Rag» (1899), «The Entertainer» (1902), «Elite Syncopations» (1902). Il suo ragtime è scritto per intero, con la mano sinistra regolare.'},
+ {n:'Allen Toussaint',k:'Pianista, autore e produttore',a:['Allen Toussaint','Toussaint'],d:'(1938–2015) pianista, autore, arrangiatore e produttore di New Orleans. Ha scritto e prodotto moltissimi successi del R&B della città e ha lavorato con i Meters, Lee Dorsey, Dr. John ed Earl King.'},
+ {n:'Fats Domino',k:'Pianista e cantante',a:['Fats Domino'],d:'Antoine «Fats» Domino (1928–2017), pianista e cantante di New Orleans, tra i padri del rock and roll: «The Fat Man» (1949), «Ain’t That a Shame», «Blueberry Hill». Le terzine ribattute della mano destra sono il suo marchio.'},
+ {n:'Huey «Piano» Smith',k:'Pianista',a:['Huey «Piano» Smith','Huey Piano Smith','Huey "Piano" Smith','Huey Smith'],d:'(1934–2023) pianista e autore di New Orleans, con i suoi Clowns: «Rockin’ Pneumonia and the Boogie Woogie Flu» (1957), «Don’t You Just Know It». Molto richiesto come pianista di studio negli anni ’50.'},
+ {n:'Champion Jack Dupree',k:'Pianista e cantante blues',a:['Champion Jack Dupree'],d:'William Thomas Dupree (1909 circa – 1992), pianista e cantante blues di New Orleans, ex pugile (da qui «Champion»). Stile barrelhouse e boogie; dal 1959 visse in Europa.'},
+ {n:'Tuts Washington',k:'Pianista',a:['Tuts Washington','Isidore Washington'],d:'Isidore «Tuts» Washington (1907–1984), pianista di New Orleans tra blues, ragtime, jazz e boogie-woogie, citato come influenza da Professor Longhair, Fats Domino e Allen Toussaint. Il primo disco a suo nome, «New Orleans Piano Professor», è del 1983.'},
+ {n:'Henry Butler',k:'Pianista e cantante',a:['Henry Butler'],d:'(1948–2018) pianista e cantante di New Orleans, cieco dall’infanzia, a cavallo tra il jazz moderno e la tradizione della città.'},
+ {n:'Jon Cleary',k:'Pianista e cantante',a:['Jon Cleary'],d:'Pianista e cantante inglese trasferitosi a New Orleans da giovane, oggi tra i grandi interpreti dello stile. Con «GoGo Juice» ha vinto un Grammy nel 2016.'},
+ {n:'The Meters',k:'Band funk',a:['The Meters','Meters'],d:'Band funk di New Orleans nata negli anni ’60: Art Neville (tastiere), Leo Nocentelli (chitarra), George Porter Jr. (basso), Zigaboo Modeliste (batteria). Gruppo di studio di Allen Toussaint. Brani: «Cissy Strut», «Just Kissed My Baby», «Hey Pocky A-Way».'},
+ {n:'Earl King',k:'Chitarrista, cantante e autore',a:['Earl King'],d:'Earl Silas Johnson IV (1934–2003), chitarrista, cantante e autore di New Orleans. Ha scritto due inni del Carnevale: «Big Chief» (inciso da Professor Longhair) e «Street Parade».'},
+ {n:'Rubén González',k:'Pianista cubano',a:['Rubén González','Ruben Gonzalez','Reuben Gonzales','Rubén Gonzalez'],d:'(1919–2003) pianista cubano, maestro del montuno; conosciuto in tutto il mondo con il Buena Vista Social Club.'},
+ {n:'Paddy Milner',k:'Pianista, autore del corso',a:['Paddy Milner'],d:'Pianista e cantante inglese, autore di questo videocorso sul piano di New Orleans (MusicGurus).'},
+ {n:'Ned Sublette',k:'Musicista e storico',a:['Ned Sublette'],d:'Musicista e storico americano, autore di «The World That Made New Orleans» (2008), storia della città con al centro la musica.'},
+ {n:'Lily Keber',k:'Regista',a:['Lily Keber'],d:'Regista di «Bayou Maharajah» (2013), documentario sulla vita di James Booker.'},
+ {n:'Stevenson J. Palfi',k:'Regista',a:['Stevenson J. Palfi','Stevenson J.Palfi','Stevenson Palfi'],d:'Regista del documentario «Piano Players Rarely Ever Play Together» (1982), con Tuts Washington, Professor Longhair e Allen Toussaint.'},
+ {n:'Robert Tallant',k:'Scrittore',a:['Robert Tallant'],d:'(1909–1957) scrittore di New Orleans. «Gumbo Ya-Ya» (1945), scritto con Lyle Saxon ed Edward Dreyer, raccoglie racconti popolari della Louisiana.'},
+ {n:'Tipitina',k:'Brano',a:['Tipitina'],d:'Brano di Professor Longhair, inciso per la Atlantic nel 1953. Il locale Tipitina’s di New Orleans porta il suo nome.'},
+ {n:'King Porter Stomp',k:'Brano',a:['King Porter Stomp'],d:'Composizione di Jelly Roll Morton dei primi anni ’20, poi diventata uno standard dell’era dello swing.'},
+ {n:'Elite Syncopations',k:'Brano',a:['Elite Syncopations'],d:'Rag di Scott Joplin pubblicato nel 1902.'},
+ {n:'Hey Now Baby',k:'Brano',a:['Hey Now Baby'],d:'Brano di Professor Longhair, inciso più volte a partire dal 1949 (per la Mercury e per la Atlantic).'},
+ {n:'Junco Partner',k:'Brano',a:['Junco Partner'],d:'Blues tradizionale di New Orleans. Versioni celebri di James Booker (che dà il titolo al suo disco del 1976) e di Dr. John nell’album «Gumbo» (1972).'},
+ {n:'Just Kissed My Baby',k:'Brano',a:['Just Kissed My Baby'],d:'Brano dei Meters dall’album «Rejuvenation» (1974).'},
+ {n:'Street Parade',k:'Brano',a:['Street Parade'],d:'Brano scritto e cantato da Earl King nei primi anni ’70, con Allen Toussaint alla produzione e all’arrangiamento e i Meters come band; è diventato un classico del Carnevale di New Orleans. L’album omonimo è uscito nel 1981.'},
+ {n:'Gumbo',k:'Album',a:['Gumbo'],d:'Album di Dr. John del 1972: la sua rilettura dei classici del R&B di New Orleans, tra cui «Iko Iko», «Junco Partner» e «Tipitina».'},
+ {n:'Crawfish Fiesta',k:'Album',a:['Crawfish Fiesta'],d:'Ultimo album in studio di Professor Longhair, uscito nel 1980 per la Alligator, con Dr. John alla chitarra.'},
+ {n:'In the Right Place',k:'Album',a:['In the Right Place','In The Right Place'],d:'Album di Dr. John del 1973, prodotto da Allen Toussaint con i Meters; contiene «Right Place Wrong Time».'},
+ {n:'Desitively Bonnaroo',k:'Album',a:['Desitively Bonnaroo'],d:'Album di Dr. John del 1974, ancora con Allen Toussaint e i Meters.'},
+ {n:'Dr. John Plays Mac Rebennack',k:'Album',a:['Dr. John Plays Mac Rebennack','Dr John Plays Mac Rebennack'],d:'Disco di piano solo di Dr. John del 1981, seguito da un secondo volume. Si apre con «Dorothy».'},
+ {n:'Classified',k:'Album',a:['Classified'],d:'Album di James Booker del 1982, l’ultimo uscito mentre era in vita.'},
+ {n:'Library of Congress',k:'Registrazioni',a:['Library Of Congress','Library of Congress'],d:'Le lunghe registrazioni del 1938 in cui Jelly Roll Morton suona, canta e racconta la sua vita e la New Orleans dei suoi anni ad Alan Lomax, per la Biblioteca del Congresso degli Stati Uniti.'},
+ {n:'The World That Made New Orleans',k:'Libro',a:['The World That Made New Orleans'],d:'Libro di Ned Sublette (2008): la storia di New Orleans dal periodo coloniale, con al centro la musica.'},
+ {n:'Under a Hoodoo Moon',k:'Libro',a:['Under A Hoodoo Moon','Under a Hoodoo Moon'],d:'Autobiografia di Dr. John (1994), scritta con Jack Rummel.'},
+ {n:'Gumbo Ya-Ya',k:'Libro',a:['Gumbo Ya-Ya'],d:'Raccolta di racconti e tradizioni popolari della Louisiana (1945), di Lyle Saxon, Edward Dreyer e Robert Tallant.'},
+ {n:'Piano Players Rarely Ever Play Together',k:'Documentario',a:['Piano Players Rarely Ever Play Together'],d:'Documentario di Stevenson J. Palfi (1982) con Tuts Washington, Professor Longhair e Allen Toussaint.'},
+ {n:'Bayou Maharajah',k:'Documentario',a:['Bayou Maharajah'],d:'Documentario di Lily Keber (2013) sulla vita di James Booker, con molte immagini inedite.'}
+];
+let GRX=null,GMAP=null;
+function glossBuild(cat){const items=GLOSS.slice();
+ if(cat)Object.entries(cat).forEach(([id,x])=>{if(!x.t||x.t.length<4)return;const g=items.find(g=>g.a.some(a=>normA(a)===normA(x.t)));if(g){g.bid=id;return}
+  const st=String(x.storia||'').split(/\n\s*\n/)[0];items.push({n:x.t,k:'Brano nella tua libreria',a:[x.t],d:(st||[x.a,x.al,x.anno].filter(Boolean).join(' · ')).slice(0,420),bid:id})});
+ GMAP=new Map();items.forEach(g=>g.a.forEach(a=>GMAP.set(a.toLowerCase(),g)));
+ const alts=[...GMAP.keys()].sort((a,b)=>b.length-a.length).map(a=>a.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));
+ GRX=new RegExp('(^|[^\\p{L}\\p{N}])('+alts.join('|')+')(?![\\p{L}\\p{N}])','giu')}
+const GSKIP='a,button,input,textarea,select,.gl,.nt,.clip .vh,.kb,.pbtn,script,style,.gpop,.chips,.stems,.btabs,.lchip,.atr .h,code';
+function linkify(root){if(!GRX||!root)return;const tw=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:n=>{const p=n.parentElement;
+  return !n.nodeValue.trim()||!p||p.closest(GSKIP)?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT}});
+ const nodes=[];while(tw.nextNode())nodes.push(tw.currentNode);
+ for(const n of nodes){const t=n.nodeValue;GRX.lastIndex=0;if(!GRX.test(t))continue;GRX.lastIndex=0;const fr=document.createDocumentFragment();let last=0,m;
+  while((m=GRX.exec(t))){const st=m.index+m[1].length;fr.append(t.slice(last,st));const sp=document.createElement('span');sp.className='gl';sp.tabIndex=0;sp.dataset.g=m[2].toLowerCase();sp.textContent=m[2];fr.append(sp);last=st+m[2].length}
+  fr.append(t.slice(last));n.parentNode.replaceChild(fr,n)}}
+let gTimer=null;
+function glossScan(){clearTimeout(gTimer);gTimer=setTimeout(async()=>{if(!GRX){try{glossBuild(await ascCat())}catch(e){glossBuild(null)}}
+ ['.flow','.brief','.chero p','.adisc','.tabc,#tabc','.dent .dx','.drecap','.lbody'].forEach(sel=>document.querySelectorAll(sel).forEach(linkify))},60)}
+new MutationObserver(glossScan).observe(document.getElementById('app'),{childList:true,subtree:true});
+function glossClose(){document.querySelectorAll('.gpop').forEach(x=>x.remove())}
+function glossOpen(el){glossClose();const g=GMAP&&GMAP.get(el.dataset.g);if(!g)return;const c=nolaCourse();
+ const brani=[];(async()=>{})();
+ const pop=document.createElement('div');pop.className='gpop';pop.setAttribute('role','dialog');
+ pop.innerHTML=`<div class="gh"><div><span class="gk">${esc(g.k)}</span><b>${esc(g.n)}</b></div><button class="sx" aria-label="Chiudi">✕</button></div><p>${esc(g.d)}</p><div class="ga"></div>`;
+ document.body.appendChild(pop);pop.querySelector('.sx').onclick=glossClose;
+ const ga=pop.querySelector('.ga');
+ ascCat().then(cat=>{if(!c)return;const ids=new Set();if(g.bid&&cat[g.bid])ids.add(g.bid);
+  Object.entries(cat).forEach(([id,x])=>{if(g.a.some(a=>normA(a)===normA(x.a)))ids.add(id)});
+  [...ids].slice(0,4).forEach(id=>{const b=document.createElement('button');b.textContent='♫ '+cat[id].t+' ›';b.onclick=()=>{glossClose();go(c.id+'-ascolti-'+id)};ga.appendChild(b)})}).catch(()=>{});
+ if(innerWidth>=700){const r=el.getBoundingClientRect(),w=pop.offsetWidth,h=pop.offsetHeight;let x=Math.min(innerWidth-w-12,Math.max(12,r.left));let y=r.bottom+8;if(y+h>innerHeight-12)y=Math.max(12,r.top-h-8);pop.style.left=x+'px';pop.style.top=y+'px'}}
+document.addEventListener('click',e=>{const g=e.target.closest('.gl');if(g){e.preventDefault();e.stopPropagation();glossOpen(g);return}if(!e.target.closest('.gpop'))glossClose()},true);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')glossClose();const g=e.target.closest&&e.target.closest('.gl');if(g&&(e.key==='Enter'||e.key===' ')){e.preventDefault();glossOpen(g)}});
+let gHover=null;document.addEventListener('pointerover',e=>{if(e.pointerType!=='mouse')return;const g=e.target.closest('.gl');clearTimeout(gHover);if(g)gHover=setTimeout(()=>glossOpen(g),450)});
+document.addEventListener('pointerout',e=>{if(e.pointerType==='mouse'&&e.target.closest('.gl'))clearTimeout(gHover)});
+
+/* ================= pratica e diario =================
+   · Timer di pratica (D): parte dalla home, dalla barra della lezione o da Strumenti › Diario. Alla fine si salva la sessione.
+   · Minuti automatici: mentre suonano metronomo, ritmi, tastiera, lettore dei brani o video della lezione (e il timer è fermo).
+   · «＋ Aggiungi a mano»: per la pratica fatta senza timer.
+   · Ogni sessione salvata va nel diario sincronizzato su GitHub (cifrato): diario/voci/<id>.json.enc (+ messaggio vocale).
+     GitHub Actions (tools/diario.py) trascrive i vocali e, con la chiave Anthropic, mette in ordine le note e scrive il
+     «diario di viaggio» della settimana: solo riassunti di quello che Paolo ha scritto o detto, mai consigli. */
+const D=Object.assign({start:null,acc:0,what:'',lez:null},LS.get('timer',{}));let dInt=null,LESSON=null;
 function tNow(){return D.acc+(D.start?Date.now()-D.start:0)}
 function hms(ms){const s=Math.floor(ms/1000);return`${Math.floor(s/3600)?Math.floor(s/3600)+':':''}${String(Math.floor(s/60)%60).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`}
-function paneDiary(){const log=LS.get('log',[]),week=log.filter(e=>Date.now()-e.at<7*864e5).reduce((a,e)=>a+e.ms,0);
+function dStore(){LS.set('timer',D)}
+function timerStart(o){if(!D.start){D.start=Date.now();if(o){if(o.what&&!D.what)D.what=o.what;if(o.lez)D.lez=o.lez}}dStore();pracChanged()}
+function timerPause(){if(D.start){D.acc=tNow();D.start=null}dStore();pracChanged()}
+function timerReset(){D.start=null;D.acc=0;D.what='';D.lez=null;dStore();pracChanged()}
+function timerFinish(){timerPause();sessionModal({ms:tNow(),what:D.what||lessonWhat(),lez:D.lez||(LESSON&&LESSON.l.n),fromTimer:true})}
+function pracChanged(){drawPrac();drawMini();live();if(curTab==='diary')paneDiary();updStreak()}
+setInterval(()=>{if(!D.start)return;const t=hms(tNow());document.querySelectorAll('[data-tnow]').forEach(e=>e.textContent=t);const m=$('#miniT');if(m)m.textContent=t;if(!curTab)live()},1000);
+function lessonWhat(){return LESSON?`Lezione ${LESSON.l.n} · ${LESSON.l.title}`:''}
+function drawPrac(){const run=!!D.start,has=tNow()>0;
+ const hp=$('#homePrac');if(hp){hp.innerHTML=`<div class="pt"><span data-tnow>${hms(tNow())}</span><small>${run?'pratica in corso':has?'in pausa':`oggi: ${todayMin()} min`}</small></div>
+  <div class="pb">${run?`<button class="pbig on" data-pr="pause">❚❚ Pausa</button><button class="psec" data-pr="fine">■ Fine e salva</button>`:has?`<button class="pbig" data-pr="start">▶ Riprendi</button><button class="psec" data-pr="fine">■ Fine e salva</button>`:`<button class="pbig" data-pr="start">▶ Inizia la pratica</button>`}
+  <button class="psec" data-pr="add">＋ Aggiungi a mano</button><button class="psec" data-go="diario">📖 Diario</button></div>`}
+ const lp=$('#lesPrac');if(lp&&LESSON){const mine=D.lez===LESSON.l.n||!D.what;lp.innerHTML=`<b>${run?`⏱ <span data-tnow>${hms(tNow())}</span> · pratica in corso${D.what&&!mine?' ('+esc(D.what)+')':''}`:has?`⏱ <span data-tnow>${hms(tNow())}</span> · pratica in pausa`:'Fai pratica mentre segui la lezione: il tempo va nel diario'}</b>
+  ${run?`<button class="on" data-pr="pause">❚❚ Pausa</button><button class="sec" data-pr="fine">■ Fine e salva</button>`:`<button data-pr="startL">▶ ${has?'Riprendi':'Avvia la pratica'}</button>${has?'<button class="sec" data-pr="fine">■ Fine e salva</button>':''}`}`}
+ document.querySelectorAll('[data-pr]').forEach(b=>b.onclick=()=>{const k=b.dataset.pr;
+  if(k==='start')timerStart();else if(k==='startL')timerStart({what:lessonWhat(),lez:LESSON&&LESSON.l.n});else if(k==='pause')timerPause();else if(k==='fine')timerFinish();else if(k==='add')sessionModal({ms:0,what:lessonWhat(),lez:LESSON&&LESSON.l.n,manual:true})})}
+/* minuti automatici */
+const PLAY=new Set();
+setInterval(()=>{if(document.hidden||D.start)return;
+ const on=M.playing||R.playing||kbActive||PLAY.size>0||[...document.querySelectorAll('video,#libPlay audio')].some(v=>!v.paused&&!v.ended);if(!on)return;
+ const a=LS.get('auto',{}),k=dayKey(Date.now());a[k]=(a[k]||0)+15000;for(const x in a){const [y,m,d]=x.split('-').map(Number);if(Date.now()-new Date(y,m-1,d)>60*864e5)delete a[x]}LS.set('auto',a);
+ if(!location.hash){const g=$('#goalStat b');if(g)g.firstChild.textContent=weekMin()}},15000);
+
+/* ---- diario sincronizzato ---- */
+let DIARIO=null,diarioLoading=null;
+async function rawGet(path,bin){const t=ghTok();
+ if(t&&navigator.onLine!==false){try{const r=await fetch(GHR+'/contents/'+path+'?ref=main&t='+Date.now(),{headers:{Authorization:'Bearer '+t,Accept:'application/vnd.github.raw+json'}});if(r.status===404)return null;if(r.ok)return bin?new Uint8Array(await r.arrayBuffer()):await r.json()}catch(e){}}
+ try{const r=await fetch(path+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)return null;return bin?new Uint8Array(await r.arrayBuffer()):await r.json()}catch(e){return null}}
+async function decJSON(u8){const {pt}=await decBytes(u8,PW);return JSON.parse(new TextDecoder().decode(pt))}
+const encJSON=o=>encBytes(new TextEncoder().encode(JSON.stringify(o)));
+function settimanaDi(at){const d=new Date(at);d.setHours(0,0,0,0);d.setDate(d.getDate()+3-((d.getDay()+6)%7));const w1=new Date(d.getFullYear(),0,4);
+ return d.getFullYear()+'-W'+String(1+Math.round(((d-w1)/864e5-3+((w1.getDay()+6)%7))/7)).padStart(2,'0')}
+function loadDiario(force){if(force)diarioLoading=null;return diarioLoading=diarioLoading||(async()=>{
+ const cache=LS.get('diario-cache',{voci:[],elab:{},sett:{}});const idx=await rawGet('diario/indice.json');
+ if(!idx){DIARIO=cache.voci.length?cache:{voci:[],elab:{},sett:{}};return DIARIO}
+ const old=Object.fromEntries(cache.voci.map(v=>[v.id,v]));const voci=[];
+ await Promise.all(idx.voci.map(async x=>{let v=old[x.id];if(!v||force){const u=await rawGet('diario/voci/'+x.id+'.json.enc',true);if(u){try{v=Object.assign(await decJSON(u),{id:x.id})}catch(e){}}}if(v)voci.push(v)}));
+ voci.sort((a,b)=>b.at-a.at);const elab=Object.assign({},cache.elab),sett=Object.assign({},cache.sett);
+ await Promise.all(voci.slice(0,40).map(async v=>{const e=elab[v.id];if(e&&e.ordinato&&(e.trascr||!v.audio))return;const u=await rawGet('diario/elab/'+v.id+'.json.enc',true);if(u){try{elab[v.id]=await decJSON(u)}catch(e){}}}));
+ const ws=[...new Set(voci.map(v=>settimanaDi(v.at)))].slice(0,8);
+ await Promise.all(ws.map(async w=>{const u=await rawGet('diario/settimane/'+w+'.json.enc',true);if(u){try{sett[w]=await decJSON(u)}catch(e){}}}));
+ DIARIO={voci,elab,sett};LS.set('diario-cache',DIARIO);return DIARIO})().catch(e=>{diarioLoading=null;throw e})}
+async function ghCommitDiario(tok,files,addIdx,msg,say,dels){const tree0=[];
+ for(const f of files){say('Invio '+f.label+'…');const b=await gh('/git/blobs',{method:'POST',body:JSON.stringify({content:u2b(f.u8),encoding:'base64'})},tok);tree0.push({path:f.path,mode:'100644',type:'blob',sha:b.sha})}
+ for(let i=0;i<4;i++){say('Salvo nel diario…');const head=(await gh('/git/ref/heads/main',{},tok)).object.sha,com=await gh('/git/commits/'+head,{},tok);
+  let idx={voci:[]};const r=await fetch(GHR+'/contents/diario/indice.json?ref='+head,{headers:{Authorization:'Bearer '+tok,Accept:'application/vnd.github.raw+json'}});if(r.ok)idx=await r.json();
+  idx.voci=idx.voci||[];addIdx(idx);
+  const cb=await gh('/git/blobs',{method:'POST',body:JSON.stringify({content:JSON.stringify(idx,null,1)+'\n',encoding:'utf-8'})},tok);
+  let tree=tree0.concat([{path:'diario/indice.json',mode:'100644',type:'blob',sha:cb.sha}]);
+  if(dels&&dels.length){const all=await gh('/git/trees/'+com.tree.sha+'?recursive=1',{},tok);const have=new Set(all.tree.map(t=>t.path));tree=tree.concat(dels.filter(p=>have.has(p)).map(p=>({path:p,mode:'100644',type:'blob',sha:null})))}
+  const tr=await gh('/git/trees',{method:'POST',body:JSON.stringify({base_tree:com.tree.sha,tree})},tok);
+  const nc=await gh('/git/commits',{method:'POST',body:JSON.stringify({message:msg,tree:tr.sha,parents:[head]})},tok);
+  try{await gh('/git/refs/heads/main',{method:'PATCH',body:JSON.stringify({sha:nc.sha})},tok);return idx}catch(e){if(e.status!==422)throw e}}
+ throw new Error('Il repository è stato aggiornato nello stesso momento: riprova.')}
+/* sessioni salvate su questo dispositivo ma non ancora inviate (es. senza chiave GitHub o offline) */
+async function syncPending(say){const q=LS.get('dqueue',[]),t=ghTok();if(!q.length||!t)return 0;let n=0;
+ for(const it of q.slice()){const files=[{path:`diario/voci/${it.v.id}.json.enc`,label:'la sessione',u8:await encJSON(it.v)}];
+  await ghCommitDiario(t,files,idx=>{if(!idx.voci.some(x=>x.id===it.v.id))idx.voci.push({id:it.v.id,at:it.v.at})},'Diario: sessione del '+new Date(it.v.at).toLocaleDateString('it-IT'),say||(()=>{}));
+  LS.set('dqueue',LS.get('dqueue',[]).filter(x=>x.v.id!==it.v.id));n++}return n}
+window.addEventListener('online',()=>syncPending().catch(()=>{}));
+
+/* ---- finestra «salva la sessione» (anche «aggiungi a mano»), con messaggio vocale ---- */
+function sessionModal(o){const sh=document.createElement('div');sh.className='modal';const today=new Date(),iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+ sh.innerHTML=`<form class="af box sess"><div class="lbl">${o.manual?'Aggiungi pratica a mano':'Salva la sessione di pratica'}</div>
+ <div class="two"><div><label>Giorno</label><input type="date" name="day" value="${iso(today)}" max="${iso(today)}"></div><div><label>Minuti</label><input type="number" name="min" min="1" max="600" inputmode="numeric" value="${o.ms?Math.max(1,Math.round(o.ms/60000)):''}" placeholder="es. 30"></div></div>
+ <label>Su cosa ti sei esercitato</label><input type="text" name="what" value="${esc(o.what||'')}" placeholder="Es. Lezione 3 · sinistra di Tipitina">
+ <label>Tempo raggiunto (bpm, facoltativo)</label><input type="number" name="bpm" inputmode="numeric" value="${M.playing?M.bpm:R.playing?R.bpm:''}" placeholder="bpm">
+ <label>Note: cosa hai imparato, cosa hai notato</label><textarea name="note" rows="3" placeholder="Scrivi qui, oppure registra un messaggio vocale"></textarea>
+ <div class="rec"><button type="button" class="rb" data-rec>🎙 Registra un messaggio vocale</button><span class="small muted" data-rt></span></div>
+ <p class="small muted" style="margin:8px 0 0">Il messaggio vocale viene trascritto e messo in ordine nel diario dopo qualche minuto.</p>
+ ${ghTok()?'':tokHTML()}
+ <button class="go" type="submit">Salva nel diario</button><div class="row2"><button type="button" class="btn sm" data-x>${o.fromTimer?'Non salvare (riprendi dopo)':'Annulla'}</button>${o.fromTimer?'<button type="button" class="btn sm del" data-zero>Azzera il timer</button>':''}</div><div class="note" data-m></div></form>`;
+ document.body.appendChild(sh);const f=sh.querySelector('form'),say=m=>sh.querySelector('[data-m]').textContent=m;let rec=null,chunks=[],blob=null,ext=null,rT=null;
+ const close=()=>{try{rec&&rec.state!=='inactive'&&rec.stop()}catch(e){}clearInterval(rT);sh.remove()};
+ sh.onclick=e=>{if(e.target===sh)close()};sh.querySelector('[data-x]').onclick=close;
+ const z=sh.querySelector('[data-zero]');if(z)z.onclick=()=>{if(confirm('Azzerare il timer senza salvare?')){timerReset();close()}};
+ const rb=sh.querySelector('[data-rec]'),rt=sh.querySelector('[data-rt]');
+ rb.onclick=async()=>{if(rec&&rec.state==='recording'){rec.stop();return}
+  if(!navigator.mediaDevices||!window.MediaRecorder){say('Questo browser non registra audio: usa il microfono della tastiera per dettare le note.');return}
+  try{const st=await navigator.mediaDevices.getUserMedia({audio:true});const mt=['audio/mp4','audio/webm;codecs=opus','audio/webm'].find(t=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(t))||'';
+   rec=new MediaRecorder(st,mt?{mimeType:mt}:{});chunks=[];rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+   rec.onstop=()=>{st.getTracks().forEach(t=>t.stop());clearInterval(rT);const type=rec.mimeType||mt||'audio/mp4';ext=/webm/.test(type)?'webm':'m4a';blob=new Blob(chunks,{type});
+    rb.classList.remove('on');rb.textContent='🎙 Registra di nuovo';rt.innerHTML='';const a=document.createElement('audio');a.controls=true;a.src=URL.createObjectURL(blob);rt.appendChild(a)};
+   rec.start(1000);const t0=Date.now();rb.classList.add('on');rb.textContent='■ Ferma la registrazione';rt.textContent='● 0:00';
+   rT=setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000);rt.textContent='● '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0');if(s>=600)rec.stop()},500)}
+  catch(e){say('Microfono non disponibile: '+e.message)}};
+ f.onsubmit=async e=>{e.preventDefault();const E=f.elements,min=+E.min.value;if(!(min>0)){say('Scrivi quanti minuti hai fatto.');return}
+  if(rec&&rec.state==='recording'){rec.stop();await new Promise(r=>setTimeout(r,400))}
+  const [y,m,d]=E.day.value.split('-').map(Number),now=new Date(),at=(y===now.getFullYear()&&m===now.getMonth()+1&&d===now.getDate())?Date.now():new Date(y,m-1,d,20).getTime();
+  const v={id:'v'+Date.now().toString(36),at,ms:min*60000,what:E.what.value.trim(),bpm:+E.bpm.value||null,note:E.note.value.trim(),lez:o.lez||null};if(blob)v.audio=ext;
+  const btn=f.querySelector('.go');btn.disabled=true;
+  const l=LS.get('log',[]);l.push({id:v.id,at,ms:v.ms,what:v.what,bpm:v.bpm,note:v.note});LS.set('log',l);
+  if(o.fromTimer)timerReset();
+  let t=null;try{t=E.tok&&E.tok.value.trim()?await needTok(f,say):ghTok()}catch(err){t=null}
+  if(!t||navigator.onLine===false){LS.set('dqueue',LS.get('dqueue',[]).concat([{v}]));if(blob)say('');toast(blob?'✓ Salvato sul dispositivo. Il vocale si può inviare solo con la chiave GitHub.':'✓ Salvato. Lo sincronizzo appena possibile.');close();afterSave();return}
+  try{await syncPending(say);const files=[{path:`diario/voci/${v.id}.json.enc`,label:'la sessione',u8:await encJSON(v)}];
+   if(blob)files.push({path:`diario/voci/${v.id}.${ext}.enc`,label:'il messaggio vocale',u8:await encBytes(new Uint8Array(await blob.arrayBuffer()))});
+   await ghCommitDiario(t,files,idx=>{idx.voci.push({id:v.id,at:v.at})},'Diario: sessione del '+new Date(at).toLocaleDateString('it-IT'),say);
+   if(DIARIO){DIARIO.voci.unshift(v);LS.set('diario-cache',DIARIO)}
+   toast(blob||v.note?'✓ Salvato nel diario. Trascrizione e riassunto arrivano tra qualche minuto.':'✓ Salvato nel diario');close();afterSave()}
+  catch(err){LS.set('dqueue',LS.get('dqueue',[]).concat([{v}]));btn.disabled=false;say(ghErr(err)+' La sessione resta salvata sul dispositivo.')}};
+ setTimeout(()=>{const i=f.elements[o.ms?'what':'min'];if(i&&innerWidth>700)i.focus()},100)}
+function afterSave(){updStreak();drawPrac();if(curTab==='diary')paneDiary();if(location.hash==='#diario')renderDiario();else if(!location.hash)renderHome()}
+
+/* ---- pannello Strumenti › Diario: timer + ultime sessioni ---- */
+function paneDiary(){const run=!!D.start,has=tNow()>0,last=sessions().slice().sort((a,b)=>b.at-a.at).slice(0,6);
  $('#pane').innerHTML=`<div class="pane">
- <div class="timer" id="tShow">${hms(tNow())}</div>
- <div class="row"><button class="btn ${D.start?'':'gold'}" id="tGo">${D.start?'❚❚ Pausa':'▶ Inizia la pratica'}</button><button class="btn sm" id="tReset">Azzera</button></div>
- <div class="lbl">Cosa hai esercitato</div>
- <input type="text" id="dWhat" placeholder="Es. Lezione 3 · rumba alla Longhair, mano sinistra">
- <div class="row" style="justify-content:flex-start"><span class="small">Tempo raggiunto</span><input type="number" id="dBpm" value="${M.playing?M.bpm:R.playing?R.bpm:''}" placeholder="bpm" style="width:90px;padding:8px"></div>
- <textarea id="dNote" rows="2" placeholder="Note: cosa migliorare la prossima volta"></textarea>
- <button class="go" id="dSave">Salva nel diario</button>
- <div class="lbl">Ultimi 7 giorni · ${hms(week)}</div>
- <ul class="log">${log.slice().reverse().slice(0,30).map(e=>`<li><b>${esc(e.what||'Pratica')}</b>${e.bpm?` · ${e.bpm} bpm`:''} · ${hms(e.ms)}<div class="d">${new Date(e.at).toLocaleDateString('it-IT',{weekday:'short',day:'numeric',month:'short'})}${e.note?' · '+esc(e.note):''}</div></li>`).join('')||'<li class="muted">Ancora nessuna sessione salvata.</li>'}</ul>
- <p class="small muted">Il diario resta salvato su questo telefono.</p></div>`;
- $('#tGo').onclick=()=>{if(D.start){D.acc=tNow();D.start=null}else D.start=Date.now();LS.set('timer',D);paneDiary()};
- $('#tReset').onclick=()=>{D.start=null;D.acc=0;LS.set('timer',D);paneDiary()};
- $('#dSave').onclick=()=>{const ms=tNow();const l=LS.get('log',[]);l.push({at:Date.now(),ms,what:$('#dWhat').value.trim(),bpm:+$('#dBpm').value||null,note:$('#dNote').value.trim()});LS.set('log',l);D.start=null;D.acc=0;LS.set('timer',D);paneDiary();updStreak();if(!location.hash)renderHome()};
- clearInterval(dInt);dInt=setInterval(()=>{const e=$('#tShow');if(e)e.textContent=hms(tNow());else clearInterval(dInt)},500)}
+ <div class="timer" data-tnow>${hms(tNow())}</div>
+ <p class="small muted" style="text-align:center;margin:0 0 6px">${run?'Pratica in corso'+(D.what?' · '+esc(D.what):''):has?'In pausa':'Avvia il timer quando cominci a suonare'}</p>
+ <div class="row">${run?`<button class="btn" id="tP">❚❚ Pausa</button>`:`<button class="btn gold" id="tS">▶ ${has?'Riprendi':'Inizia la pratica'}</button>`}${has?'<button class="btn" id="tF">■ Fine e salva</button>':''}</div>
+ <div class="row"><button class="btn sm" id="tAdd">＋ Aggiungi a mano</button><button class="btn sm" id="tDia">📖 Apri il diario</button></div>
+ <div class="lbl">Questa settimana · ${weekMin()} min · oggi ${todayMin()} min</div>
+ <ul class="log">${last.map(e=>`<li><b>${esc(e.what||'Pratica')}</b>${e.bpm?` · ${e.bpm} bpm`:''} · ${Math.round((e.ms||0)/60000)} min<div class="d">${new Date(e.at).toLocaleDateString('it-IT',{weekday:'short',day:'numeric',month:'short'})}${e.note?' · '+esc(e.note):''}</div></li>`).join('')||'<li class="muted">Ancora nessuna sessione salvata.</li>'}</ul>
+ <p class="small muted">I minuti si contano anche da soli mentre usi metronomo, ritmi, tastiera, brani e video (quando il timer è fermo).</p></div>`;
+ const q=x=>$('#pane').querySelector(x);
+ if(q('#tS'))q('#tS').onclick=()=>timerStart({what:lessonWhat(),lez:LESSON&&LESSON.l.n});if(q('#tP'))q('#tP').onclick=timerPause;if(q('#tF'))q('#tF').onclick=timerFinish;
+ q('#tAdd').onclick=()=>sessionModal({ms:0,what:lessonWhat(),lez:LESSON&&LESSON.l.n,manual:true});q('#tDia').onclick=()=>{if(innerWidth<700)closeTools();go('diario')}}
+
+/* ---- pagina Diario ---- */
+async function renderDiario(){theme('');$('#crumb').textContent='Diario di pratica';updStreak();
+ const draw=()=>{const Dg=DIARIO||{voci:[],elab:{},sett:{}},loc=LS.get('log',[]),ids=new Set(Dg.voci.map(v=>v.id));
+  const all=Dg.voci.concat(loc.filter(e=>!e.id||!ids.has(e.id)).map(e=>Object.assign({local:true},e))).sort((a,b)=>b.at-a.at);
+  const weeks={};all.forEach(v=>{(weeks[settimanaDi(v.at)]=weeks[settimanaDi(v.at)]||[]).push(v)});
+  const auto=autoMs(),pending=LS.get('dqueue',[]).length;
+  const wtxt=w=>{const l=weeks[w],d0=new Date(Math.min(...l.map(v=>v.at)));const mon=new Date(d0);mon.setDate(d0.getDate()-((d0.getDay()+6)%7));const sun=new Date(mon);sun.setDate(mon.getDate()+6);
+   return`${mon.toLocaleDateString('it-IT',{day:'numeric',month:'short'})} – ${sun.toLocaleDateString('it-IT',{day:'numeric',month:'short'})}`};
+  const mech=l=>{const by={};l.forEach(v=>{const k=v.what||'Pratica';by[k]=(by[k]||0)+(v.ms||0)});
+   return Object.entries(by).sort((a,b)=>b[1]-a[1]).map(([k,ms])=>`– ${k}: ${Math.round(ms/60000)} min`).join('\n')};
+  $('#app').innerHTML=`<section class="chero"><div class="wrap"><div class="eyebrow">Scuola</div><h1>Diario di pratica</h1><p>Le tue sessioni, le note e i messaggi vocali, settimana per settimana</p></div></section><div class="wrap">
+  <div class="stats"><div class="stat"><b>${weekMin()}<small style="font-size:13px;font-weight:600"> min</small></b><span>questa settimana</span></div><div class="stat"><b>${streakDays()} 🔥</b><span>giorni di fila</span></div><div class="stat"><b>${todayMin()}<small style="font-size:13px;font-weight:600"> min</small></b><span>oggi</span></div></div>
+  <div class="prac" id="homePrac"></div>
+  ${pending?`<div class="note">${pending} ${pending===1?'sessione salvata':'sessioni salvate'} solo su questo dispositivo: le invio al prossimo salvataggio con la chiave GitHub.</div>`:''}
+  ${Object.keys(weeks).sort().reverse().map(w=>{const l=weeks[w],tot=Math.round(l.reduce((a,v)=>a+(v.ms||0),0)/60000),rc=Dg.sett[w];
+   return`<div class="dweek">Settimana ${wtxt(w)}<small>${tot} min · ${l.length} ${l.length===1?'sessione':'sessioni'}</small></div>
+   <div class="drecap"><div class="lbl">${rc?'Diario di viaggio della settimana':'Riepilogo'}</div>${esc(rc?rc.testo:mech(l))}</div>
+   ${l.map(v=>{const e=Dg.elab[v.id]||{};return`<div class="dent"><div class="dh"><b>${esc(v.what||'Pratica')}</b><span>${new Date(v.at).toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'})} · ${Math.round((v.ms||0)/60000)} min${v.bpm?' · '+v.bpm+' bpm':''}${v.local?' · solo su questo dispositivo':''}</span></div>
+    ${e.ordinato?`<div class="dx">${esc(e.ordinato)}</div>`:v.note?`<div class="dx">${esc(v.note)}</div>`:''}
+    ${v.audio?(e.trascr?`<details class="dt"><summary>🎙 Messaggio vocale · trascrizione</summary>${esc(e.trascr)}</details>`:e.err?`<div class="dw">⚠️ ${esc(e.err)}</div>`:'<div class="dw">🎙 Messaggio vocale: trascrizione in arrivo (qualche minuto)</div>'):''}
+    ${e.ordinato&&v.note?`<details class="dt"><summary>Le tue note originali</summary>${esc(v.note)}</details>`:''}</div>`}).join('')}`}).join('')||'<div class="empty">Ancora nessuna sessione. Avvia la pratica qui sopra, oppure aggiungi a mano quella che hai già fatto oggi.</div>'}
+  <p class="small muted" style="margin-top:22px">Minuti registrati in automatico (metronomo, ritmi, tastiera, brani, video): oggi ${Math.round((auto[dayKey(Date.now())]||0)/60000)} min. Contano nei totali ma non compaiono come sessioni.</p>
+  <div class="row"><button class="btn sm" id="dRel">↻ Aggiorna</button><button class="btn sm" data-go="home">‹ Home</button></div><div class="foot"></div></div>`;
+  drawPrac();$('#dRel').onclick=async()=>{$('#dRel').textContent='…';await loadDiario(true).catch(()=>{});if(location.hash==='#diario')draw()}};
+ draw();window.scrollTo(0,0);try{await loadDiario();if(location.hash==='#diario')draw()}catch(e){}}
 
 /* ================= tools sheet ================= */
 /* pannello flottante: grande per regolare, ridotto (▁) a una finestrella in basso a destra; ✕ o trascina giù per chiudere.
@@ -1271,14 +1543,14 @@ function showTab(){document.querySelectorAll('#tabs button').forEach(b=>b.classL
 function drawMini(){if(!miniOn||!curTab)return;const m=$('#mini');let t,play,ctl;
  const pm=(bpm)=>`<button class="m5" data-mm="-5" aria-label="Meno 5 bpm">−5</button><button data-mm="-1" aria-label="Meno 1 bpm">−</button><em>${bpm}<small> bpm</small></em><button data-mm="1" aria-label="Più 1 bpm">+</button><button class="m5" data-mm="5" aria-label="Più 5 bpm">+5</button>`;
  if(curTab==='rhythm'){t=RHY[R.id].name;play=R.playing;ctl=pm(R.bpm)}
- else if(curTab==='diary'){t='Tempo di pratica';play=!!D.start;ctl=`<em id="miniT">${hms(tNow())}</em>`}
+ else if(curTab==='diary'){t='Tempo di pratica';play=!!D.start;ctl=`<em id="miniT">${hms(tNow())}</em>${tNow()>0?'<button data-mm="fine">■ Fine</button>':''}`}
  else{t=`Metronomo · ${M.beats}/4${M.sub===2&&M.swing?' · swing':''}`;play=M.playing;ctl=pm(M.bpm)+`<button data-mm="tap">Tap</button>`}
  m.innerHTML=`<div class="mrow"><span class="mt">${esc(t)}</span><button class="sx" data-mm="max" title="Apri tutto" aria-label="Apri tutto">⤢</button><button class="sx" data-mm="x" title="Chiudi" aria-label="Chiudi">✕</button></div>
  <div class="mrow"><button class="mp ${play?'on':''}" data-mm="play" aria-label="${play?'Stop':'Avvia'}">${play?(curTab==='diary'?'❚❚':'■'):'▶'}</button><div class="mc">${ctl}</div></div>`;
  requestAnimationFrame(()=>document.body.style.setProperty('--minih',$('#sheet').offsetHeight+'px'))}
 $('#mini').addEventListener('click',e=>{const b=e.target.closest('[data-mm]');if(!b)return;const k=b.dataset.mm;
- if(k==='x')return closeTools();if(k==='max'){setMini(false);return showTab()}
- if(k==='play'){if(curTab==='rhythm')R.playing?stopRhythm():startRhythm();else if(curTab==='diary'){if(D.start){D.acc=tNow();D.start=null}else D.start=Date.now();LS.set('timer',D);setMini(true)}else M.playing?stopMetro():startMetro()}
+ if(k==='x')return closeTools();if(k==='fine'){timerFinish();return}if(k==='max'){setMini(false);return showTab()}
+ if(k==='play'){if(curTab==='rhythm')R.playing?stopRhythm():startRhythm();else if(curTab==='diary'){if(D.start)timerPause();else timerStart({what:lessonWhat(),lez:LESSON&&LESSON.l.n});setMini(true)}else M.playing?stopMetro():startMetro()}
  else if(k==='tap'){const n=performance.now();taps=taps.filter(x=>n-x<2500);taps.push(n);if(taps.length>1){M.bpm=Math.max(30,Math.min(260,Math.round(60000/((taps[taps.length-1]-taps[0])/(taps.length-1)))));mSave()}}
  else if(curTab==='rhythm'){R.bpm=Math.max(40,Math.min(240,R.bpm+ +k));rSave()}else{M.bpm=Math.max(30,Math.min(260,M.bpm+ +k));mSave()}
  drawMini();live()});
@@ -1293,8 +1565,8 @@ $('#openTools').onclick=()=>openTools(lastTab);
 $('#tClose').onclick=closeTools;$('#tMin').onclick=()=>setMini(true);
 document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{curTab=b.dataset.t;lastTab=curTab;showTab()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.querySelector('.leg,.modal')){if($('#lib').classList.contains('show'))closeLib();else if(curTab)closeTools()}});
-function live(){const on=(M.playing||R.playing)&&!curTab,l=$('#live');l.classList.toggle('show',on);$('#liveTxt').textContent=M.playing?M.bpm+' bpm · Stop':R.playing?RHY[R.id].name.split(' ')[0]+' '+R.bpm+' · Stop':'';drawMini()}
-$('#live').onclick=()=>{stopMetro();stopRhythm()};
+function live(){const snd=M.playing||R.playing,on=(snd||D.start)&&!curTab,l=$('#live');l.classList.toggle('show',!!on);$('#liveTxt').textContent=M.playing?M.bpm+' bpm · Stop':R.playing?RHY[R.id].name.split(' ')[0]+' '+R.bpm+' · Stop':D.start?'⏱ '+hms(tNow()):'';drawMini()}
+$('#live').onclick=()=>{if(M.playing||R.playing){stopMetro();stopRhythm()}else if(D.start)openTools('diary',true)};
 $('#live').oncontextmenu=e=>{e.preventDefault();openTools(M.playing?'metro':'rhythm',true)};
 
 /* start */
