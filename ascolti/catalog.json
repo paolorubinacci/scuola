@@ -119,15 +119,25 @@
     "k": "audio",
     "c": "Registrazione",
     "t": "Early King - Street Parade",
-    "st": "elaborazione",
+    "st": "pronto",
     "tipo": "band",
     "midi_auto": false,
-    "pdf_auto": false
+    "pdf_auto": false,
+    "stems": [
+     "drums",
+     "bass",
+     "piano",
+     "vocals",
+     "other"
+    ],
+    "dur": 194.53,
+    "f": "rmwobjf9i0/mix.mp3.enc"
    }
   ],
   "t": "Street Parade",
   "a": "Early King",
   "al": "",
-  "anno": ""
+  "anno": "",
+  "agg": "2026-11-20"
  }
 }
