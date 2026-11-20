@@ -452,7 +452,7 @@ new MutationObserver(()=>applyNola(document)).observe(document.getElementById('a
 function boot(){$('#gate').remove();
  try{const app=navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
   if(app&&!location.hash&&!sessionStorage.getItem('aperta')){const c=nolaCourse();if(c)history.replaceState(null,'','#'+c.id)}sessionStorage.setItem('aperta','1')}catch(e){}
- render()}
+ render();setTimeout(()=>syncProg().catch(()=>{}),800)}
 function progress(){return LS.get('done',{})}
 /* lezioni fatte: ora si salva il momento (conta nei giorni di fila); le vecchie spunte senza data valgono da oggi */
 (()=>{const p=LS.get('done',{});let ch=false;for(const k in p)if(p[k]===true){p[k]=Date.now();ch=true}if(ch)LS.set('done',p)})();
@@ -469,7 +469,7 @@ function dayKey(ts){const d=new Date(ts);return d.getFullYear()+'-'+(d.getMonth(
 /* attività: sessioni salvate (questo dispositivo + diario sincronizzato), minuti registrati in automatico, lezioni segnate come fatte */
 function sessions(){const loc=LS.get('log',[]),ids=new Set(loc.map(e=>e.id).filter(Boolean));
  return loc.concat(((DIARIO&&DIARIO.voci)||[]).filter(v=>!ids.has(v.id)))}
-function autoMs(){return LS.get('auto',{})}
+function autoMs(){const a=Object.assign({},LS.get('auto',{}));Object.entries(LS.get('auto-altri',{})).forEach(([k,v])=>a[k]=(a[k]||0)+v);return a}
 function activeDays(){const days=new Set(sessions().filter(e=>e.ms>0).map(e=>dayKey(e.at)));
  Object.entries(autoMs()).forEach(([k,ms])=>{if(ms>=60000)days.add(k)});
  Object.values(progress()).forEach(v=>{if(typeof v==='number')days.add(dayKey(v))});return days}
@@ -517,7 +517,7 @@ function renderLesson(c,l){
   ${next?`<button class="btn sm" data-go="${c.id}-l${next.n}">Lezione ${next.n} ›</button>`:'<span></span>'}</div><div class="foot"></div></div>`;
  $('#app').innerHTML=h;window.scrollTo(0,0);
  LESSON={c,l};drawPrac();
- $('#doneBtn').onclick=()=>{const p=progress();if(p[key])delete p[key];else{p[key]=Date.now();toast('✓ Lezione fatta: oggi conta nei giorni di fila')}LS.set('done',p);updStreak();renderLesson(c,l)};
+ $('#doneBtn').onclick=()=>{const p=progress();const dl=LS.get('done-del',{});if(p[key]){delete p[key];dl[key]=Date.now()}else{p[key]=Date.now();delete dl[key];toast('✓ Lezione fatta: oggi conta nei giorni di fila')}LS.set('done',p);LS.set('done-del',dl);progSoon();updStreak();renderLesson(c,l)};
  document.querySelectorAll('.clip[data-src]').forEach(initClip);
  document.querySelectorAll('.kb[data-k]').forEach(initKb);
  document.querySelectorAll('img[data-enc]').forEach(async i=>{i.src=await mediaURL(i.dataset.enc,'image/png')});
@@ -1035,7 +1035,7 @@ function tokHTML(){const t=ghTok();return`<details class="ghk" ${t?'':'open'}><s
  <p class="note">Serve per pubblicare dal sito. Si crea qui: <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">https://github.com/settings/personal-access-tokens/new</a> · nome «Scuola», <b>Only select repositories → scuola</b>, permesso <b>Contents: Read and write</b>. Resta salvata solo su questo dispositivo.</p>
  <input type="password" name="tok" placeholder="github_pat_…" autocomplete="off"></details>`}
 async function needTok(f,say){const t=(f.elements.tok&&f.elements.tok.value.trim())||ghTok();if(!t){const d=f.querySelector('.ghk');if(d)d.open=true;say('Inserisci la chiave GitHub (vedi sopra).');return null}
- say('Controllo la chiave GitHub…');await gh('',{},t);if(f.elements.tok&&f.elements.tok.value.trim())LS.set('gh',t);return t}
+ say('Controllo la chiave GitHub…');await gh('',{},t);if(f.elements.tok&&f.elements.tok.value.trim()){LS.set('gh',t);setTimeout(()=>syncProg(true).catch(()=>{}),500)}return t}
 const ghErr=err=>/^40[134]/.test(err.message)?'La chiave GitHub non funziona: controlla che abbia «Contents: Read and write» sul repository scuola.':'Errore: '+err.message;
 
 /* ---- «Carica»: qualsiasi file sui brani. Riconosce tipo, brano, titolo e categoria; Paolo controlla e pubblica ---- */
@@ -1518,6 +1518,35 @@ async function syncPending(say){const q=LS.get('dqueue',[]),t=ghTok();if(!q.leng
   await ghCommitDiario(t,files,idx=>{if(!idx.voci.some(x=>x.id===it.v.id))idx.voci.push({id:it.v.id,at:it.v.at})},'Diario: sessione del '+new Date(it.v.at).toLocaleDateString('it-IT'),say||(()=>{}));
   LS.set('dqueue',LS.get('dqueue',[]).filter(x=>x.v.id!==it.v.id));n++}return n}
 window.addEventListener('online',()=>syncPending().catch(()=>{}));
+/* ---- progressi sincronizzati: lezioni fatte e minuti automatici, uguali su tutti i dispositivi ---- */
+const PROG='progresso/stato.json.enc';let progBusy=null,progT=0;
+function devId(){let d=LS.get('dev',null);if(!d){d=Math.random().toString(36).slice(2,10);LS.set('dev',d)}return d}
+function progSoon(){clearTimeout(progT);progT=setTimeout(()=>syncProg(true).catch(()=>{}),1500)}
+function progRender(){if(!location.hash||DATA.courses.some(c=>'#'+c.id===location.hash)){const y=scrollY;render();scrollTo(0,y)}}
+let progGet=0;function syncProg(push){if(progBusy)return progBusy;if(!push&&Date.now()-progGet<20000)return Promise.resolve();progGet=Date.now();return progBusy=(async()=>{const t=ghTok();if(!t||navigator.onLine===false)return;
+ for(let i=0;i<4;i++){
+  let R={done:{},del:{},auto:{}},sha=null;
+  const r=await fetch(GHR+'/contents/'+PROG+'?ref=main&t='+Date.now(),{headers:{Authorization:'Bearer '+t,Accept:'application/vnd.github+json'}});
+  if(r.ok){const j=await r.json();sha=j.sha;try{R=Object.assign(R,await decJSON(Uint8Array.from(atob(j.content.replace(/\s/g,'')),c=>c.charCodeAt(0))))}catch(e){return}}
+  else if(r.status!==404)return;
+  const before=JSON.stringify(R),L=LS.get('done',{}),D=LS.get('done-del',{});
+  for(const k in L)R.done[k]=Math.max(R.done[k]||0,L[k]||1);
+  for(const k in D)R.del[k]=Math.max(R.del[k]||0,D[k]);
+  const me=devId(),la=LS.get('auto',{}),old=R.auto[me]||{};R.auto[me]=Object.assign({},old,la);
+  const done={},del={};for(const k in R.done)if(!(R.del[k]>=R.done[k]))done[k]=R.done[k];for(const k in R.del)if(R.del[k]>=(R.done[k]||0))del[k]=R.del[k];
+  const altri={};for(const d in R.auto)if(d!==me)for(const k in R.auto[d])altri[k]=(altri[k]||0)+R.auto[d][k];
+  const ch=JSON.stringify(done)!==JSON.stringify(L)||JSON.stringify(altri)!==JSON.stringify(LS.get('auto-altri',{}));
+  LS.set('done',done);LS.set('done-del',del);LS.set('auto-altri',altri);if(ch){try{updStreak()}catch(e){}progRender()}
+  const doneCh=JSON.stringify(R.done)!==JSON.stringify(JSON.parse(before).done)||JSON.stringify(R.del)!==JSON.stringify(JSON.parse(before).del);
+  const autoCh=JSON.stringify(old)!==JSON.stringify(R.auto[me]);
+  if(!doneCh&&!(autoCh&&(push||Date.now()-LS.get('prog-at',0)>20*60e3)))return;
+  const body={message:'Progressi: lezioni fatte e minuti',content:u2b(await encJSON(R)),branch:'main'};if(sha)body.sha=sha;
+  const w=await fetch(GHR+'/contents/'+PROG,{method:'PUT',headers:{Authorization:'Bearer '+t,Accept:'application/vnd.github+json','Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(w.ok){LS.set('prog-at',Date.now());return}if(w.status!==409&&w.status!==422)return}
+ })().finally(()=>{progBusy=null})}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')syncProg().catch(()=>{});else syncProg(true).catch(()=>{})});
+setInterval(()=>syncProg().catch(()=>{}),5*60e3);
+window.addEventListener('hashchange',()=>{if(!location.hash||DATA.courses.some(c=>'#'+c.id===location.hash))syncProg().catch(()=>{})});
 
 /* ---- finestra «salva la sessione» (anche «aggiungi a mano»), con messaggio vocale ---- */
 function sessionModal(o){const sh=document.createElement('div');sh.className='modal';const today=new Date(),iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
