@@ -452,7 +452,7 @@ new MutationObserver(()=>applyNola(document)).observe(document.getElementById('a
 function boot(){$('#gate').remove();
  try{const app=navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
   if(app&&!location.hash&&!sessionStorage.getItem('aperta')){const c=nolaCourse();if(c)history.replaceState(null,'','#'+c.id)}sessionStorage.setItem('aperta','1')}catch(e){}
- render();setTimeout(()=>syncProg().catch(()=>{}),800)}
+ render();try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}progBoot().finally(()=>syncProg().catch(()=>{}))}
 function progress(){return LS.get('done',{})}
 /* lezioni fatte: ora si salva il momento (conta nei giorni di fila); le vecchie spunte senza data valgono da oggi */
 (()=>{const p=LS.get('done',{});let ch=false;for(const k in p)if(p[k]===true){p[k]=Date.now();ch=true}if(ch)LS.set('done',p)})();
@@ -501,7 +501,7 @@ function renderCourse(c){
  $('#app').innerHTML=`<section class="chero"><div class="wrap"><div class="eyebrow">${esc(c.kind||'Videocorso')}</div><h1 class="nt">${esc(c.title)}</h1><p>${esc(c.sub)}</p></div></section><div class="wrap">
  <ul class="lessons">${c.lessons.map(l=>`<li data-go="${c.id}-l${l.n}"><span class="num">${l.n}</span><div><div class="t">${esc(l.title)}</div><div class="d">${esc(l.dur||'')}${l.clips?` · ${l.clips} passaggi suonati`:''}${l.ready?'':' · in preparazione'}</div></div><span class="chk ${done[c.id+'-'+l.n]?'done':''}">${done[c.id+'-'+l.n]?'✓ fatta':'›'}</span></li>`).join('')}</ul>
  ${isNola(c)?`<div class="acard" data-go="${c.id}-ascolti"><span class="ic">♫</span><div><b>Ascolti consigliati</b><span>Dal PDF della lezione 1 · ascolto e tracce separate</span></div></div>`:''}
- <div class="foot"></div></div>`;window.scrollTo(0,0)}
+ <p class="small muted" id="progStat" style="margin:14px 2px 0"></p><div class="foot"></div></div>`;window.scrollTo(0,0);progShow()}
 function renderLesson(c,l){
  if(!l)return go(c.id);
  theme(c.theme?'t-'+c.theme.replace(/^.*\s/,''):'');updStreak();
@@ -517,7 +517,7 @@ function renderLesson(c,l){
   ${next?`<button class="btn sm" data-go="${c.id}-l${next.n}">Lezione ${next.n} ›</button>`:'<span></span>'}</div><div class="foot"></div></div>`;
  $('#app').innerHTML=h;window.scrollTo(0,0);
  LESSON={c,l};drawPrac();
- $('#doneBtn').onclick=()=>{const p=progress();const dl=LS.get('done-del',{});if(p[key]){delete p[key];dl[key]=Date.now()}else{p[key]=Date.now();delete dl[key];toast('✓ Lezione fatta: oggi conta nei giorni di fila')}LS.set('done',p);LS.set('done-del',dl);progSoon();updStreak();renderLesson(c,l)};
+ $('#doneBtn').onclick=()=>{const p=progress();const dl=LS.get('done-del',{});if(p[key]){delete p[key];dl[key]=Date.now()}else{p[key]=Date.now();delete dl[key];}saveProg(p,dl);progSoon();updStreak();renderLesson(c,l)};
  document.querySelectorAll('.clip[data-src]').forEach(initClip);
  document.querySelectorAll('.kb[data-k]').forEach(initKb);
  document.querySelectorAll('img[data-enc]').forEach(async i=>{i.src=await mediaURL(i.dataset.enc,'image/png')});
@@ -1521,14 +1521,25 @@ window.addEventListener('online',()=>syncPending().catch(()=>{}));
 /* ---- progressi sincronizzati: lezioni fatte e minuti automatici, uguali su tutti i dispositivi ---- */
 const PROG='progresso/stato.json.enc';let progBusy=null,progT=0;
 function devId(){let d=LS.get('dev',null);if(!d){d=Math.random().toString(36).slice(2,10);LS.set('dev',d)}return d}
-function progSoon(){clearTimeout(progT);progT=setTimeout(()=>syncProg(true).catch(()=>{}),1500)}
+function idb(){return new Promise((ok,ko)=>{try{const r=indexedDB.open('scuola',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>ok(r.result);r.onerror=()=>ko(r.error)}catch(e){ko(e)}})}
+async function idbSet(k,v){try{const db=await idb();await new Promise(ok=>{const t=db.transaction('kv','readwrite',{durability:'strict'});t.objectStore('kv').put(v,k);t.oncomplete=t.onerror=t.onabort=ok})}catch(e){}}
+async function idbGet(k){try{const db=await idb();return await new Promise(ok=>{const q=db.transaction('kv').objectStore('kv').get(k);q.onsuccess=()=>ok(q.result);q.onerror=()=>ok(undefined)})}catch(e){}}
+function mergeProg(A,Ad,B,Bd){const all={},dl={};[A,B].forEach(x=>{for(const k in x||{})all[k]=Math.max(all[k]||0,x[k]||1)});[Ad,Bd].forEach(x=>{for(const k in x||{})dl[k]=Math.max(dl[k]||0,x[k])});
+ const done={},del={};for(const k in all)if(!(dl[k]>=all[k]))done[k]=all[k];for(const k in dl)if(dl[k]>=(all[k]||0))del[k]=dl[k];return {done,del}}
+function saveProg(done,del){LS.set('done',done);LS.set('done-del',del);idbSet('prog',{done,del})}
+/* all'avvio: riprende le spunte anche se la memoria rapida dell'app le ha perse */
+async function progBoot(){const x=await idbGet('prog');if(x){const L=LS.get('done',{}),m=mergeProg(L,LS.get('done-del',{}),x.done,x.del);if(JSON.stringify(m.done)!==JSON.stringify(L)){saveProg(m.done,m.del);try{updStreak()}catch(e){}progRender()}else idbSet('prog',m)}else saveProg(LS.get('done',{}),LS.get('done-del',{}))}
+function progSoon(){clearTimeout(progT);syncProg(true).then(st=>{progShow();
+  toast(st==='ok'||st==='same'?'✓ Salvata: la ritrovi anche su iPad e iPhone':st==='nokey'?'Salvata solo su questo dispositivo: collega la chiave GitHub nel Diario per ritrovarla ovunque':'Salvata sul dispositivo; la invio a GitHub appena c\'è connessione')}).catch(()=>{})}
+function progShow(){const el=$('#progStat');if(!el)return;const t=ghTok(),at=LS.get('prog-ok',0);
+ el.innerHTML=!t?'Le lezioni fatte restano solo su questo dispositivo. <a href="#diario">Collega la chiave GitHub</a> per ritrovarle su iPad e iPhone.':at?'✓ Lezioni fatte sincronizzate su tutti i dispositivi · '+new Date(at).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}):'Sincronizzo le lezioni fatte…'}
 function progRender(){if(!location.hash||DATA.courses.some(c=>'#'+c.id===location.hash)){const y=scrollY;render();scrollTo(0,y)}}
-let progGet=0;function syncProg(push){if(progBusy)return progBusy;if(!push&&Date.now()-progGet<20000)return Promise.resolve();progGet=Date.now();return progBusy=(async()=>{const t=ghTok();if(!t||navigator.onLine===false)return;
+let progGet=0;function syncProg(push){if(progBusy)return push?progBusy.then(()=>syncProg(true)):progBusy;if(!push&&Date.now()-progGet<20000)return Promise.resolve('same');progGet=Date.now();return progBusy=(async()=>{const t=ghTok();if(!t)return 'nokey';if(navigator.onLine===false)return 'offline';
  for(let i=0;i<4;i++){
   let R={done:{},del:{},auto:{}},sha=null;
   const r=await fetch(GHR+'/contents/'+PROG+'?ref=main&t='+Date.now(),{headers:{Authorization:'Bearer '+t,Accept:'application/vnd.github+json'}});
-  if(r.ok){const j=await r.json();sha=j.sha;try{R=Object.assign(R,await decJSON(Uint8Array.from(atob(j.content.replace(/\s/g,'')),c=>c.charCodeAt(0))))}catch(e){return}}
-  else if(r.status!==404)return;
+  if(r.ok){const j=await r.json();sha=j.sha;try{R=Object.assign(R,await decJSON(Uint8Array.from(atob(j.content.replace(/\s/g,'')),c=>c.charCodeAt(0))))}catch(e){return 'err'}}
+  else if(r.status!==404)return 'err';
   const before=JSON.stringify(R),L=LS.get('done',{}),D=LS.get('done-del',{});
   for(const k in L)R.done[k]=Math.max(R.done[k]||0,L[k]||1);
   for(const k in D)R.del[k]=Math.max(R.del[k]||0,D[k]);
@@ -1536,13 +1547,13 @@ let progGet=0;function syncProg(push){if(progBusy)return progBusy;if(!push&&Date
   const done={},del={};for(const k in R.done)if(!(R.del[k]>=R.done[k]))done[k]=R.done[k];for(const k in R.del)if(R.del[k]>=(R.done[k]||0))del[k]=R.del[k];
   const altri={};for(const d in R.auto)if(d!==me)for(const k in R.auto[d])altri[k]=(altri[k]||0)+R.auto[d][k];
   const ch=JSON.stringify(done)!==JSON.stringify(L)||JSON.stringify(altri)!==JSON.stringify(LS.get('auto-altri',{}));
-  LS.set('done',done);LS.set('done-del',del);LS.set('auto-altri',altri);if(ch){try{updStreak()}catch(e){}progRender()}
+  saveProg(done,del);LS.set('auto-altri',altri);if(ch){try{updStreak()}catch(e){}progRender()}
   const doneCh=JSON.stringify(R.done)!==JSON.stringify(JSON.parse(before).done)||JSON.stringify(R.del)!==JSON.stringify(JSON.parse(before).del);
   const autoCh=JSON.stringify(old)!==JSON.stringify(R.auto[me]);
-  if(!doneCh&&!(autoCh&&(push||Date.now()-LS.get('prog-at',0)>20*60e3)))return;
+  if(!doneCh&&!(autoCh&&(push||Date.now()-LS.get('prog-at',0)>20*60e3))){LS.set('prog-ok',Date.now());progShow();return 'same'}
   const body={message:'Progressi: lezioni fatte e minuti',content:u2b(await encJSON(R)),branch:'main'};if(sha)body.sha=sha;
-  const w=await fetch(GHR+'/contents/'+PROG,{method:'PUT',headers:{Authorization:'Bearer '+t,Accept:'application/vnd.github+json','Content-Type':'application/json'},body:JSON.stringify(body)});
-  if(w.ok){LS.set('prog-at',Date.now());return}if(w.status!==409&&w.status!==422)return}
+  const w=await fetch(GHR+'/contents/'+PROG,{method:'PUT',keepalive:true,headers:{Authorization:'Bearer '+t,Accept:'application/vnd.github+json','Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(w.ok){LS.set('prog-at',Date.now());LS.set('prog-ok',Date.now());progShow();return 'ok'}if(w.status!==409&&w.status!==422)return 'err'}return 'err'
  })().finally(()=>{progBusy=null})}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')syncProg().catch(()=>{});else syncProg(true).catch(()=>{})});
 setInterval(()=>syncProg().catch(()=>{}),5*60e3);
