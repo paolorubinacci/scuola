@@ -1,0 +1,6 @@
+controlla: si audio: si
+da trascrivere: 1 · da ordinare: 0 · settimane: [] · riassunti: no (manca ANTHROPIC_API_KEY)
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+trascritto v1 158 caratteri
+dopo: no
+ELAB: {'trascr': 'Oggi ho studiato la lezione 2, il ritmo della habanera e lo street beat. Ho ascoltato street pad a vedere il king e ho provato la clavete 2 al metronomo a 90.'}
