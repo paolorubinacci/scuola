@@ -394,6 +394,7 @@ textarea,input[type=text],input[type=password],input[type=number]{width:100%;bac
  .prac{display:block;padding:14px}.prac .pt{display:flex;align-items:baseline;gap:10px;font-size:34px;margin-bottom:10px}.prac .pt small{display:inline}
  .prac .pb{display:grid!important;grid-template-columns:1fr 1fr;gap:8px}.prac .pb button{width:100%;padding:12px 6px;font-size:14px;white-space:nowrap}.prac .pb button:last-child:nth-child(even){grid-column:1/-1}.prac .pb .pbig{grid-column:1/-1;padding:14px}
  #app{padding-bottom:96px}}
+.lessons li.lsec{display:block;cursor:default;background:none;border:0;box-shadow:none;padding:18px 4px 6px;font:800 13px var(--font);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}.lessons li.lsec:first-child{padding-top:4px}
 </style>
 </head>
 <body>
@@ -510,14 +511,14 @@ function renderHome(){
 function renderCourse(c){
  theme(c.theme?'t-'+c.theme.replace(/^.*\s/,''):'');$('#crumb').textContent=c.title;updStreak();const done=progress();
  $('#app').innerHTML=`<section class="chero"><div class="wrap"><div class="eyebrow">${esc(c.kind||'Videocorso')}</div><h1 class="nt">${esc(c.title)}</h1><p>${esc(c.sub)}</p></div></section><div class="wrap">
- <ul class="lessons">${c.lessons.map(l=>`<li data-go="${c.id}-l${l.n}"><span class="num">${l.n}</span><div><div class="t">${esc(l.title)}</div><div class="d">${esc(l.dur||'')}${l.clips?` · ${l.clips} passaggi suonati`:''}${l.ready?'':' · in preparazione'}</div></div><span class="chk ${done[c.id+'-'+l.n]?'done':''}">${done[c.id+'-'+l.n]?'✓ fatta':'›'}</span></li>`).join('')}</ul>
+ <ul class="lessons">${c.lessons.map((l,i)=>`${l.sec&&(i===0||c.lessons[i-1].sec!==l.sec)?`<li class="lsec">${esc(l.sec)}</li>`:''}<li data-go="${c.id}-l${l.n}"><span class="num">${l.n}</span><div><div class="t">${esc(l.title)}</div><div class="d">${esc(l.dur||'')}${l.clips?` · ${l.clips} passaggi suonati`:''}${l.ready?'':' · in preparazione'}</div></div><span class="chk ${done[c.id+'-'+l.n]?'done':''}">${done[c.id+'-'+l.n]?'✓ fatta':'›'}</span></li>`).join('')}</ul>
  ${isNola(c)?`<div class="acard" data-go="${c.id}-ascolti"><span class="ic">♫</span><div><b>Ascolti consigliati</b><span>Dal PDF della lezione 1 · ascolto e tracce separate</span></div></div>`:''}
  <p class="small muted" id="progStat" style="margin:14px 2px 0"></p><div class="foot"></div></div>`;window.scrollTo(0,0);progShow()}
 function renderLesson(c,l){
  if(!l)return go(c.id);
  theme(c.theme?'t-'+c.theme.replace(/^.*\s/,''):'');updStreak();
  $('#crumb').textContent=c.title+' · Lezione '+l.n;const key=c.id+'-'+l.n,done=progress()[key];
- let h=`<section class="chero"><div class="wrap"><div class="eyebrow">Lezione ${l.n} · ${esc(l.dur||'')}</div><h1 class="nt">${esc(l.title)}</h1><p>${esc(c.title)} · ${esc(c.sub.split('·')[0])}</p></div></section><div class="wrap">`;
+ let h=`<section class="chero"><div class="wrap"><div class="eyebrow">Lezione ${l.n}${l.sec?' · '+esc(l.sec):''} · ${esc(l.dur||'')}</div><h1 class="nt">${esc(l.title)}</h1><p>${esc(c.title)} · ${esc(c.sub.split('·')[0])}</p></div></section><div class="wrap">`;
  h+=`<div class="lbar" id="lesPrac"></div>`;
  if(l.brief)h+=`<div class="brief"><h3 class="nt">In breve</h3>${l.brief}</div>`;
  h+=`<div class="flow">`+(l.blocks||[]).map(blockHTML).join('')+`</div>`;
