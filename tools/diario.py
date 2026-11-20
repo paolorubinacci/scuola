@@ -5,6 +5,10 @@ diario/indice.json elenca solo id e data. Questo script:
   1. trascrive i messaggi vocali (faster-whisper, italiano)                      -> diario/elab/<id>.json.enc  {trascr}
   2. se c'e' ANTHROPIC_API_KEY: mette in ordine note + trascrizione              -> diario/elab/<id>.json.enc  {ordinato}
   3. se c'e' ANTHROPIC_API_KEY: scrive il diario di viaggio della settimana       -> diario/settimane/<AAAA-Wss>.json.enc
+  4. «Chiudi la giornata»: diario/giorni/<AAAA-MM-GG>.json.enc con stato 'richiesta' -> riassunto del giorno + compiti
+     che Paolo ha detto di voler esercitare (stato 'proposta'); il sito lo fa approvare e poi cancella i vocali.
+Riassunti: Claude (ANTHROPIC_API_KEY) se c'e'; senza chiave, per «Chiudi la giornata» un modello aperto (Qwen) che gira
+sul server di GitHub Actions con Ollama (LOCAL_LLM=http://127.0.0.1:11434, avviato dal workflow: tools/llm.sh).
 REGOLA FERMA: solo riassunti di cio' che Paolo ha scritto o detto. Niente consigli, esercizi, valutazioni o contenuti aggiunti.
 
   python3 tools/diario.py [RADICE]                 elabora
@@ -21,7 +25,9 @@ ROOT = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].star
 PW = os.environ['SCUOLA_PW']
 SALT = bytes.fromhex(open(os.path.join(ROOT, 'tools', 'salt.hex')).read().strip())
 KEY = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=SALT, iterations=200000).derive(PW.encode())
-API = os.environ.get('ANTHROPIC_API_KEY', '').strip()
+ANT = os.environ.get('ANTHROPIC_API_KEY', '').strip()
+LOCAL = os.environ.get('LOCAL_LLM', '').strip()
+API = ANT   # note in ordine e settimane: solo con Claude
 MODELS = [m for m in [os.environ.get('ANTHROPIC_MODEL', '').strip(), 'claude-sonnet-5-5', 'claude-sonnet-4-5', 'claude-3-5-sonnet-latest'] if m]
 DIR = os.path.join(ROOT, 'diario')
 TZ = ZoneInfo('Europe/Paris')
@@ -90,12 +96,28 @@ def lavoro(vs):
     return tr, ord_, sett
 
 
+def giorni():
+    idx = json.load(open(os.path.join(DIR, 'indice.json'))) if os.path.exists(os.path.join(DIR, 'indice.json')) else {}
+    out = []
+    for d in idx.get('giorni', []):
+        g = leggi('giorni/%s.json.enc' % d)
+        if g:
+            g['d'] = d
+            out.append(g)
+    return out
+
+
+def da_chiudere():
+    return [g for g in giorni() if g.get('stato') == 'richiesta']
+
+
 def fonte(v, e):
     return json.dumps([v.get('note', ''), e.get('trascr', ''), v.get('what', '')], ensure_ascii=False)
 
 
 def firma(l):
-    return json.dumps(sorted([v['id'] + ':' + str(v.get('agg', v['at'])) for v in l]))
+    gs = sorted({v['giorno'] for v in l if v.get('giorno')})
+    return json.dumps(sorted([v['id'] + ':' + str(v.get('agg', v['at'])) for v in l]) + gs)
 
 
 def trascrivi(lista):
@@ -124,6 +146,22 @@ REGOLE = ("Regole ferme: usa SOLO le informazioni presenti nel testo che ricevi.
 
 
 def claude(system, user, max_tokens=1200):
+    if ANT:
+        return anthropic(system, user, max_tokens)
+    if LOCAL:
+        return locale(system, user, max_tokens)
+    raise RuntimeError('nessun modello per i riassunti')
+
+
+def locale(system, user, max_tokens):
+    body = json.dumps({'model': os.environ.get('LOCAL_MODEL', 'qwen2.5:7b'), 'messages': [{'role': 'system', 'content': system}, {'role': 'user', 'content': user}],
+                       'max_tokens': max_tokens, 'temperature': 0.1, 'response_format': {'type': 'json_object'}}).encode()
+    req = urllib.request.Request(LOCAL.rstrip('/') + '/v1/chat/completions', data=body, headers={'Content-Type': 'application/json'})
+    r = json.load(urllib.request.urlopen(req, timeout=1500))
+    return r['choices'][0]['message']['content'].strip()
+
+
+def anthropic(system, user, max_tokens=1200):
     last = None
     for model in MODELS:
         body = json.dumps({'model': model, 'max_tokens': max_tokens, 'system': system, 'messages': [{'role': 'user', 'content': user}]}).encode()
@@ -169,6 +207,42 @@ def ordina(lista):
         scrivi('elab/%s.json.enc' % v['id'], e)
 
 
+def chiudi(gs, vs):
+    sys_ = ("Sei l'archivista del diario di pratica di Paolo, pianista. Ricevi tutte le sessioni di pratica di una giornata: "
+            "minuti, tempi del metronomo, note scritte e trascrizioni automatiche dei suoi messaggi vocali. Rispondi SOLO con un "
+            "oggetto JSON con due chiavi.\n"
+            "\"riassunto\": una prima riga «Oggi: N minuti di pratica» (N = totale che ricevi), poi un elenco puntato, ogni riga "
+            "comincia con «- » e parla a Paolo in seconda persona («Hai…»): su cosa ti sei esercitato (brani, lezioni, mano sinistra/"
+            "destra, passaggi), i bpm del metronomo (dal piu' lento al piu' veloce), cosa hai notato o scoperto. Una cosa per riga.\n"
+            "\"compiti\": lista di frasi brevi, una per ogni cosa che Paolo ha detto esplicitamente di voler fare, esercitare di piu', "
+            "ripassare o fare piu' tardi/domani/in futuro. Ogni compito deve capirsi da solo, col nome del brano o della lezione "
+            "(es. «Portare le due battute di <brano> in tutte le tonalita'», con il brano vero). Se non ha detto niente del genere, lista vuota. "
+            "Non mettere nei compiti nulla che non abbia detto lui.\n"
+            "Esempio di forma: {\"riassunto\": \"Oggi: 40 minuti di pratica\\n- Hai lavorato su …\\n- Hai notato che …\", \"compiti\": [\"…\"]}\n" + REGOLE)
+    for g in gs:
+        l = [v for v in vs if v['id'] in g.get('voci', [])]
+        try:
+            if not l:
+                raise RuntimeError('nessuna sessione trovata per questa giornata')
+            testo = '\n\n'.join(descr(v, leggi('elab/%s.json.enc' % v['id']) or {}) for v in l)
+            tot = round(sum(v.get('ms', 0) for v in l) / 60000)
+            extra = ('\n\nAggiunte di Paolo da includere: ' + g['nota']) if g.get('nota') else ''
+            out = claude(sys_, 'Giornata del %s. Totale minuti: %d. Sessioni:\n\n%s%s' % (g['d'], tot, testo, extra), 1500)
+            j = json.loads(out[out.index('{'):out.rindex('}') + 1])
+            r = j.get('riassunto', '')
+            g['riassunto'] = ('\n'.join(x if str(x).startswith(('-', 'Oggi')) else '- ' + str(x) for x in r) if isinstance(r, list) else str(r)).strip()
+            g['compiti'] = [str(c).strip() for c in (j.get('compiti') or []) if str(c).strip()]
+            g['stato'] = 'proposta'
+            g.pop('err', None)
+            print('giornata', g['d'], len(g['compiti']), 'compiti', flush=True)
+        except Exception as ex:
+            traceback.print_exc()
+            g['err'] = 'Riassunto non riuscito: ' + str(ex)[-200:]
+            g['stato'] = 'errore'
+        g['agg'] = int(datetime.datetime.now().timestamp() * 1000)
+        scrivi('giorni/%s.json.enc' % g['d'], g)
+
+
 def settimane(ws, vs):
     sys_ = ("Sei l'archivista del diario di pratica di Paolo, pianista. Ricevi tutte le sessioni di una settimana. Scrivi il suo "
             "«diario di viaggio» della settimana: un breve paragrafo che racconta cosa ha fatto (in seconda persona, «hai…»), poi "
@@ -176,7 +250,9 @@ def settimane(ws, vs):
             "minuti che ricevi. Non scrivere nulla sulla settimana successiva. " + REGOLE)
     for w in sorted(ws):
         l = [v for v in vs if settimana(v['at']) == w]
-        testo = '\n\n'.join(descr(v, leggi('elab/%s.json.enc' % v['id']) or {}) for v in l)
+        chiusi = {g['d']: g for g in giorni() if g.get('stato') == 'approvata'}
+        testo = '\n\n'.join(descr(v, leggi('elab/%s.json.enc' % v['id']) or {}) for v in l if not v.get('giorno'))
+        testo += ''.join('\n\nRiassunto approvato della giornata %s:\n%s' % (d, chiusi[d].get('riassunto', '')) for d in sorted({v['giorno'] for v in l if v.get('giorno') in chiusi}))
         tot = round(sum(v.get('ms', 0) for v in l) / 60000)
         try:
             out = claude(sys_, 'Settimana %s. Totale minuti di pratica: %d. Sessioni:\n\n%s' % (w, tot, testo), 1500)
@@ -192,13 +268,19 @@ def main():
     if '--controlla-audio' in sys.argv:
         print('si' if tr else 'no')
         return
-    if '--controlla' in sys.argv:
-        print('si' if (tr or ord_ or sett) else 'no')
+    if '--controlla-locale' in sys.argv:
+        print('si' if (da_chiudere() and not ANT) else 'no')
         return
-    print('da trascrivere:', len(tr), '· da ordinare:', len(ord_), '· settimane:', sorted(sett), '· riassunti:', 'si' if API else 'no (manca ANTHROPIC_API_KEY)', flush=True)
+    if '--controlla' in sys.argv:
+        print('si' if (tr or ord_ or sett or da_chiudere()) else 'no')
+        return
+    print('da trascrivere:', len(tr), '· da ordinare:', len(ord_), '· settimane:', sorted(sett), '· riassunti:', 'Claude' if ANT else 'modello locale' if LOCAL else 'no', flush=True)
     if tr:
         trascrivi(tr)
     tr, ord_, sett = lavoro(vs)   # dopo le trascrizioni cambiano le fonti da riassumere
+    gs = da_chiudere()
+    if gs:
+        chiudi(gs, vs)
     if ord_:
         ordina(ord_)
     tr, ord_, sett = lavoro(vs)

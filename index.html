@@ -238,6 +238,17 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .dweek{margin:26px 0 8px;font:800 18px var(--font)}.dweek small{font:600 13px var(--font);color:var(--muted);margin-left:6px}
 .drecap{background:#f4f8ff;border:1px solid #d9e6ff;border-radius:16px;padding:14px 16px;margin:8px 0 12px;font:500 15px/1.55 var(--font);white-space:pre-wrap}
 .drecap .lbl{margin:0 0 6px}
+.gcard{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;margin:14px 0;font:500 15px/1.5 var(--font)}
+.gcard h3{margin:0 0 4px;font:800 18px var(--font)}.gcard .row{flex-wrap:wrap;gap:8px;margin-top:12px}
+.gcard textarea{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font:500 15px/1.5 var(--font);min-height:150px;resize:vertical}
+.gcard.prop{border-color:#e6c46a;background:#fffbf0}.gcard.wait{background:#f6f6f2}
+.gcard .cmp{display:flex;gap:8px;align-items:center;margin:6px 0}.gcard .cmp input[type=text]{flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:9px 10px;font:500 15px var(--font)}
+.gcard .cmp .x{flex:none;width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:16px}
+.ctask{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--line)}.ctask:first-of-type{border-top:0}
+.ctask input{width:22px;height:22px;flex:none;margin-top:1px}.ctask span{flex:1}.ctask small{display:block;color:var(--muted);font-size:12px}
+.ctask .x{flex:none;border:0;background:none;color:var(--muted);font-size:16px;width:32px;height:32px}
+.ctask.done span{text-decoration:line-through;color:var(--muted)}
+.dent.gday{border-color:#e6c46a;background:#fffbf0;white-space:normal}.dent.gday .dx{white-space:pre-wrap}
 .dent{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:8px 0;font:500 15px/1.5 var(--font)}
 .dent .dh{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}.dent .dh b{font-weight:800}.dent .dh span{color:var(--muted);font-size:13px}
 .dent .dx{white-space:pre-wrap;margin-top:6px}.dent .dt{margin-top:6px;color:var(--muted);font-size:14px;white-space:pre-wrap}
@@ -1517,14 +1528,17 @@ function settimanaDi(at){const d=new Date(at);d.setHours(0,0,0,0);d.setDate(d.ge
  return d.getFullYear()+'-W'+String(1+Math.round(((d-w1)/864e5-3+((w1.getDay()+6)%7))/7)).padStart(2,'0')}
 function loadDiario(force){if(force)diarioLoading=null;return diarioLoading=diarioLoading||(async()=>{
  const cache=LS.get('diario-cache',{voci:[],elab:{},sett:{}});const idx=await rawGet('diario/indice.json');
- if(!idx){DIARIO=cache.voci.length?cache:{voci:[],elab:{},sett:{}};return DIARIO}
+ if(!idx){DIARIO=cache.voci.length?Object.assign({giorni:{},compiti:[]},cache):{voci:[],elab:{},sett:{},giorni:{},compiti:[]};return DIARIO}
  const old=Object.fromEntries(cache.voci.map(v=>[v.id,v]));const voci=[];
  await Promise.all(idx.voci.map(async x=>{let v=old[x.id];if(!v||force){const u=await rawGet('diario/voci/'+x.id+'.json.enc',true);if(u){try{v=Object.assign(await decJSON(u),{id:x.id})}catch(e){}}}if(v)voci.push(v)}));
  voci.sort((a,b)=>b.at-a.at);const elab=Object.assign({},cache.elab),sett=Object.assign({},cache.sett);
  await Promise.all(voci.slice(0,40).map(async v=>{const e=elab[v.id];if(e&&e.ordinato&&(e.trascr||!v.audio))return;const u=await rawGet('diario/elab/'+v.id+'.json.enc',true);if(u){try{elab[v.id]=await decJSON(u)}catch(e){}}}));
  const ws=[...new Set(voci.map(v=>settimanaDi(v.at)))].slice(0,8);
  await Promise.all(ws.map(async w=>{const u=await rawGet('diario/settimane/'+w+'.json.enc',true);if(u){try{sett[w]=await decJSON(u)}catch(e){}}}));
- DIARIO={voci,elab,sett};LS.set('diario-cache',DIARIO);return DIARIO})().catch(e=>{diarioLoading=null;throw e})}
+ const giorni=Object.assign({},cache.giorni||{});
+ await Promise.all((idx.giorni||[]).slice(-60).map(async d=>{if(giorni[d]&&giorni[d].stato==='approvata'&&!force)return;const u=await rawGet('diario/giorni/'+d+'.json.enc',true);if(u){try{giorni[d]=Object.assign(await decJSON(u),{d})}catch(e){}}}));
+ let compiti=cache.compiti||[];{const u=await rawGet('diario/compiti.json.enc',true);if(u){try{compiti=(await decJSON(u)).lista||[]}catch(e){}}}
+ DIARIO={voci,elab,sett,giorni,compiti};LS.set('diario-cache',DIARIO);return DIARIO})().catch(e=>{diarioLoading=null;throw e})}
 async function ghCommitDiario(tok,files,addIdx,msg,say,dels){const tree0=[];
  for(const f of files){say('Invio '+f.label+'…');const b=await gh('/git/blobs',{method:'POST',body:JSON.stringify({content:u2b(f.u8),encoding:'base64'})},tok);tree0.push({path:f.path,mode:'100644',type:'blob',sha:b.sha})}
  for(let i=0;i<4;i++){say('Salvo nel diario…');const head=(await gh('/git/ref/heads/main',{},tok)).object.sha,com=await gh('/git/commits/'+head,{},tok);
@@ -1670,7 +1684,7 @@ function paneDiary(){const run=!!D.start,has=tNow()>0,last=sessions().slice().so
  <div class="timer" data-tnow>${hms(tNow())}</div>
  <p class="small muted" style="text-align:center;margin:0 0 6px">${run?'Pratica in corso'+(D.what?' · '+esc(D.what):''):has?'In pausa':'Avvia il timer quando cominci a suonare'}</p>
  <div class="row">${run?`<button class="btn" id="tP">❚❚ Pausa</button>`:`<button class="btn gold" id="tS">▶ ${has?'Riprendi':'Inizia la pratica'}</button>`}${has?'<button class="btn" id="tF">■ Fine e salva</button>':''}</div>
- <div class="row"><button class="btn sm" id="tAdd">＋ Aggiungi a mano</button><button class="btn sm" id="tDia">📖 Apri il diario</button></div>
+ <div class="row"><button class="btn sm" id="tAdd">＋ Aggiungi a mano</button><button class="btn sm" id="tDia">📖 Apri il diario</button><button class="btn sm" id="tDay">🌙 Chiudi la giornata</button></div>
  <div class="row"><button class="btn ${M.playing?'on':''}" id="tMet">${M.playing?'■ Ferma il metronomo':'♩ Metronomo '+M.bpm+' bpm'}</button><button class="btn sm" id="tMin2">▁ Riduci: timer e metronomo insieme</button></div>
  <div class="lbl">Questa settimana · ${weekMin()} min · oggi ${todayMin()} min</div>
  <ul class="log">${last.map(e=>`<li><b>${esc(e.what||'Pratica')}</b>${e.bpm?` · ${e.bpm} bpm`:''} · ${Math.round((e.ms||0)/60000)} min<div class="d">${new Date(e.at).toLocaleDateString('it-IT',{weekday:'short',day:'numeric',month:'short'})}${e.note?' · '+esc(e.note):''}</div></li>`).join('')||'<li class="muted">Ancora nessuna sessione salvata.</li>'}</ul>
@@ -1678,7 +1692,76 @@ function paneDiary(){const run=!!D.start,has=tNow()>0,last=sessions().slice().so
  const q=x=>$('#pane').querySelector(x);
  if(q('#tS'))q('#tS').onclick=()=>timerStart({what:lessonWhat(),lez:LESSON&&LESSON.l.n});if(q('#tP'))q('#tP').onclick=timerPause;if(q('#tF'))q('#tF').onclick=timerFinish;
  q('#tMet').onclick=()=>{M.playing?stopMetro():startMetro();paneDiary()};q('#tMin2').onclick=()=>setMini(true);
- q('#tAdd').onclick=()=>sessionModal({ms:0,what:lessonWhat(),lez:LESSON&&LESSON.l.n,manual:true});q('#tDia').onclick=()=>{if(innerWidth<700)closeTools();go('diario')}}
+ q('#tAdd').onclick=()=>sessionModal({ms:0,what:lessonWhat(),lez:LESSON&&LESSON.l.n,manual:true});q('#tDia').onclick=()=>{if(innerWidth<700)closeTools();go('diario')};q('#tDay').onclick=()=>{if(innerWidth<700)closeTools();go('diario');setTimeout(()=>{const b=$('#gClose');if(b){b.scrollIntoView({block:'center'});b.click()}else toast('Non ci sono sessioni da chiudere')},900)}}
+
+/* ---- «Chiudi la giornata»: riassunto del giorno + compiti per il futuro; i vocali si cancellano solo dopo l'approvazione ---- */
+const ymd=ts=>{const d=new Date(ts);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const dTxt=d=>new Date(d+'T12:00').toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
+function giorniAperti(){const Dg=DIARIO||{voci:[],giorni:{}},G=Dg.giorni||{},by={};
+ Dg.voci.forEach(v=>{if(v.giorno)return;const d=ymd(v.at),g=G[d];if(g&&g.stato!=='approvata'&&(g.voci||[]).includes(v.id))return;(by[d]=by[d]||[]).push(v)});return by}
+async function gCommit(files,days,msg){const t=ghTok();if(!t){syncModal();throw new Error('Serve la chiave GitHub')}
+ return ghCommitDiario(t,files,idx=>{idx.giorni=[...new Set([...(idx.giorni||[]),...days])].sort()},msg,m=>toast(m))}
+async function chiudiGiornata(btn){if(D.start||tNow()>0)return toast('Prima salva la pratica in corso con «■ Fine e salva», poi chiudi la giornata');
+ if(!ghTok())return syncModal();if(btn){btn.disabled=true;btn.textContent='Preparo…'}
+ try{await syncPending(m=>toast(m)).catch(()=>{});await loadDiario(true);const by=giorniAperti(),days=Object.keys(by).sort();
+  if(!days.length){toast('Non ci sono sessioni da chiudere');return renderDiario()}
+  const files=[];for(const d of days){const old=DIARIO.giorni[d],prev=old&&old.stato!=='approvata'?old.voci||[]:[];
+   const g={d,stato:'richiesta',voci:[...new Set(prev.concat(by[d].map(v=>v.id)))],at:Date.now()};files.push({path:'diario/giorni/'+d+'.json.enc',label:'giornata',u8:await encJSON(g)});DIARIO.giorni[d]=g}
+  await gCommit(files,days,'Diario: chiudi la giornata '+days.join(', '));LS.set('diario-cache',DIARIO);toast('✓ Fatto: il riassunto arriva tra qualche minuto, poi lo approvi tu');gPoll()}
+ catch(e){toast(ghErr?ghErr(e):e.message)}if(location.hash==='#diario')renderDiario()}
+let gPollT=0;function gPoll(){clearTimeout(gPollT);gPollT=setTimeout(async()=>{if(location.hash!=='#diario')return;
+ const w=Object.values((DIARIO||{}).giorni||{}).some(g=>g.stato==='richiesta');if(!w)return;await loadDiario(true).catch(()=>{});
+ if(location.hash==='#diario'&&!document.querySelector('.gcard.prop textarea:focus,.gcard.prop input:focus'))renderDiario();gPoll()},30000)}
+async function gApprova(d,riass,compiti){const g=DIARIO.giorni[d];if(!g)return;const ids=new Set(g.voci||[]),files=[],dels=[];
+ const ng=Object.assign({},g,{stato:'approvata',riassunto:riass,compiti,approvata:Date.now()});delete ng.nota;delete ng.err;
+ files.push({path:'diario/giorni/'+d+'.json.enc',label:'giornata',u8:await encJSON(ng)});
+ for(const v of DIARIO.voci.filter(v=>ids.has(v.id))){const nv=Object.assign({},v,{giorno:d,agg:Date.now()});delete nv.id;
+  if(v.audio){dels.push('diario/voci/'+v.id+'.'+v.audio+'.enc');delete nv.audio}dels.push('diario/elab/'+v.id+'.json.enc');
+  files.push({path:'diario/voci/'+v.id+'.json.enc',label:'sessione',u8:await encJSON(nv)})}
+ if(compiti.length){const lista=(DIARIO.compiti||[]).concat(compiti.map((t,i)=>({id:'c'+Date.now().toString(36)+i,t,d,fatto:false})));
+  files.push({path:'diario/compiti.json.enc',label:'compiti',u8:await encJSON({lista})});DIARIO.compiti=lista}
+ const t=ghTok();if(!t)return syncModal();
+ await ghCommitDiario(t,files,idx=>{idx.giorni=[...new Set([...(idx.giorni||[]),d])].sort()},'Diario: giornata '+d+' approvata',m=>toast(m),dels);
+ DIARIO.giorni[d]=Object.assign(ng,{d});DIARIO.voci=DIARIO.voci.map(v=>ids.has(v.id)?Object.assign({},v,{giorno:d,audio:undefined}):v);ids.forEach(i=>delete DIARIO.elab[i]);
+ LS.set('diario-cache',DIARIO);toast('✓ Giornata approvata: vocali cancellati'+(compiti.length?', compiti aggiunti':''))}
+async function gRifai(d,nota){const g=Object.assign({},DIARIO.giorni[d],{stato:'richiesta',at:Date.now()});delete g.err;if(nota)g.nota=nota;
+ await gCommit([{path:'diario/giorni/'+d+'.json.enc',label:'giornata',u8:await encJSON(g)}],[d],'Diario: rifai il riassunto del '+d);DIARIO.giorni[d]=g;LS.set('diario-cache',DIARIO);gPoll()}
+async function cSalva(lista,msg){const t=ghTok();if(!t)return syncModal();DIARIO.compiti=lista;LS.set('diario-cache',DIARIO);
+ try{await ghCommitDiario(t,[{path:'diario/compiti.json.enc',label:'compiti',u8:await encJSON({lista})}],()=>{},msg,()=>{})}catch(e){toast(ghErr?ghErr(e):e.message)}}
+function gHTML(){const Dg=DIARIO||{giorni:{},compiti:[]},G=Dg.giorni||{},by=giorniAperti(),days=Object.keys(by).sort(),oggi=ymd(Date.now());
+ let h='';
+ Object.values(G).filter(g=>g.stato&&g.stato!=='approvata').sort((a,b)=>a.d<b.d?-1:1).forEach(g=>{
+  if(g.stato==='richiesta')h+=`<div class="gcard wait"><h3>⏳ Giornata ${g.d===oggi?'di oggi':'del '+dTxt(g.d)}</h3>Sto ascoltando i vocali e preparando il riassunto: ci vogliono alcuni minuti. La pagina si aggiorna da sola.<div class="row"><button class="btn sm" data-grel>↻ Aggiorna adesso</button></div></div>`;
+  else if(g.stato==='errore')h+=`<div class="gcard"><h3>⚠️ Giornata del ${dTxt(g.d)}</h3>${esc(g.err||'Riassunto non riuscito')}<div class="row"><button class="btn sm" data-gredo="${g.d}">↻ Riprova</button></div></div>`;
+  else if(g.stato==='proposta')h+=`<div class="gcard prop" data-gd="${g.d}"><h3>🌙 Da approvare: giornata ${g.d===oggi?'di oggi':'del '+dTxt(g.d)}</h3>
+   <p class="small muted" style="margin:0 0 8px">Controlla e correggi pure. Quando approvi, i vocali e le loro trascrizioni vengono cancellati e resta questo riassunto; le note scritte restano.</p>
+   <label class="lbl">Riassunto della giornata</label><textarea data-gr>${esc(g.riassunto||'')}</textarea>
+   <label class="lbl" style="margin-top:12px;display:block">Compiti per il futuro (cose che hai detto di voler esercitare)</label>
+   <div data-gcl>${(g.compiti||[]).map(c=>`<div class="cmp"><input type="text" value="${esc(c)}"><button class="x" type="button" data-gcx aria-label="Togli">✕</button></div>`).join('')||'<p class="small muted" data-gnone>Nessun compito: non hai detto di voler esercitare qualcosa in particolare.</p>'}</div>
+   <button class="btn sm" type="button" data-gca>＋ Aggiungi un compito</button>
+   <label class="lbl" style="margin-top:12px;display:block">Vuoi aggiungere qualcosa e rifare il riassunto?</label><textarea data-gn style="min-height:70px" placeholder="Es. ho lavorato anche sulla mano destra di Tipitina"></textarea>
+   <div class="row"><button class="btn gold" data-gok>✓ Approva e cancella i vocali</button><button class="btn sm" data-gre>↻ Rifai con le aggiunte</button></div></div>`});
+ if(days.length){const l=days.flatMap(d=>by[d]),voc=l.filter(v=>v.audio).length,min=Math.round(l.reduce((a,v)=>a+(v.ms||0),0)/60000),old=days.filter(d=>d!==oggi);
+  h+=`<div class="gcard"><h3>Hai finito di esercitarti?</h3>${days.includes(oggi)?`Oggi: ${by[oggi].length} ${by[oggi].length===1?'sessione':'sessioni'}, ${min} min${voc?`, ${voc} ${voc===1?'vocale':'vocali'}`:''}.`:''}${old.length?` Da chiudere anche: ${old.map(dTxt).join(', ')}.`:''} Faccio il riassunto di tutto e aggiungo ai compiti le cose che hai detto di voler esercitare; i vocali si cancellano solo dopo che approvi.
+  <div class="row"><button class="btn gold" id="gClose">🌙 Chiudi la giornata</button></div></div>`}
+ const open=(Dg.compiti||[]).filter(c=>!c.fatto),done=(Dg.compiti||[]).filter(c=>c.fatto);
+ h+=`<div class="gcard"><h3>📝 Compiti per il futuro</h3>${open.map(c=>`<label class="ctask"><input type="checkbox" data-ct="${c.id}"><span>${esc(c.t)}<small>dal ${dTxt(c.d)}</small></span><button class="x" type="button" data-cdel="${c.id}" aria-label="Elimina">✕</button></label>`).join('')||'<p class="small muted" style="margin:4px 0">Nessun compito aperto.</p>'}
+  ${done.length?`<details><summary class="small muted">Fatti (${done.length})</summary>${done.map(c=>`<label class="ctask done"><input type="checkbox" checked data-ct="${c.id}"><span>${esc(c.t)}<small>dal ${dTxt(c.d)}</small></span><button class="x" type="button" data-cdel="${c.id}" aria-label="Elimina">✕</button></label>`).join('')}</details>`:''}
+  <div class="cmp" style="display:flex;gap:8px;margin-top:8px"><input type="text" id="cNew" placeholder="Aggiungi un compito" style="flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:9px 10px;font:500 15px var(--font)"><button class="btn sm" id="cAdd">＋</button></div></div>`;
+ return h}
+function gBind(){const A=$('#app');
+ const c=A.querySelector('#gClose');if(c)c.onclick=()=>chiudiGiornata(c);
+ A.querySelectorAll('[data-grel]').forEach(b=>b.onclick=async()=>{b.textContent='…';await loadDiario(true).catch(()=>{});renderDiario()});
+ A.querySelectorAll('[data-gredo]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await gRifai(b.dataset.gredo)}catch(e){toast(e.message)}renderDiario()});
+ A.querySelectorAll('[data-gd]').forEach(card=>{const d=card.dataset.gd,cl=card.querySelector('[data-gcl]');
+  const bindX=()=>cl.querySelectorAll('[data-gcx]').forEach(x=>x.onclick=()=>x.parentNode.remove());bindX();
+  card.querySelector('[data-gca]').onclick=()=>{const n=cl.querySelector('[data-gnone]');if(n)n.remove();cl.insertAdjacentHTML('beforeend','<div class="cmp"><input type="text" placeholder="Cosa vuoi esercitare"><button class="x" type="button" data-gcx aria-label="Togli">✕</button></div>');bindX();cl.lastElementChild.querySelector('input').focus()};
+  card.querySelector('[data-gok]').onclick=async e=>{const b=e.target;if(!confirm('Approvi il riassunto? I vocali di questa giornata verranno cancellati.'))return;b.disabled=true;b.textContent='Salvo…';
+   try{await gApprova(d,card.querySelector('[data-gr]').value.trim(),[...cl.querySelectorAll('input')].map(i=>i.value.trim()).filter(Boolean))}catch(err){toast(ghErr?ghErr(err):err.message)}renderDiario()};
+  card.querySelector('[data-gre]').onclick=async e=>{const b=e.target;b.disabled=true;try{await gRifai(d,card.querySelector('[data-gn]').value.trim())}catch(err){toast(err.message)}renderDiario()}});
+ A.querySelectorAll('[data-ct]').forEach(i=>i.onchange=()=>{const l=(DIARIO.compiti||[]).map(c=>c.id===i.dataset.ct?Object.assign({},c,{fatto:i.checked,fattoIl:i.checked?Date.now():undefined}):c);cSalva(l,'Diario: compito '+(i.checked?'fatto':'riaperto'));setTimeout(renderDiario,300)});
+ A.querySelectorAll('[data-cdel]').forEach(b=>b.onclick=e=>{e.preventDefault();if(!confirm('Eliminare questo compito?'))return;cSalva((DIARIO.compiti||[]).filter(c=>c.id!==b.dataset.cdel),'Diario: compito eliminato');renderDiario()});
+ const cn=A.querySelector('#cNew'),ca=A.querySelector('#cAdd');if(ca){const add=()=>{const t=cn.value.trim();if(!t)return;cSalva((DIARIO.compiti||[]).concat([{id:'c'+Date.now().toString(36),t,d:ymd(Date.now()),fatto:false}]),'Diario: nuovo compito');renderDiario()};ca.onclick=add;cn.onkeydown=e=>{if(e.key==='Enter')add()}}}
 
 /* ---- pagina Diario ---- */
 async function renderDiario(){theme('');$('#crumb').textContent='Diario di pratica';updStreak();
@@ -1693,18 +1776,20 @@ async function renderDiario(){theme('');$('#crumb').textContent='Diario di prati
   $('#app').innerHTML=`<section class="chero"><div class="wrap"><div class="eyebrow">Scuola</div><h1>Diario di pratica</h1><p>Le tue sessioni, le note e i messaggi vocali, settimana per settimana</p></div></section><div class="wrap">
   <div class="stats"><div class="stat"><b>${weekMin()}<small style="font-size:13px;font-weight:600"> min</small></b><span>questa settimana</span></div><div class="stat"><b>${streakDays()} 🔥</b><span>giorni di fila</span></div><div class="stat"><b>${todayMin()}<small style="font-size:13px;font-weight:600"> min</small></b><span>oggi</span></div></div>
   <div class="prac" id="homePrac"></div>
+  ${gHTML()}
   ${pending||!ghTok()?`<div class="note">${pending?`<b>${pending} ${pending===1?'sessione salvata':'sessioni salvate'} solo su questo dispositivo.</b> `:''}${ghTok()?'':'Questo dispositivo non è ancora collegato a GitHub. '}<button class="btn sm" id="dSync" style="margin-top:8px">🔑 ${ghTok()?'Sincronizza adesso':'Collega GitHub e sincronizza'}</button></div>`:''}
   ${Object.keys(weeks).sort().reverse().map(w=>{const l=weeks[w],tot=Math.round(l.reduce((a,v)=>a+(v.ms||0),0)/60000),rc=Dg.sett[w];
    return`<div class="dweek">Settimana ${wtxt(w)}<small>${tot} min · ${l.length} ${l.length===1?'sessione':'sessioni'}</small></div>
    <div class="drecap"><div class="lbl">${rc?'Diario di viaggio della settimana':'Riepilogo'}</div>${esc(rc?rc.testo:mech(l))}</div>
-   ${l.map(v=>{const e=Dg.elab[v.id]||{};return`<div class="dent"><div class="dh"><b>${esc(v.what||'Pratica')}</b><span>${new Date(v.at).toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'})} · ${Math.round((v.ms||0)/60000)} min${v.bpm?' · '+v.bpm+' bpm':''}${v.local?' · solo su questo dispositivo':''}</span></div>${v.tempi&&v.tempi.length?`<div class="dw">♩ ${esc(tempiTxt(v.tempi))}</div>`:''}
+   ${Object.values(Dg.giorni||{}).filter(g=>g.stato==='approvata'&&settimanaDi(new Date(g.d+'T12:00').getTime())===w).sort((a,b)=>a.d<b.d?1:-1).map(g=>`<div class="dent gday"><div class="dh"><b>🌙 Giornata chiusa</b><span>${dTxt(g.d)}</span></div><div class="dx">${esc(g.riassunto||'')}</div>${(g.compiti||[]).length?`<div class="dw">📝 Compiti aggiunti: ${g.compiti.map(esc).join(' · ')}</div>`:''}</div>`).join('')}
+   ${l.map(v=>{const e=Dg.elab[v.id]||{};if(v.giorno)return`<div class="dent"><div class="dh"><b>${esc(v.what||'Pratica')}</b><span>${new Date(v.at).toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'})} · ${Math.round((v.ms||0)/60000)} min${v.bpm?' · '+v.bpm+' bpm':''}</span></div>${v.tempi&&v.tempi.length?`<div class="dw">♩ ${esc(tempiTxt(v.tempi))}</div>`:''}${v.note?`<details class="dt"><summary>Le tue note</summary>${esc(v.note)}</details>`:''}</div>`;return`<div class="dent"><div class="dh"><b>${esc(v.what||'Pratica')}</b><span>${new Date(v.at).toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'})} · ${Math.round((v.ms||0)/60000)} min${v.bpm?' · '+v.bpm+' bpm':''}${v.local?' · solo su questo dispositivo':''}</span></div>${v.tempi&&v.tempi.length?`<div class="dw">♩ ${esc(tempiTxt(v.tempi))}</div>`:''}
     ${e.ordinato?`<div class="dx">${esc(e.ordinato)}</div>`:v.note?`<div class="dx">${esc(v.note)}</div>`:''}
     ${v.audio?(e.trascr?`<details class="dt"><summary>🎙 Messaggio vocale · trascrizione</summary>${esc(e.trascr)}</details>`:e.err?`<div class="dw">⚠️ ${esc(e.err)}</div>`:'<div class="dw">🎙 Messaggio vocale: trascrizione in arrivo (qualche minuto)</div>'):''}
     ${e.ordinato&&v.note?`<details class="dt"><summary>Le tue note originali</summary>${esc(v.note)}</details>`:''}</div>`}).join('')}`}).join('')||'<div class="empty">Ancora nessuna sessione. Avvia la pratica qui sopra, oppure aggiungi a mano quella che hai già fatto oggi.</div>'}
   <p class="small muted" style="margin-top:22px">Minuti registrati in automatico (metronomo, ritmi, tastiera, brani, video): oggi ${Math.round((auto[dayKey(Date.now())]||0)/60000)} min. Contano nei totali ma non compaiono come sessioni.</p>
   <div class="row"><button class="btn sm" id="dRel">↻ Aggiorna</button><button class="btn sm" data-go="home">‹ Home</button></div><div class="foot"></div></div>`;
-  drawPrac();if($('#dSync'))$('#dSync').onclick=syncModal;$('#dRel').onclick=async()=>{$('#dRel').textContent='…';await loadDiario(true).catch(()=>{});if(location.hash==='#diario')draw()}};
- draw();window.scrollTo(0,0);try{await loadDiario();if(location.hash==='#diario')draw()}catch(e){}}
+  drawPrac();gBind();if($('#dSync'))$('#dSync').onclick=syncModal;$('#dRel').onclick=async()=>{$('#dRel').textContent='…';await loadDiario(true).catch(()=>{});if(location.hash==='#diario')draw()}};
+ draw();window.scrollTo(0,0);try{await loadDiario();if(location.hash==='#diario')draw();gPoll()}catch(e){}}
 
 /* ================= tools sheet ================= */
 /* pannello flottante: grande per regolare, ridotto (▁) a una finestrella in basso a destra; ✕ o trascina giù per chiudere.

@@ -4,7 +4,7 @@ name: Diario - trascrizioni e riassunti
 on:
   push:
     branches: [main]
-    paths: ['diario/indice.json', 'diario/voci/**']
+    paths: ['diario/indice.json', 'diario/voci/**', 'diario/giorni/**']
   workflow_dispatch:
 permissions:
   contents: write
@@ -29,6 +29,7 @@ jobs:
           pip install -q cryptography
           echo "fare=$(python tools/diario.py --controlla)" >> "$GITHUB_OUTPUT"
           echo "audio=$(python tools/diario.py --controlla-audio)" >> "$GITHUB_OUTPUT"
+          echo "locale=$(python tools/diario.py --controlla-locale)" >> "$GITHUB_OUTPUT"
       - uses: actions/cache@v4
         if: steps.c.outputs.audio == 'si'
         with:
@@ -39,18 +40,30 @@ jobs:
       - name: Trascrizione (faster-whisper)
         if: steps.c.outputs.audio == 'si'
         run: pip install -q faster-whisper
+      # «Chiudi la giornata» senza chiave Claude: modello aperto Qwen2.5 7B con Ollama, sul server stesso
+      - uses: actions/cache@v4
+        if: steps.c.outputs.locale == 'si'
+        with:
+          path: ~/llm
+          key: diario-ollama-qwen25-7b-v1
+      - name: Avvia il modello locale
+        if: steps.c.outputs.locale == 'si'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash tools/llm.sh
       - name: Elabora
         if: steps.c.outputs.fare == 'si'
         env:
           SCUOLA_PW: ${{ secrets.SCUOLA_PW }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          LOCAL_LLM: ${{ steps.c.outputs.locale == 'si' && 'http://127.0.0.1:11434' || '' }}
         run: python tools/diario.py
       - name: Pubblica
         if: steps.c.outputs.fare == 'si'
         run: |
           git config user.name "Scuola bot"
           git config user.email "scuola-bot@users.noreply.github.com"
-          git add -A diario/elab diario/settimane 2>/dev/null || true
+          git add -A diario
           git diff --cached --quiet && exit 0
           git commit -q -m "Diario: trascrizioni e riassunti"
           for i in 1 2 3 4; do git pull -q --rebase && git push -q && break; sleep 6; done
