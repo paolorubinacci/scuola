@@ -150,6 +150,9 @@ body.p-tools .fab:not(.fl),body.p-lib .fab.fl{display:none}
 .mc button{flex:none;min-width:42px;height:42px;padding:0 8px;border:1px solid var(--line);background:#fff;border-radius:999px;font:700 16px var(--font);cursor:pointer;color:var(--ink)}
 .mc em{flex:1;min-width:0;font:800 21px var(--font);font-style:normal;text-align:center;white-space:nowrap}
 .mc em small{font:600 12px var(--font);color:var(--muted)}
+.mtim{border-top:1px solid var(--line);padding-top:10px}.mtim .mt small{font:600 12px var(--font);color:var(--muted)}
+.mtim button{flex:none;height:42px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:#fff;font:700 15px var(--font);color:var(--ink);cursor:pointer}
+.mtim button[data-mm="tplay"]{background:var(--blue);border-color:var(--blue);color:#fff}
 @media (max-width:420px){.mc .m5{display:none}}
 /* libreria */
 .lnew{display:flex;align-items:center;gap:12px;margin:4px 14px 10px;padding:12px 14px;border-radius:16px;border:1.5px dashed var(--blue);background:#f4f8ff;cursor:pointer;width:calc(100% - 28px);text-align:left;font-family:var(--font);color:var(--ink)}
@@ -197,6 +200,8 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .rplayer .bpmrow{display:flex;align-items:center;gap:10px;margin-top:6px}
 .rplayer .bpmrow b{font:800 22px var(--font);min-width:86px;text-align:center}.rplayer .bpmrow b small{font:600 12px var(--font);color:var(--muted)}
 .rplayer .go{margin-top:12px;height:52px}
+.mtop{display:flex;align-items:center;gap:14px;margin:4px 0 6px}.mtop .big{flex:1;margin:0;text-align:left;font-size:58px}.mtop h3{flex:1;margin:0}
+.mtop .go{flex:none;width:auto;min-width:132px;height:56px;margin:0;padding:0 20px}.rplayer .mtop .go{height:50px;min-width:116px;margin:0}
 .grid16{display:grid;gap:3px;margin:12px 0}
 .grid16 .r{display:grid;grid-template-columns:64px repeat(16,1fr);gap:3px;align-items:center;font-size:11px;color:var(--muted)}
 .grid16 .c{height:16px;border-radius:4px;background:var(--surf2)}
@@ -218,7 +223,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .sess .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .rec{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px}
 .rec .rb{border:0;border-radius:999px;background:#fff;border:1.5px solid var(--coral);color:var(--coral);font:700 15px var(--font);padding:11px 16px;cursor:pointer}
-.rec .rb.on{background:var(--coral);color:#fff}.rec audio{height:36px;max-width:100%}
+.rec .rb.on{background:var(--coral);color:#fff}.rec audio{height:36px;max-width:100%}.rst2{font:700 14px var(--font);color:var(--coral)}
 /* diario */
 .dweek{margin:26px 0 8px;font:800 18px var(--font)}.dweek small{font:600 13px var(--font);color:var(--muted);margin-left:6px}
 .drecap{background:#f4f8ff;border:1px solid #d9e6ff;border-radius:16px;padding:14px 16px;margin:8px 0 12px;font:500 15px/1.55 var(--font);white-space:pre-wrap}
@@ -594,11 +599,14 @@ function initKb(el){
    · il «tic» del programmatore viene da un Web Worker, che il browser non rallenta come i timer della pagina;
    · in secondo piano si programmano le note con più anticipo (1,2 s invece di 0,15 s), così i rallentamenti non si sentono;
    · ogni strumento suona su un «bus»: allo stop il bus si spegne e le note già programmate in anticipo non suonano. */
-const TICK=(()=>{const fns=new Map();let id=0,w=null;
+const TICK=(()=>{const fns=new Map(),ivs=new Map();let id=0,w=null,ok=false;
+ const run=()=>fns.forEach(f=>{try{f()}catch(e){console.error(e)}});
+ const fallback=()=>{if(!w)return;try{w.terminate()}catch(e){}w=null;fns.forEach((f,k)=>ivs.set(k,setInterval(f,25)))};   // worker muto: timer normali
  try{w=new Worker(URL.createObjectURL(new Blob(['let t=null;onmessage=e=>{if(e.data&&!t)t=setInterval(()=>postMessage(0),25);else if(!e.data&&t){clearInterval(t);t=null}}'],{type:'text/javascript'})));
-  w.onmessage=()=>fns.forEach(f=>{try{f()}catch(e){console.error(e)}})}catch(e){w=null}
- return{add(f){const k=++id;fns.set(k,w?f:setInterval(f,25));if(w&&fns.size===1)w.postMessage(1);return k},
-  del(k){if(!fns.has(k))return;if(!w)clearInterval(fns.get(k));fns.delete(k);if(w&&!fns.size)w.postMessage(0)}}})();
+  w.onmessage=()=>{ok=true;run()};w.onerror=fallback}catch(e){w=null}
+ return{add(f){const k=++id;fns.set(k,f);
+   if(w){if(fns.size===1)w.postMessage(1);if(!ok)setTimeout(()=>{if(!ok)fallback()},300)}else ivs.set(k,setInterval(f,25));return k},
+  del(k){if(!fns.has(k))return;fns.delete(k);if(ivs.has(k)){clearInterval(ivs.get(k));ivs.delete(k)}if(w&&!fns.size)w.postMessage(0)}}})();
 const LA=()=>document.hidden?1.2:.15;
 let BUSN=null;function bus(){if(!BUSN){BUSN=AC.createGain();BUSN.connect(MASTER)}return BUSN}
 function cutBus(){if(!BUSN||!AC)return;const b=BUSN;BUSN=null;try{b.gain.cancelScheduledValues(AC.currentTime);b.gain.setValueAtTime(b.gain.value,AC.currentTime);b.gain.linearRampToValueAtTime(0,AC.currentTime+.02)}catch(e){}setTimeout(()=>{try{b.disconnect()}catch(e){}},200)}
@@ -617,14 +625,16 @@ function synthNote(t,dur,m,v){const f=440*Math.pow(2,(m-69)/12),g=AC.createGain(
 /* ================= audio engine ================= */
 let AC=null,MASTER=null,NOISE=null;
 /* iPhone: senza questo il Web Audio resta muto se l'interruttore silenzioso è attivo */
-let iosUnlocked=false;
+let iosUnlocked=false,IOSA=null,RECORDING=false;
 function iosAudio(){if(iosUnlocked)return;iosUnlocked=true;
  try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
- try{const a=document.createElement('audio');a.setAttribute('playsinline','');a.setAttribute('x-webkit-airplay','deny');a.preload='auto';a.loop=true;
+ try{const a=IOSA=document.createElement('audio');a.setAttribute('playsinline','');a.setAttribute('x-webkit-airplay','deny');a.preload='auto';a.loop=true;
   a.src='data:audio/wav;base64,UklGRmQGAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YUAGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';a.volume=.01;const pr=a.play();if(pr)pr.catch(()=>{iosUnlocked=false})}catch(e){}}
 function ac(){iosAudio();if(!AC){AC=new (window.AudioContext||window.webkitAudioContext)();MASTER=AC.createGain();MASTER.gain.value=.9;MASTER.connect(AC.destination);
  const n=AC.createBuffer(1,AC.sampleRate*.3,AC.sampleRate),d=n.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;NOISE=n}
- if(AC.state==='suspended')AC.resume();return AC}
+ if(AC.state!=='running')AC.resume().catch(()=>{});
+ if(!RECORDING){try{if(navigator.audioSession&&navigator.audioSession.type!=='playback')navigator.audioSession.type='playback'}catch(e){}if(IOSA&&IOSA.paused)IOSA.play().catch(()=>{})}
+ return AC}
 function env(t,g,a,dur){g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(a,t+.002);g.gain.exponentialRampToValueAtTime(.0008,t+dur)}
 /* real drum samples (acoustic kit + OLPC Berklee clave/bass, see drums/CREDITS.txt); synth fallback */
 const DS={};let dsLoad=null;
@@ -651,8 +661,8 @@ const SND={click:(t,a)=>SYN.click(t,a),sub:t=>SYN.sub(t),bell:(t,v)=>SYN.bell(t,
 const M=Object.assign({bpm:90,beats:4,sub:1,swing:0,acc:[2,0,0,0],playing:false,train:false,trainStep:2,trainBars:4,trainMax:160},LS.get('metro',{}),{playing:false});
 let mTimer=null,mNext=0,mStep=0,mBar=0;
 function mSave(){const {playing,...s}=M;LS.set('metro',s)}
-function startMetro(){if(kbActive)kbActive();stopRhythm();ac();if(M.playing)return;M.playing=true;mStep=0;mBar=0;mNext=AC.currentTime+.08;mTimer=TICK.add(mTick);live();if(curTab==='metro')paneMetro()}
-function stopMetro(){if(M.playing)cutBus();M.playing=false;TICK.del(mTimer);live();if(curTab==='metro')paneMetro()}
+function startMetro(){if(kbActive)kbActive();stopRhythm();ac();if(M.playing)return;M.playing=true;mStep=0;mBar=0;mNext=AC.currentTime+.08;mTimer=TICK.add(mTick);live();drawPrac();if(curTab==='metro')paneMetro();else if(curTab==='diary')paneDiary()}
+function stopMetro(){if(M.playing)cutBus();M.playing=false;TICK.del(mTimer);live();drawPrac();if(curTab==='metro')paneMetro();else if(curTab==='diary')paneDiary()}
 function mTick(){const spb=60/M.bpm,stepDur=spb/M.sub;
  while(mNext<AC.currentTime+LA()){const beat=Math.floor(mStep/M.sub),s=mStep%M.sub;let t=mNext;
   if(M.sub===2&&s===1)t+=stepDur*(M.swing/100)*.667; /* swing: 0 = straight, 100 = full triplet */
@@ -664,7 +674,7 @@ let taps=[];
 function paneMetro(){
  if(M.acc.length!==M.beats){M.acc=Array.from({length:M.beats},(_,k)=>k===0?2:0)}
  $('#pane').innerHTML=`<div class="pane">
- <div class="big" id="mBpm">${M.bpm}<small>bpm</small></div>
+ <div class="mtop"><div class="big" id="mBpm">${M.bpm}<small>bpm</small></div><button class="go ${M.playing?'stop':''}" id="mGo">${M.playing?'■ Stop':'▶ Avvia'}</button></div>
  <input type="range" id="mRange" min="30" max="260" value="${M.bpm}">
  <div class="row"><button class="ib" data-d="-5">−5</button><button class="ib" data-d="-1">−</button><button class="btn sm" id="tap">Tap</button><button class="ib" data-d="1">+</button><button class="ib" data-d="5">+5</button></div>
  <div class="beats" id="mBeats">${M.acc.map(a=>`<i class="${a===2||a===1?'acc':''} ${a===-1?'mute':''}"></i>`).join('')}</div>
@@ -677,8 +687,7 @@ function paneMetro(){
  <input type="range" id="mSwing" min="0" max="100" value="${M.swing}" ${M.sub===2?'':'disabled'}>
  <div class="lbl">Allenatore di velocità</div>
  <div class="row" style="justify-content:flex-start"><button class="btn sm ${M.train?'on':''}" id="mTrain">${M.train?'Attivo':'Spento'}</button>
-  <span class="small">+<input type="number" id="tS" value="${M.trainStep}" style="width:62px;padding:6px;font-size:16px"> bpm ogni <input type="number" id="tB" value="${M.trainBars}" style="width:62px;padding:6px;font-size:16px"> battute, fino a <input type="number" id="tM" value="${M.trainMax}" style="width:72px;padding:6px;font-size:16px"></span></div>
- <button class="go ${M.playing?'stop':''}" id="mGo">${M.playing?'■ Stop':'▶ Avvia'}</button></div>`;
+  <span class="small">+<input type="number" id="tS" value="${M.trainStep}" style="width:62px;padding:6px;font-size:16px"> bpm ogni <input type="number" id="tB" value="${M.trainBars}" style="width:62px;padding:6px;font-size:16px"> battute, fino a <input type="number" id="tM" value="${M.trainMax}" style="width:72px;padding:6px;font-size:16px"></span></div></div>`;
  const setB=v=>{M.bpm=Math.max(30,Math.min(260,Math.round(v)));$('#mBpm').innerHTML=M.bpm+'<small>bpm</small>';$('#mRange').value=M.bpm;mSave();live()};
  $('#mRange').oninput=e=>setB(+e.target.value);
  $('#pane').querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>setB(M.bpm+ +b.dataset.d));
@@ -726,10 +735,10 @@ function rTick(){const r=RHY[R.id],per=r.triplet?3:4,len=(r.triplet?12:16)*(r.ba
 const PNAME={clave:'Clave',kick:'Cassa',snare:'Rullante',hat:'Charleston',bass:'Basso',bell:'Campana'};
 function paneRhythm(){const r=RHY[R.id];
  $('#pane').innerHTML=`<div class="pane">
- <div class="rplayer"><h3>${r.name}</h3><p>${r.desc}</p>
+ <div class="rplayer"><div class="mtop"><h3>${r.name}</h3><button class="go ${R.playing?'stop':''}" id="rGo">${R.playing?'■ Stop':'▶ Suona'}</button></div><p>${r.desc}</p>
  <div class="grid16">${Object.entries(r.parts).map(([p,pat])=>`<div class="r" style="grid-template-columns:64px repeat(${pat.length},1fr)"><span data-mute="${p}" style="cursor:pointer;${R.mute[p]?'text-decoration:line-through;opacity:.5':''}">${PNAME[p]}</span>${[...pat].map((c,i)=>`<i class="c ${c==='x'?'x':c==='o'?'o':''}" data-i="${i}"></i>`).join('')}</div>`).join('')}</div>
  <div class="bpmrow"><button class="ib" data-rd="-5">−</button><input type="range" id="rRange" min="50" max="180" value="${R.bpm}"><b id="rBpm">${R.bpm}<small> bpm</small></b><button class="ib" data-rd="5">+</button></div>
- <button class="go ${R.playing?'stop':''}" id="rGo">${R.playing?'■ Stop':'▶ Suona il ritmo'}</button></div>
+ </div>
  <div class="lbl" style="margin-top:4px">Tocca un ritmo per suonarlo</div>
  <div class="rlist">${Object.entries(RHY).map(([k,x])=>`<button data-rid="${k}" class="${k===R.id?'on':''} ${k===R.id&&R.playing?'pl':''}"><i>${k===R.id&&R.playing?'■':'▶'}</i>${x.name}</button>`).join('')}</div>
  <p class="small muted">Tocca il nome di uno strumento nella griglia per toglierlo e suonarlo tu.</p><p class="small muted" style="font-size:11px">Suoni: acoustic kit (web-audio-samples, C. Wilson); clave e basso: OLPC Berklee Sound Library (CC BY 3.0).</p></div>`;
@@ -1399,11 +1408,11 @@ function lessonWhat(){return LESSON?`Lezione ${LESSON.l.n} · ${LESSON.l.title}`
 function drawPrac(){const run=!!D.start,has=tNow()>0;
  const hp=$('#homePrac');if(hp){hp.innerHTML=`<div class="pt"><span data-tnow>${hms(tNow())}</span><small>${run?'pratica in corso':has?'in pausa':`oggi: ${todayMin()} min`}</small></div>
   <div class="pb">${run?`<button class="pbig on" data-pr="pause">❚❚ Pausa</button><button class="psec" data-pr="fine">■ Fine e salva</button>`:has?`<button class="pbig" data-pr="start">▶ Riprendi</button><button class="psec" data-pr="fine">■ Fine e salva</button>`:`<button class="pbig" data-pr="start">▶ Inizia la pratica</button>`}
-  <button class="psec" data-pr="add">＋ Aggiungi a mano</button><button class="psec" data-go="diario">📖 Diario</button></div>`}
+  <button class="psec" data-pr="met">${M.playing?'■ Metronomo':'♩ Metronomo'}</button><button class="psec" data-pr="add">＋ Aggiungi a mano</button><button class="psec" data-go="diario">📖 Diario</button></div>`}
  const lp=$('#lesPrac');if(lp&&LESSON){const mine=D.lez===LESSON.l.n||!D.what;lp.innerHTML=`<b>${run?`⏱ <span data-tnow>${hms(tNow())}</span> · pratica in corso${D.what&&!mine?' ('+esc(D.what)+')':''}`:has?`⏱ <span data-tnow>${hms(tNow())}</span> · pratica in pausa`:'Fai pratica mentre segui la lezione: il tempo va nel diario'}</b>
-  ${run?`<button class="on" data-pr="pause">❚❚ Pausa</button><button class="sec" data-pr="fine">■ Fine e salva</button>`:`<button data-pr="startL">▶ ${has?'Riprendi':'Avvia la pratica'}</button>${has?'<button class="sec" data-pr="fine">■ Fine e salva</button>':''}`}`}
+  ${run?`<button class="on" data-pr="pause">❚❚ Pausa</button><button class="sec" data-pr="fine">■ Fine e salva</button>`:`<button data-pr="startL">▶ ${has?'Riprendi':'Avvia la pratica'}</button>${has?'<button class="sec" data-pr="fine">■ Fine e salva</button>':''}`}<button class="sec" data-pr="met">${M.playing?'■ Metronomo':'♩ Metronomo'}</button>`}
  document.querySelectorAll('[data-pr]').forEach(b=>b.onclick=()=>{const k=b.dataset.pr;
-  if(k==='start')timerStart();else if(k==='startL')timerStart({what:lessonWhat(),lez:LESSON&&LESSON.l.n});else if(k==='pause')timerPause();else if(k==='fine')timerFinish();else if(k==='add')sessionModal({ms:0,what:lessonWhat(),lez:LESSON&&LESSON.l.n,manual:true})})}
+  if(k==='start')timerStart();else if(k==='startL')timerStart({what:lessonWhat(),lez:LESSON&&LESSON.l.n});else if(k==='pause')timerPause();else if(k==='fine')timerFinish();else if(k==='met'){if(M.playing)stopMetro();else{openTools('metro',true);startMetro()}drawPrac()}else if(k==='add')sessionModal({ms:0,what:lessonWhat(),lez:LESSON&&LESSON.l.n,manual:true})})}
 /* minuti automatici */
 const PLAY=new Set();
 setInterval(()=>{if(document.hidden||D.start)return;
@@ -1456,25 +1465,43 @@ function sessionModal(o){const sh=document.createElement('div');sh.className='mo
  <label>Su cosa ti sei esercitato</label><input type="text" name="what" value="${esc(o.what||'')}" placeholder="Es. Lezione 3 · sinistra di Tipitina">
  <label>Tempo raggiunto (bpm, facoltativo)</label><input type="number" name="bpm" inputmode="numeric" value="${M.playing?M.bpm:R.playing?R.bpm:''}" placeholder="bpm">
  <label>Note: cosa hai imparato, cosa hai notato</label><textarea name="note" rows="3" placeholder="Scrivi qui, oppure registra un messaggio vocale"></textarea>
- <div class="rec"><button type="button" class="rb" data-rec>🎙 Registra un messaggio vocale</button><span class="small muted" data-rt></span></div>
- <p class="small muted" style="margin:8px 0 0">Il messaggio vocale viene trascritto e messo in ordine nel diario dopo qualche minuto.</p>
+ <div class="rec"><button type="button" class="rb" data-rec>🎙 Detta le note</button><span class="rst2" data-rt></span></div>
+ <p class="small muted" style="margin:6px 0 0" data-rh>Parla: il testo compare nelle note mentre parli, poi puoi correggerlo. Anche il microfono della tastiera funziona.</p>
  ${ghTok()?'':tokHTML()}
  <button class="go" type="submit">Salva nel diario</button><div class="row2"><button type="button" class="btn sm" data-x>${o.fromTimer?'Non salvare (riprendi dopo)':'Annulla'}</button>${o.fromTimer?'<button type="button" class="btn sm del" data-zero>Azzera il timer</button>':''}</div><div class="note" data-m></div></form>`;
  document.body.appendChild(sh);const f=sh.querySelector('form'),say=m=>sh.querySelector('[data-m]').textContent=m;let rec=null,chunks=[],blob=null,ext=null,rT=null;
- const close=()=>{try{rec&&rec.state!=='inactive'&&rec.stop()}catch(e){}clearInterval(rT);sh.remove()};
- sh.onclick=e=>{if(e.target===sh)close()};sh.querySelector('[data-x]').onclick=close;
+ let close=()=>{try{rec&&rec.state!=='inactive'&&rec.stop()}catch(e){}clearInterval(rT);sh.remove()};
+ sh.onclick=e=>{if(e.target===sh)close()};sh.querySelector('[data-x]').onclick=()=>close();
  const z=sh.querySelector('[data-zero]');if(z)z.onclick=()=>{if(confirm('Azzerare il timer senza salvare?')){timerReset();close()}};
- const rb=sh.querySelector('[data-rec]'),rt=sh.querySelector('[data-rt]');
- rb.onclick=async()=>{if(rec&&rec.state==='recording'){rec.stop();return}
-  if(!navigator.mediaDevices||!window.MediaRecorder){say('Questo browser non registra audio: usa il microfono della tastiera per dettare le note.');return}
+ const rb=sh.querySelector('[data-rec]'),rt=sh.querySelector('[data-rt]'),rh=sh.querySelector('[data-rh]'),ta=f.elements.note;
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;let sr=null,srOn=false,base='',useRec=!SR;
+ const sess=t=>{try{if(navigator.audioSession)navigator.audioSession.type=t}catch(e){}};
+ const stopAll=()=>{if(sr&&srOn){srOn=false;try{sr.stop()}catch(e){}}if(rec&&rec.state==='recording')rec.stop()};
+ /* 1) dettatura: il riconoscimento vocale del dispositivo scrive nelle note mentre parli */
+ function dictate(){sr=new SR();sr.lang='it-IT';sr.continuous=true;sr.interimResults=true;base=ta.value?ta.value.replace(/\s*$/,' '):'';let fin='';
+  sr.onresult=e=>{let tmp='';for(let k=e.resultIndex;k<e.results.length;k++){const r=e.results[k];if(r.isFinal)fin+=r[0].transcript+' ';else tmp+=r[0].transcript}ta.value=(base+fin+tmp).replace(/\s+/g,' ').trimStart()};
+  sr.onerror=e=>{if(e.error!=='no-speech'&&e.error!=='aborted'){srOn=false;useRec=true;rb.classList.remove('on');rb.textContent='🎙 Registra un messaggio vocale';rt.textContent='';
+    rh.textContent='La dettatura qui non è disponibile: registra il messaggio vocale, lo trascrivo nel diario dopo qualche minuto.'}
+};
+  sr.onend=()=>{if(srOn){try{base=ta.value?ta.value.replace(/\s*$/,' '):'';fin='';sr.start();return}catch(e){}}srOn=false;RECORDING=false;sess('playback');rb.classList.remove('on');
+   if(!useRec)rb.textContent='🎙 Continua a dettare';if(!rt.textContent.startsWith('⚠️'))rt.textContent=ta.value?'✓ Testo inserito':''};
+  RECORDING=true;sess('play-and-record');srOn=true;try{sr.start()}catch(e){srOn=false;RECORDING=false;useRec=true;return record()}
+  rb.classList.add('on');rb.textContent='■ Fine dettatura';rt.textContent='● Ti ascolto…'}
+ /* 2) riserva: registra l'audio; la trascrizione la fa GitHub e compare nel diario */
+ async function record(){if(!navigator.mediaDevices||!window.MediaRecorder){rt.textContent='⚠️ Questo browser non registra audio: usa il microfono della tastiera.';return}
+  RECORDING=true;sess('play-and-record');
   try{const st=await navigator.mediaDevices.getUserMedia({audio:true});const mt=['audio/mp4','audio/webm;codecs=opus','audio/webm'].find(t=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(t))||'';
    rec=new MediaRecorder(st,mt?{mimeType:mt}:{});chunks=[];rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
-   rec.onstop=()=>{st.getTracks().forEach(t=>t.stop());clearInterval(rT);const type=rec.mimeType||mt||'audio/mp4';ext=/webm/.test(type)?'webm':'m4a';blob=new Blob(chunks,{type});
-    rb.classList.remove('on');rb.textContent='🎙 Registra di nuovo';rt.innerHTML='';const a=document.createElement('audio');a.controls=true;a.src=URL.createObjectURL(blob);rt.appendChild(a)};
-   rec.start(1000);const t0=Date.now();rb.classList.add('on');rb.textContent='■ Ferma la registrazione';rt.textContent='● 0:00';
-   rT=setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000);rt.textContent='● '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0');if(s>=600)rec.stop()},500)}
-  catch(e){say('Microfono non disponibile: '+e.message)}};
+   rec.onstop=()=>{st.getTracks().forEach(t=>t.stop());RECORDING=false;sess('playback');clearInterval(rT);const type=rec.mimeType||mt||'audio/mp4';ext=/webm/.test(type)?'webm':'m4a';blob=new Blob(chunks,{type});
+    rb.classList.remove('on');rb.textContent='🎙 Registra di nuovo';rt.innerHTML='';if(!blob.size){rt.textContent='⚠️ Registrazione vuota, riprova';blob=null;return}
+    const a=document.createElement('audio');a.controls=true;a.src=URL.createObjectURL(blob);rt.appendChild(a)};
+   rec.start();const t0=Date.now();rb.classList.add('on');rb.textContent='■ Ferma la registrazione';rt.textContent='● 0:00';
+   rT=setInterval(()=>{const q=Math.floor((Date.now()-t0)/1000);rt.textContent='● '+Math.floor(q/60)+':'+String(q%60).padStart(2,'0');if(q>=600)rec.stop()},500)}
+  catch(e){RECORDING=false;sess('playback');rt.textContent='⚠️ Microfono non disponibile ('+(e.name||e.message)+'): consenti il microfono per questo sito nelle impostazioni di Safari.'}}
+ rb.onclick=()=>{if(srOn||(rec&&rec.state==='recording'))return stopAll();if(useRec)record();else dictate()};
+ const close0=close;close=()=>{stopAll();RECORDING=false;sess('playback');close0()};
  f.onsubmit=async e=>{e.preventDefault();const E=f.elements,min=+E.min.value;if(!(min>0)){say('Scrivi quanti minuti hai fatto.');return}
+  if(srOn){srOn=false;try{sr.stop()}catch(e){}await new Promise(r=>setTimeout(r,500))}
   if(rec&&rec.state==='recording'){rec.stop();await new Promise(r=>setTimeout(r,400))}
   const [y,m,d]=E.day.value.split('-').map(Number),now=new Date(),at=(y===now.getFullYear()&&m===now.getMonth()+1&&d===now.getDate())?Date.now():new Date(y,m-1,d,20).getTime();
   const v={id:'v'+Date.now().toString(36),at,ms:min*60000,what:E.what.value.trim(),bpm:+E.bpm.value||null,note:E.note.value.trim(),lez:o.lez||null};if(blob)v.audio=ext;
@@ -1499,11 +1526,13 @@ function paneDiary(){const run=!!D.start,has=tNow()>0,last=sessions().slice().so
  <p class="small muted" style="text-align:center;margin:0 0 6px">${run?'Pratica in corso'+(D.what?' · '+esc(D.what):''):has?'In pausa':'Avvia il timer quando cominci a suonare'}</p>
  <div class="row">${run?`<button class="btn" id="tP">❚❚ Pausa</button>`:`<button class="btn gold" id="tS">▶ ${has?'Riprendi':'Inizia la pratica'}</button>`}${has?'<button class="btn" id="tF">■ Fine e salva</button>':''}</div>
  <div class="row"><button class="btn sm" id="tAdd">＋ Aggiungi a mano</button><button class="btn sm" id="tDia">📖 Apri il diario</button></div>
+ <div class="row"><button class="btn ${M.playing?'on':''}" id="tMet">${M.playing?'■ Ferma il metronomo':'♩ Metronomo '+M.bpm+' bpm'}</button><button class="btn sm" id="tMin2">▁ Riduci: timer e metronomo insieme</button></div>
  <div class="lbl">Questa settimana · ${weekMin()} min · oggi ${todayMin()} min</div>
  <ul class="log">${last.map(e=>`<li><b>${esc(e.what||'Pratica')}</b>${e.bpm?` · ${e.bpm} bpm`:''} · ${Math.round((e.ms||0)/60000)} min<div class="d">${new Date(e.at).toLocaleDateString('it-IT',{weekday:'short',day:'numeric',month:'short'})}${e.note?' · '+esc(e.note):''}</div></li>`).join('')||'<li class="muted">Ancora nessuna sessione salvata.</li>'}</ul>
  <p class="small muted">I minuti si contano anche da soli mentre usi metronomo, ritmi, tastiera, brani e video (quando il timer è fermo).</p></div>`;
  const q=x=>$('#pane').querySelector(x);
  if(q('#tS'))q('#tS').onclick=()=>timerStart({what:lessonWhat(),lez:LESSON&&LESSON.l.n});if(q('#tP'))q('#tP').onclick=timerPause;if(q('#tF'))q('#tF').onclick=timerFinish;
+ q('#tMet').onclick=()=>{M.playing?stopMetro():startMetro();paneDiary()};q('#tMin2').onclick=()=>setMini(true);
  q('#tAdd').onclick=()=>sessionModal({ms:0,what:lessonWhat(),lez:LESSON&&LESSON.l.n,manual:true});q('#tDia').onclick=()=>{if(innerWidth<700)closeTools();go('diario')}}
 
 /* ---- pagina Diario ---- */
@@ -1540,19 +1569,22 @@ function openTools(t,mini){try{loadDrums()}catch(e){}curTab=t||curTab||'metro';l
 function closeTools(){$('#sheet').classList.remove('show');document.body.classList.remove('p-tools');if(curTab)lastTab=curTab;curTab=null;setMini(false);live()}
 function setMini(on){miniOn=on;$('#sheet').classList.toggle('mini',on);document.body.classList.toggle('p-mini',on);clearInterval(miniInt);if(on){drawMini();if(curTab==='diary')miniInt=setInterval(()=>{const e=$('#miniT');if(e)e.textContent=hms(tNow())},500)}}
 function showTab(){document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===curTab));({metro:paneMetro,rhythm:paneRhythm,diary:paneDiary})[curTab]()}
-function drawMini(){if(!miniOn||!curTab)return;const m=$('#mini');let t,play,ctl;
+function drawMini(){if(!miniOn||!curTab)return;const m=$('#mini');
  const pm=(bpm)=>`<button class="m5" data-mm="-5" aria-label="Meno 5 bpm">−5</button><button data-mm="-1" aria-label="Meno 1 bpm">−</button><em>${bpm}<small> bpm</small></em><button data-mm="1" aria-label="Più 1 bpm">+</button><button class="m5" data-mm="5" aria-label="Più 5 bpm">+5</button>`;
- if(curTab==='rhythm'){t=RHY[R.id].name;play=R.playing;ctl=pm(R.bpm)}
- else if(curTab==='diary'){t='Tempo di pratica';play=!!D.start;ctl=`<em id="miniT">${hms(tNow())}</em>${tNow()>0?'<button data-mm="fine">■ Fine</button>':''}`}
- else{t=`Metronomo · ${M.beats}/4${M.sub===2&&M.swing?' · swing':''}`;play=M.playing;ctl=pm(M.bpm)+`<button data-mm="tap">Tap</button>`}
+ /* la finestrella mostra sempre lo strumento che suona (metronomo o ritmo) e, se c'è, il timer di pratica: si usano insieme */
+ const rh=curTab==='rhythm'||(curTab==='diary'&&R.playing);
+ const t=rh?RHY[R.id].name:`Metronomo · ${M.beats}/4${M.sub===2&&M.swing?' · swing':''}`,play=rh?R.playing:M.playing,ctl=rh?pm(R.bpm):pm(M.bpm)+`<button data-mm="tap">Tap</button>`;
+ const showT=curTab==='diary'||tNow()>0;
  m.innerHTML=`<div class="mrow"><span class="mt">${esc(t)}</span><button class="sx" data-mm="max" title="Apri tutto" aria-label="Apri tutto">⤢</button><button class="sx" data-mm="x" title="Chiudi" aria-label="Chiudi">✕</button></div>
- <div class="mrow"><button class="mp ${play?'on':''}" data-mm="play" aria-label="${play?'Stop':'Avvia'}">${play?(curTab==='diary'?'❚❚':'■'):'▶'}</button><div class="mc">${ctl}</div></div>`;
+ <div class="mrow"><button class="mp ${play?'on':''}" data-mm="play" aria-label="${play?'Stop':'Avvia'}">${play?'■':'▶'}</button><div class="mc">${ctl}</div></div>
+ ${showT?`<div class="mrow mtim"><span class="mt">⏱ <span id="miniT">${hms(tNow())}</span> <small>${D.start?'pratica in corso':tNow()>0?'in pausa':'pratica'}</small></span><button data-mm="tplay">${D.start?'❚❚ Pausa':tNow()>0?'▶ Riprendi':'▶ Avvia pratica'}</button>${tNow()>0?'<button data-mm="fine">■ Fine</button>':''}</div>`:''}`;
  requestAnimationFrame(()=>document.body.style.setProperty('--minih',$('#sheet').offsetHeight+'px'))}
 $('#mini').addEventListener('click',e=>{const b=e.target.closest('[data-mm]');if(!b)return;const k=b.dataset.mm;
  if(k==='x')return closeTools();if(k==='fine'){timerFinish();return}if(k==='max'){setMini(false);return showTab()}
- if(k==='play'){if(curTab==='rhythm')R.playing?stopRhythm():startRhythm();else if(curTab==='diary'){if(D.start)timerPause();else timerStart({what:lessonWhat(),lez:LESSON&&LESSON.l.n});setMini(true)}else M.playing?stopMetro():startMetro()}
+ if(k==='play'){if(curTab==='rhythm'||(curTab==='diary'&&R.playing))R.playing?stopRhythm():startRhythm();else M.playing?stopMetro():startMetro()}
+ else if(k==='tplay'){if(D.start)timerPause();else timerStart({what:lessonWhat(),lez:LESSON&&LESSON.l.n})}
  else if(k==='tap'){const n=performance.now();taps=taps.filter(x=>n-x<2500);taps.push(n);if(taps.length>1){M.bpm=Math.max(30,Math.min(260,Math.round(60000/((taps[taps.length-1]-taps[0])/(taps.length-1)))));mSave()}}
- else if(curTab==='rhythm'){R.bpm=Math.max(40,Math.min(240,R.bpm+ +k));rSave()}else{M.bpm=Math.max(30,Math.min(260,M.bpm+ +k));mSave()}
+ else if(curTab==='rhythm'||(curTab==='diary'&&R.playing)){R.bpm=Math.max(40,Math.min(240,R.bpm+ +k));rSave()}else{M.bpm=Math.max(30,Math.min(260,M.bpm+ +k));mSave()}
  drawMini();live()});
 /* trascina giù per chiudere (dall'intestazione o dalla finestrella ridotta) */
 function swipeClose(el,close){let y0=null,dy=0;const box=el.closest('.sheet,.lib');
