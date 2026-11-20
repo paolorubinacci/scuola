@@ -119,32 +119,37 @@ figure{margin:18px 0}figure img{width:100%;background:#fff;border:1px solid var(
 .dot{width:9px;height:9px;border-radius:50%;background:#fff;animation:pulse 1s infinite}@keyframes pulse{50%{opacity:.25}}
 /* pannelli flottanti (Strumenti a destra, Libreria a sinistra): non coprono il sito, si continua a navigare */
 .fab.fl{right:auto;left:16px}
-@media (max-width:699px){body.p-mini .fab.fl{bottom:calc(84px + var(--safe-b))}body.p-mini #app{padding-bottom:80px}}
+@media (max-width:699px){body.p-tools:not(.p-mini) .fab.fl{display:none}body.p-mini .lib{bottom:var(--minih,140px);max-height:calc(86vh - var(--minih,140px));padding-bottom:0;box-shadow:0 -6px 24px rgba(15,27,45,.18)}
+ body.p-mini .fab.fl{bottom:calc(var(--minih,140px) + 12px)}body.p-mini #app{padding-bottom:calc(var(--minih,140px) + 70px)}}
 .fab .libb{background:#fff;color:var(--ink);box-shadow:0 10px 28px rgba(15,27,45,.18);border:1px solid var(--line)}
 body.p-tools .fab:not(.fl),body.p-lib .fab.fl{display:none}
 .sheet,.lib{position:fixed;z-index:51;background:#fff;font-family:var(--font);color:var(--ink);box-shadow:0 12px 44px rgba(15,27,45,.22);display:flex;flex-direction:column;
  left:0;right:0;bottom:0;border-radius:22px 22px 0 0;max-height:62vh;transform:translateY(110%);transition:transform .26s ease;padding-bottom:var(--safe-b)}
 .lib{max-height:86vh;z-index:52}
-.sheet.show,.lib.show{transform:none}
+.sheet:not(.show),.lib:not(.show){visibility:hidden;pointer-events:none;transition:transform .26s ease,visibility 0s .26s}
+.sheet.show,.lib.show{transform:none;visibility:visible}
 @media (min-width:700px){
- .sheet,.lib{left:auto;right:16px;bottom:calc(16px + var(--safe-b));width:380px;max-height:min(70vh,640px);border-radius:20px;padding-bottom:0;transform:translateY(calc(100% + 40px))}
- .lib{right:auto;left:16px;width:420px;max-height:min(84vh,820px)}
- .sheet.mini{width:330px}}
+ .sheet,.lib{left:auto;right:16px;bottom:calc(16px + var(--safe-b));width:min(400px,calc(50vw - 22px));max-height:min(70vh,640px);border-radius:20px;padding-bottom:0;transform:translateY(calc(100% + 40px))}
+ .lib{right:auto;left:16px;width:min(420px,calc(100vw - 44px - min(400px,50vw - 22px)));max-height:min(84vh,820px)}}
 .chero .lchip{margin-top:12px}
 .shead{flex:none;padding:6px 0 0;touch-action:none;cursor:grab}
 .shrow{display:flex;align-items:center;gap:6px;padding:0 10px 8px 0}
-.shrow .tabs{flex:1;min-width:0;padding:0 0 0 14px}
+.shead .tabs{padding:0 14px 10px}
 .shrow .lt{flex:1;font:800 17px var(--font);padding-left:18px}
-.sx{flex:none;width:36px;height:36px;border-radius:50%;border:0;background:var(--surf);color:var(--ink);font:700 15px var(--font);cursor:pointer;display:grid;place-items:center}
+.sx{flex:none;width:42px;height:42px;border-radius:50%;border:0;background:var(--surf);color:var(--ink);font:700 15px var(--font);cursor:pointer;display:grid;place-items:center}
 #pane,.lbody{flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;padding-bottom:16px}
 .grab{width:44px;height:5px;border-radius:9px;background:var(--line);margin:2px auto 8px}
-#mini{display:none;align-items:center;gap:10px;padding:10px 10px 10px 12px;touch-action:none}
+#mini{display:none;flex-direction:column;gap:10px;padding:12px 12px 14px;touch-action:none}
 .sheet.mini .shead,.sheet.mini #pane{display:none}.sheet.mini #mini{display:flex}
-.mp{flex:none;width:48px;height:48px;border-radius:50%;border:0;background:var(--blue);color:#fff;font-size:18px;cursor:pointer}.mp.on{background:var(--coral)}
-.mi{flex:1;min-width:0}.mi b{display:block;font:700 13px var(--font);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mi span{display:flex;align-items:center;gap:4px;margin-top:3px}.mi em{font:800 18px var(--font);font-style:normal;min-width:76px;text-align:center}
-@media (max-width:440px){.mi [data-mm="-5"],.mi [data-mm="5"]{display:none}.mi em{min-width:64px;font-size:16px}}
-.mi span button{border:1px solid var(--line);background:#fff;border-radius:999px;min-width:32px;height:30px;font:700 14px var(--font);cursor:pointer;color:var(--ink)}
+.mrow{display:flex;align-items:center;gap:8px;min-width:0}
+.mt{flex:1;min-width:0;font:700 15px var(--font);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:4px}
+.mrow .sx{width:42px;height:42px;font-size:18px}
+.mp{flex:none;width:52px;height:52px;border-radius:50%;border:0;background:var(--blue);color:#fff;font-size:20px;cursor:pointer}.mp.on{background:var(--coral)}
+.mc{flex:1;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:6px}
+.mc button{flex:none;min-width:42px;height:42px;padding:0 8px;border:1px solid var(--line);background:#fff;border-radius:999px;font:700 16px var(--font);cursor:pointer;color:var(--ink)}
+.mc em{flex:1;min-width:0;font:800 21px var(--font);font-style:normal;text-align:center;white-space:nowrap}
+.mc em small{font:600 12px var(--font);color:var(--muted)}
+@media (max-width:420px){.mc .m5{display:none}}
 /* libreria */
 .lnew{display:flex;align-items:center;gap:12px;margin:4px 14px 10px;padding:12px 14px;border-radius:16px;border:1.5px dashed var(--blue);background:#f4f8ff;cursor:pointer;width:calc(100% - 28px);text-align:left;font-family:var(--font);color:var(--ink)}
 .lnew b{font-size:24px;color:var(--blue)}.lnew small{display:block;color:var(--muted);font-size:12px}
@@ -344,8 +349,8 @@ textarea,input[type=text],input[type=password],input[type=number]{width:100%;bac
 <div class="fab fl"><button class="libb" id="openLib">♫ Libreria</button></div>
 <div class="fab"><button class="live" id="live"><span class="dot"></span><span id="liveTxt">Metronomo</span></button><button class="tools" id="openTools">♩ Strumenti</button></div>
 <div class="sheet" id="sheet"><div class="shead" id="sHead"><div class="grab"></div>
-  <div class="shrow"><div class="tabs" id="tabs"><button data-t="metro">Metronomo</button><button data-t="rhythm">Ritmi New Orleans</button><button data-t="diary">Diario</button></div>
-  <button class="sx" id="tMin" title="Riduci" aria-label="Riduci">▁</button><button class="sx" id="tClose" title="Chiudi" aria-label="Chiudi">✕</button></div></div>
+  <div class="shrow"><b class="lt">Strumenti</b><button class="sx" id="tMin" title="Riduci" aria-label="Riduci">▁</button><button class="sx" id="tClose" title="Chiudi" aria-label="Chiudi">✕</button></div>
+  <div class="tabs" id="tabs"><button data-t="metro">Metronomo</button><button data-t="rhythm">Ritmi New Orleans</button><button data-t="diary">Diario</button></div></div>
   <div id="pane"></div><div id="mini"></div>
 </div>
 <div class="lib" id="lib"><div class="shead" id="libHead"><div class="grab"></div><div class="shrow"><b class="lt">Libreria</b><button class="sx" id="libClose" aria-label="Chiudi">✕</button></div>
@@ -1263,11 +1268,14 @@ function openTools(t,mini){try{loadDrums()}catch(e){}curTab=t||curTab||'metro';l
 function closeTools(){$('#sheet').classList.remove('show');document.body.classList.remove('p-tools');if(curTab)lastTab=curTab;curTab=null;setMini(false);live()}
 function setMini(on){miniOn=on;$('#sheet').classList.toggle('mini',on);document.body.classList.toggle('p-mini',on);clearInterval(miniInt);if(on){drawMini();if(curTab==='diary')miniInt=setInterval(()=>{const e=$('#miniT');if(e)e.textContent=hms(tNow())},500)}}
 function showTab(){document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===curTab));({metro:paneMetro,rhythm:paneRhythm,diary:paneDiary})[curTab]()}
-function drawMini(){if(!miniOn||!curTab)return;const m=$('#mini');let h;
- if(curTab==='rhythm')h=`<button class="mp ${R.playing?'on':''}" data-mm="play">${R.playing?'■':'▶'}</button><div class="mi"><b>${esc(RHY[R.id].name)}</b><span><button data-mm="-5">−5</button><button data-mm="-1">−</button><em>${R.bpm} bpm</em><button data-mm="1">+</button><button data-mm="5">+5</button></span></div>`;
- else if(curTab==='diary')h=`<button class="mp ${D.start?'on':''}" data-mm="play">${D.start?'❚❚':'▶'}</button><div class="mi"><b>Tempo di pratica</b><span><em id="miniT">${hms(tNow())}</em></span></div>`;
- else h=`<button class="mp ${M.playing?'on':''}" data-mm="play">${M.playing?'■':'▶'}</button><div class="mi"><b>Metronomo · ${M.beats}/4${M.sub===2&&M.swing?' · swing':''}</b><span><button data-mm="-5">−5</button><button data-mm="-1">−</button><em>${M.bpm} bpm</em><button data-mm="1">+</button><button data-mm="5">+5</button><button data-mm="tap">Tap</button></span></div>`;
- m.innerHTML=h+`<button class="sx" data-mm="max" title="Apri" aria-label="Apri">⤢</button><button class="sx" data-mm="x" aria-label="Chiudi">✕</button>`}
+function drawMini(){if(!miniOn||!curTab)return;const m=$('#mini');let t,play,ctl;
+ const pm=(bpm)=>`<button class="m5" data-mm="-5" aria-label="Meno 5 bpm">−5</button><button data-mm="-1" aria-label="Meno 1 bpm">−</button><em>${bpm}<small> bpm</small></em><button data-mm="1" aria-label="Più 1 bpm">+</button><button class="m5" data-mm="5" aria-label="Più 5 bpm">+5</button>`;
+ if(curTab==='rhythm'){t=RHY[R.id].name;play=R.playing;ctl=pm(R.bpm)}
+ else if(curTab==='diary'){t='Tempo di pratica';play=!!D.start;ctl=`<em id="miniT">${hms(tNow())}</em>`}
+ else{t=`Metronomo · ${M.beats}/4${M.sub===2&&M.swing?' · swing':''}`;play=M.playing;ctl=pm(M.bpm)+`<button data-mm="tap">Tap</button>`}
+ m.innerHTML=`<div class="mrow"><span class="mt">${esc(t)}</span><button class="sx" data-mm="max" title="Apri tutto" aria-label="Apri tutto">⤢</button><button class="sx" data-mm="x" title="Chiudi" aria-label="Chiudi">✕</button></div>
+ <div class="mrow"><button class="mp ${play?'on':''}" data-mm="play" aria-label="${play?'Stop':'Avvia'}">${play?(curTab==='diary'?'❚❚':'■'):'▶'}</button><div class="mc">${ctl}</div></div>`;
+ requestAnimationFrame(()=>document.body.style.setProperty('--minih',$('#sheet').offsetHeight+'px'))}
 $('#mini').addEventListener('click',e=>{const b=e.target.closest('[data-mm]');if(!b)return;const k=b.dataset.mm;
  if(k==='x')return closeTools();if(k==='max'){setMini(false);return showTab()}
  if(k==='play'){if(curTab==='rhythm')R.playing?stopRhythm():startRhythm();else if(curTab==='diary'){if(D.start){D.acc=tNow();D.start=null}else D.start=Date.now();LS.set('timer',D);setMini(true)}else M.playing?stopMetro():startMetro()}
