@@ -136,38 +136,6 @@
   ],
   "cat_sugg": "stile"
  },
- "junkopartner": {
-  "r": [
-   {
-    "id": "rmwqf2dnh0",
-    "k": "audio",
-    "c": "Registrazione",
-    "t": "Registrazione",
-    "st": "pronto",
-    "tipo": "band",
-    "midi_auto": true,
-    "pdf_auto": false,
-    "stems": [
-     "drums",
-     "bass",
-     "piano",
-     "vocals",
-     "other"
-    ],
-    "dur": 272.12,
-    "f": "rmwqf2dnh0/mix.mp3.enc"
-   }
-  ],
-  "t": "Junko Partner",
-  "a": "Dr. John",
-  "al": "",
-  "anno": "",
-  "lez": [
-   5
-  ],
-  "agg": "2026-11-21",
-  "cat_sugg": "stile"
- },
  "juncopartner": {
   "r": [
    {
@@ -181,7 +149,8 @@
     "pdf_auto": false,
     "stems": [],
     "dur": 310.07,
-    "f": "rmwqf2v6x0/mix.mp3.enc"
+    "f": "rmwqf2v6x0/mix.mp3.enc",
+    "v": "booker"
    },
    {
     "id": "rmwqf2v6x0-mid",
@@ -204,16 +173,89 @@
      "note": 5266,
      "battiti": "beat_this"
     }
+   },
+   {
+    "id": "rmwqf2dnh0",
+    "k": "audio",
+    "c": "Registrazione",
+    "t": "Registrazione",
+    "st": "pronto",
+    "tipo": "band",
+    "midi_auto": true,
+    "pdf_auto": false,
+    "stems": [
+     "drums",
+     "bass",
+     "piano",
+     "vocals",
+     "other"
+    ],
+    "dur": 272.12,
+    "f": "rmwqf2dnh0/mix.mp3.enc",
+    "v": "drjohn"
+   },
+   {
+    "id": "rmilnerv",
+    "k": "video",
+    "c": "Performance",
+    "t": "Performance · con la tastiera allineata",
+    "v": "milner",
+    "f": "rmilnerv/video.mp4.enc",
+    "poster": "rmilnerv/poster.jpg.enc",
+    "dur": 120.63,
+    "st": "pronto"
+   },
+   {
+    "id": "rmilnera",
+    "k": "audio",
+    "c": "Registrazione",
+    "t": "Performance (audio del video)",
+    "v": "milner",
+    "tipo": "solo",
+    "stems": [],
+    "dur": 120.63,
+    "f": "rmilnera/mix.mp3.enc",
+    "st": "pronto",
+    "midi_auto": false,
+    "pdf_auto": false
+   },
+   {
+    "id": "rmilnerp",
+    "k": "pdf",
+    "c": "Partitura",
+    "t": "Trascrizione integrale (Paddy Milner)",
+    "v": "milner",
+    "f": "rmilnerp/spartito.pdf.enc",
+    "st": "pronto",
+    "omr": "attesa"
    }
   ],
   "t": "Junco Partner",
-  "a": "James Booker",
+  "a": "",
   "al": "",
   "anno": "",
   "lez": [
-   5
+   4,
+   5,
+   6
   ],
-  "agg": "2026-11-21",
-  "cat_sugg": "piano"
+  "agg": "2026-11-22",
+  "cat_sugg": "piano",
+  "v": [
+   {
+    "id": "booker",
+    "a": "James Booker"
+   },
+   {
+    "id": "drjohn",
+    "a": "Dr. John"
+   },
+   {
+    "id": "milner",
+    "a": "Paddy Milner",
+    "nota": "Il tutor del corso · lezione 6"
+   }
+  ],
+  "cat": "piano"
  }
 }
