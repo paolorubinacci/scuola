@@ -247,6 +247,15 @@ def _fedele(testo, fonte_txt, src):
     return True
 
 
+GENERICO = set('continuare continuero continuo riprendere riprovare momento altro altra volta dopo domani prossima ancora '
+               'meglio cosa cose questo quello lavoro esercizio esercizi pratica sessione'.split())
+
+
+def _concreto(testo):
+    """Un compito deve dire su cosa (brano, lezione, passaggio): «Continuare in un altro momento» non basta."""
+    return any(len(w) >= 4 and w not in STOP and w not in GENERICO for w in _norm(testo).split())
+
+
 def fatti(l):
     """Minuti, lezioni e metronomo: li scrive il sistema dai dati delle sessioni, non il modello."""
     tot = round(sum(v.get('ms', 0) for v in l) / 60000)
@@ -274,7 +283,8 @@ def chiudi(gs, vs):
             "accorciata, alla seconda persona («Hai lavorato su…»), usando SOLO parole che compaiono nella fonte. \"fonte\" e' la "
             "frase copiata ALLA LETTERA dal testo che ricevi, da cui viene il punto.\n"
             "\"compiti\": le cose che dice di voler fare, continuare, esercitare o ripassare piu' avanti (es. «continuero' in un altro "
-            "momento» su un brano diventa «Continuare <brano>»), con la stessa forma "
+            "momento» detto parlando di un brano diventa «Continuare» + il nome di quel brano), con la stessa forma. Ogni compito deve "
+            "nominare su cosa (brano, lezione o passaggio), sempre con parole prese dal testo; "
             "(testo breve + fonte copiata alla lettera). Se non ne dice, lista vuota.\n"
             "Vietato: conclusioni, valutazioni, progressi («hai migliorato», «ti aiuta a…»), consigli, spiegazioni, cose che lui "
             "non ha detto. Non scrivere minuti o bpm: li aggiunge il sistema. Se una frase e' incomprensibile, saltala.")
@@ -300,7 +310,8 @@ def chiudi(gs, vs):
                 j = json.loads(out[out.index('{'):out.rindex('}') + 1])
                 for k, dest in (('punti', punti), ('compiti', compiti)):
                     for it in j.get(k) or []:
-                        if isinstance(it, dict) and it.get('testo') and _fedele(it['testo'], it.get('fonte', ''), src):
+                        if isinstance(it, dict) and it.get('testo') and _fedele(it['testo'], it.get('fonte', ''), src) \
+                                and (k == 'punti' or _concreto(it['testo'])):
                             t = str(it['testo']).strip().rstrip('.')
                             if t not in dest:
                                 dest.append(t)
