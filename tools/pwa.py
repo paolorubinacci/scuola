@@ -2,7 +2,7 @@
 Da lanciare dopo ogni modifica:  python3 tools/pwa.py"""
 import os,json,hashlib
 R=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-skip={'src','tools','.git'};files=['./']
+skip={'src','tools','.git','lavori'};files=['./']
 for d,ds,fs in os.walk(R):
     ds[:]=[x for x in ds if x not in skip and not x.startswith('.')]
     for f in fs:

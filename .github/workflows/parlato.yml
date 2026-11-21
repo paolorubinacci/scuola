@@ -1,0 +1,38 @@
+# Trascrizione del parlato dei videocorsi (tools/trascrivi_parlato.py). Segreto: SCUOLA_PW.
+name: Lezioni - trascrizione del parlato
+on:
+  push:
+    branches: [main]
+    paths: ['lavori/*.audio.enc']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: parlato
+  cancel-in-progress: false
+jobs:
+  trascrivi:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.cache/huggingface
+          key: parlato-whisper-v1
+      - run: pip install -q cryptography faster-whisper
+      - env:
+          SCUOLA_PW: ${{ secrets.SCUOLA_PW }}
+        run: python tools/trascrivi_parlato.py
+      - run: |
+          git config user.name "Scuola bot"
+          git config user.email "scuola-bot@users.noreply.github.com"
+          git add -A lavori
+          git diff --cached --quiet && exit 0
+          git commit -q -m "Lezioni: trascrizione del parlato"
+          for i in 1 2 3 4; do git pull -q --rebase && git push -q && break; sleep 6; done
