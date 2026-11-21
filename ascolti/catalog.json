@@ -135,5 +135,26 @@
    2
   ],
   "cat_sugg": "stile"
+ },
+ "junkopartner": {
+  "r": [
+   {
+    "id": "rmwqf2dnh0",
+    "k": "audio",
+    "c": "Registrazione",
+    "t": "Registrazione",
+    "st": "elaborazione",
+    "tipo": "band",
+    "midi_auto": true,
+    "pdf_auto": false
+   }
+  ],
+  "t": "Junko Partner",
+  "a": "Dr. John",
+  "al": "",
+  "anno": "",
+  "lez": [
+   5
+  ]
  }
 }
