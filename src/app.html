@@ -77,22 +77,22 @@ header.top .wrap{display:flex;align-items:center;gap:12px;height:56px}
 .lessons .chk{margin-left:auto;font:600 12px var(--font);color:var(--nmuted);white-space:nowrap}.lessons .chk.done{color:#2f7a5b}
 .brief{background:var(--cream);border:1px solid var(--nline);border-left:3px solid var(--gold);padding:16px 18px 6px;margin:22px 0 26px}
 .brief h3{color:var(--navy);margin:0 0 8px;font-size:21px}
-/* concetti chiave: colpo d'occhio. Una riga per tema (icona e nome a margine, solo i titoli dei concetti);
-   la spiegazione si apre toccando il titolo, cosi' la sezione resta corta e si legge in pochi secondi. */
-.kc{margin:18px 0 10px;border-top:2px solid var(--navy)}
-.kc .kch{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:4px 12px;white-space:nowrap;font:700 11px/1 var(--font);letter-spacing:.16em;text-transform:uppercase;color:var(--navy);padding:10px 0 4px}
-.kc .kch small{font:500 11px var(--font);letter-spacing:0;text-transform:none;color:var(--nmuted)}
-.kcb{display:grid;grid-template-columns:150px minmax(0,1fr);column-gap:18px;align-items:start;padding:10px 0;border-bottom:1px solid var(--nline)}
-.kcb:last-child{border-bottom:0}
-.kcb .kht{display:flex;align-items:center;gap:8px;min-height:32px;font:700 11px/1.2 var(--font);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
-.kcb .kht i{color:var(--navy);line-height:0;flex:none}.kcb .kht i svg{width:22px;height:22px}
-.kcb ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:2px 20px}
-.kcb li{display:block}
-.kt{background:none;border:0;padding:7px 0 3px;margin:0;cursor:pointer;font:700 16px/1.35 "Playfair Display",Georgia,serif;color:var(--wine);text-align:left;border-bottom:1px dotted var(--gold2)}
-.kt[aria-expanded=true]{color:var(--navy);border-bottom:2px solid var(--gold)}
-.kd{grid-column:2;margin:8px 0 2px;padding-left:12px;border-left:2px solid var(--gold);font-size:15px;line-height:1.45;color:var(--nink)}
-.kd[hidden]{display:none}
-@media (max-width:560px){.kcb{grid-template-columns:1fr;row-gap:2px;padding:10px 0 8px}.kcb .kht{min-height:0}.kcb ul{gap:2px 16px}.kd{grid-column:1}.kt{font-size:15.5px}}
+/* concetti chiave: un tema per fascia (icona e nome sopra, filo sottile tra un tema e l'altro).
+   Su schermo largo le voci scorrono in due colonne di testo bilanciate, come in un giornale; un tema con una sola voce va a tutta larghezza.
+   Su telefono una colonna, con interlinee strette, per non allungare la pagina. */
+.kc{margin:18px 0 6px;border-top:2px solid var(--navy)}
+.kc .kch{font:700 11px/1 var(--font);letter-spacing:.16em;text-transform:uppercase;color:var(--navy);padding:10px 0 0}
+.kcb{padding:12px 0 6px;border-bottom:1px solid var(--nline)}
+.kcb:last-child{border-bottom:0;padding-bottom:0}
+.kcb .kht{display:flex;align-items:center;gap:9px;margin:0 0 8px;font:700 11px/1.2 var(--font);letter-spacing:.13em;text-transform:uppercase;color:var(--gold)}
+.kcb .kht i{color:var(--navy);line-height:0;flex:none}.kcb .kht i svg{width:24px;height:24px}
+.kcb ul{list-style:none;margin:0;padding:0;columns:2;column-gap:32px;column-rule:1px solid var(--nline)}
+.kcb.one ul{columns:1}
+.kcb li{break-inside:avoid;margin:0 0 9px;font-size:15px;line-height:1.45}
+.kcb li b{font:700 15.5px/1.3 "Playfair Display",Georgia,serif;color:var(--wine)}
+.kcb li b::after{content:" — ";font-weight:400;color:var(--nmuted)}
+@media (max-width:640px){.kcb ul{columns:1}.kcb{padding:10px 0 4px}.kcb .kht{margin-bottom:5px}.kcb .kht i svg{width:20px;height:20px}
+ .kcb li{font-size:14.5px;line-height:1.4;margin-bottom:6px}.kcb li b{font-size:15px}}
 .flow h2{font-size:24px;color:var(--navy);margin:34px 0 8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--nline);padding-bottom:6px;font-weight:400}
 .flow p{margin:0 0 14px}
 .ts{display:inline-block;white-space:nowrap;font:700 11px/1 var(--font);color:var(--gold);border:1px solid var(--gold2);border-radius:3px;padding:3px 5px;margin-right:7px;vertical-align:2px;background:var(--paper)}
@@ -540,11 +540,8 @@ const KCI=(()=>{const s=x=>`<svg viewBox="0 0 24 24" fill="none" stroke="current
  musicisti:['Musicisti',s('<circle cx="12" cy="8" r="4"/><path d="M4.5 21c0-4.2 3.4-7 7.5-7s7.5 2.8 7.5 7"/>')],
  ascolti:['Brani e ascolti',s('<path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4.5" height="7" rx="1.5"/><rect x="16.5" y="14" width="4.5" height="7" rx="1.5"/>')],
  metodo:['Metodo',s('<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/>')]}})();
-function kcHTML(kc){if(!kc||!kc.length)return'';return`<div class="kc"><div class="kch">Concetti chiave<small>Tocca un concetto per la spiegazione</small></div>${kc.map(g=>{const [n,ic]=KCI[g.g]||[g.g,''];
- return`<section class="kcb"><div class="kht"><i>${ic}</i>${esc(n)}</div><ul>${g.it.map(([a],k)=>`<li><button class="kt" aria-expanded="false" data-k="${k}">${a}</button></li>`).join('')}</ul>${g.it.map(([,b],k)=>`<p class="kd" data-k="${k}" hidden>${b}</p>`).join('')}</section>`}).join('')}</div>`}
-document.addEventListener('click',e=>{const b=e.target.closest('.kt');if(!b)return;const s=b.closest('.kcb'),open=b.getAttribute('aria-expanded')!=='true';
- s.querySelectorAll('.kt').forEach(x=>x.setAttribute('aria-expanded','false'));s.querySelectorAll('.kd').forEach(x=>x.hidden=true);
- if(open){b.setAttribute('aria-expanded','true');s.querySelector(`.kd[data-k="${b.dataset.k}"]`).hidden=false}});
+function kcHTML(kc){if(!kc||!kc.length)return'';return`<div class="kc"><div class="kch">Concetti chiave</div>${kc.map(g=>{const [n,ic]=KCI[g.g]||[g.g,''];
+ return`<section class="kcb${g.it.length<2?' one':''}"><div class="kht"><i>${ic}</i>${esc(n)}</div><ul>${g.it.map(([a,b])=>`<li><b>${a}</b>${b}</li>`).join('')}</ul></section>`}).join('')}</div>`}
 function renderLesson(c,l){
  if(!l)return go(c.id);
  theme(c.theme?'t-'+c.theme.replace(/^.*\s/,''):'');updStreak();
