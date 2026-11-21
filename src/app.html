@@ -77,19 +77,20 @@ header.top .wrap{display:flex;align-items:center;gap:12px;height:56px}
 .lessons .chk{margin-left:auto;font:600 12px var(--font);color:var(--nmuted);white-space:nowrap}.lessons .chk.done{color:#2f7a5b}
 .brief{background:var(--cream);border:1px solid var(--nline);border-left:3px solid var(--gold);padding:16px 18px 6px;margin:22px 0 26px}
 .brief h3{color:var(--navy);margin:0 0 8px;font-size:21px}
-/* concetti chiave: gruppi con icona */
-.kc{margin:16px 0 12px}
-.kc .kch{font:700 11px/1.3 var(--font);letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:0 0 10px}
-.kcg{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
-.kcb{background:var(--paper);border:1px solid var(--nline);border-radius:12px;padding:12px 14px 6px}
-.kcb .kht{display:flex;align-items:center;gap:10px;margin:0 0 8px;font:700 14px var(--font);color:var(--navy)}
-.kcb .kht i{flex:none;width:34px;height:34px;border-radius:50%;background:var(--navy);color:var(--gold2);display:inline-flex;align-items:center;justify-content:center}
-.kcb .kht i svg{width:19px;height:19px}
-.kcb .kht small{margin-left:auto;font:600 11px var(--font);color:var(--nmuted)}
+/* concetti chiave: indice per temi, come le voci a margine di un manuale stampato.
+   Ogni tema occupa una riga intera (etichetta a sinistra, voci a destra): con 1, 2 o 5 temi la pagina resta in equilibrio. */
+.kc{margin:18px 0 10px;border-top:2px solid var(--navy)}
+.kc .kch{font:700 11px/1 var(--font);letter-spacing:.16em;text-transform:uppercase;color:var(--navy);padding:10px 0 2px}
+.kcb{display:grid;grid-template-columns:150px minmax(0,1fr);column-gap:20px;padding:14px 0 6px;border-bottom:1px solid var(--nline)}
+.kcb:last-child{border-bottom:0}
+.kcb .kht{display:flex;flex-direction:column;align-items:flex-start;gap:6px;font:700 11px/1.3 var(--font);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.kcb .kht i{color:var(--navy);display:block;line-height:0}
+.kcb .kht i svg{width:28px;height:28px}
 .kcb ul{list-style:none;margin:0;padding:0}
-.kcb li{padding:7px 0 8px;border-top:1px solid var(--nline);font-size:15px;line-height:1.45}
-.kcb li:first-child{border-top:0;padding-top:2px}
-.kcb li b{display:block;font:700 15px/1.3 "Playfair Display",Georgia,serif;color:var(--wine);margin-bottom:2px}
+.kcb li{margin:0 0 10px;font-size:15px;line-height:1.45}
+.kcb li b{font:700 15.5px/1.3 "Playfair Display",Georgia,serif;color:var(--wine)}
+.kcb li b::after{content:" — ";font-weight:400;color:var(--nmuted)}
+@media (max-width:560px){.kcb{grid-template-columns:1fr;padding-top:12px}.kcb .kht{flex-direction:row;align-items:center;gap:10px;margin-bottom:8px}.kcb .kht i svg{width:24px;height:24px}}
 .flow h2{font-size:24px;color:var(--navy);margin:34px 0 8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--nline);padding-bottom:6px;font-weight:400}
 .flow p{margin:0 0 14px}
 .ts{display:inline-block;white-space:nowrap;font:700 11px/1 var(--font);color:var(--gold);border:1px solid var(--gold2);border-radius:3px;padding:3px 5px;margin-right:7px;vertical-align:2px;background:var(--paper)}
