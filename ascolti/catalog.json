@@ -156,28 +156,6 @@
     ],
     "dur": 272.12,
     "f": "rmwqf2dnh0/mix.mp3.enc"
-   },
-   {
-    "id": "rmwqf2dnh0-mid",
-    "k": "midi",
-    "c": "Trascrizione automatica",
-    "t": "MIDI automatico da «Registrazione»",
-    "f": "rmwqf2dnh0/auto.mid.enc",
-    "auto": true,
-    "da": "rmwqf2dnh0",
-    "st": "pronto",
-    "info": {
-     "contrasto": {
-      "2/4": 1.01,
-      "3/4": 1.25,
-      "4/4": 1.04
-     },
-     "metro": "3/4",
-     "bpm": 150,
-     "griglia": "1/4",
-     "note": 262,
-     "battiti": "beat_this"
-    }
    }
   ],
   "t": "Junko Partner",
