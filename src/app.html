@@ -77,6 +77,19 @@ header.top .wrap{display:flex;align-items:center;gap:12px;height:56px}
 .lessons .chk{margin-left:auto;font:600 12px var(--font);color:var(--nmuted);white-space:nowrap}.lessons .chk.done{color:#2f7a5b}
 .brief{background:var(--cream);border:1px solid var(--nline);border-left:3px solid var(--gold);padding:16px 18px 6px;margin:22px 0 26px}
 .brief h3{color:var(--navy);margin:0 0 8px;font-size:21px}
+/* concetti chiave: gruppi con icona */
+.kc{margin:16px 0 12px}
+.kc .kch{font:700 11px/1.3 var(--font);letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:0 0 10px}
+.kcg{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.kcb{background:var(--paper);border:1px solid var(--nline);border-radius:12px;padding:12px 14px 6px}
+.kcb .kht{display:flex;align-items:center;gap:10px;margin:0 0 8px;font:700 14px var(--font);color:var(--navy)}
+.kcb .kht i{flex:none;width:34px;height:34px;border-radius:50%;background:var(--navy);color:var(--gold2);display:inline-flex;align-items:center;justify-content:center}
+.kcb .kht i svg{width:19px;height:19px}
+.kcb .kht small{margin-left:auto;font:600 11px var(--font);color:var(--nmuted)}
+.kcb ul{list-style:none;margin:0;padding:0}
+.kcb li{padding:7px 0 8px;border-top:1px solid var(--nline);font-size:15px;line-height:1.45}
+.kcb li:first-child{border-top:0;padding-top:2px}
+.kcb li b{display:block;font:700 15px/1.3 "Playfair Display",Georgia,serif;color:var(--wine);margin-bottom:2px}
 .flow h2{font-size:24px;color:var(--navy);margin:34px 0 8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--nline);padding-bottom:6px;font-weight:400}
 .flow p{margin:0 0 14px}
 .ts{display:inline-block;white-space:nowrap;font:700 11px/1 var(--font);color:var(--gold);border:1px solid var(--gold2);border-radius:3px;padding:3px 5px;margin-right:7px;vertical-align:2px;background:var(--paper)}
@@ -514,13 +527,25 @@ function renderCourse(c){
  <ul class="lessons">${c.lessons.map((l,i)=>`${l.sec&&(i===0||c.lessons[i-1].sec!==l.sec)?`<li class="lsec">${esc(l.sec)}</li>`:''}<li data-go="${c.id}-l${l.n}"><span class="num">${l.n}</span><div><div class="t">${esc(l.title)}</div><div class="d">${esc(l.dur||'')}${l.clips?` · ${l.clips} passaggi suonati`:''}${l.ready?'':' · in preparazione'}</div></div><span class="chk ${done[c.id+'-'+l.n]?'done':''}">${done[c.id+'-'+l.n]?'✓ fatta':'›'}</span></li>`).join('')}</ul>
  ${isNola(c)?`<div class="acard" data-go="${c.id}-ascolti"><span class="ic">♫</span><div><b>Ascolti consigliati</b><span>Dal PDF della lezione 1 · ascolto e tracce separate</span></div></div>`:''}
  <p class="small muted" id="progStat" style="margin:14px 2px 0"></p><div class="foot"></div></div>`;window.scrollTo(0,0);progShow()}
+/* concetti chiave raggruppati, ognuno con la sua icona */
+const KCI=(()=>{const s=x=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${x}</svg>`;return{
+ ritmo:['Ritmo',s('<ellipse cx="12" cy="10" rx="8" ry="3"/><path d="M4 10v6.5c0 1.7 3.6 3 8 3s8-1.3 8-3V10"/><path d="M7 12.5l1.5 6.5M17 12.5l-1.5 6.5M12 13v6.5"/><path d="M14.5 7.5L20 3M9.5 7.5L4 3"/>')],
+ armonia:['Armonia',s('<ellipse cx="8.5" cy="18.5" rx="3" ry="2.2"/><ellipse cx="8.5" cy="13.5" rx="3" ry="2.2"/><ellipse cx="8.5" cy="8.5" rx="3" ry="2.2"/><path d="M11.5 18.5V3"/><path d="M15 6h6M15 11h6M15 16h6" opacity=".55"/>')],
+ forma:['Forma',s('<rect x="3" y="4" width="8" height="6" rx="1.2"/><rect x="13" y="4" width="8" height="6" rx="1.2"/><rect x="3" y="14" width="18" height="6" rx="1.2"/>')],
+ piano:['Al pianoforte',s('<rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M7.25 13v6M12 13v6M16.75 13v6"/><path d="M5.6 5h3.3v8H5.6zM10.35 5h3.3v8h-3.3zM15.1 5h3.3v8h-3.3z" fill="currentColor" stroke="none"/>')],
+ storia:['Storia e contesto',s('<path d="M3 21h18M5 21V10.5M9.5 21V10.5M14.5 21V10.5M19 21V10.5M2.5 10.5L12 4.5l9.5 6z"/>')],
+ musicisti:['Musicisti',s('<circle cx="12" cy="8" r="4"/><path d="M4.5 21c0-4.2 3.4-7 7.5-7s7.5 2.8 7.5 7"/>')],
+ ascolti:['Brani e ascolti',s('<path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4.5" height="7" rx="1.5"/><rect x="16.5" y="14" width="4.5" height="7" rx="1.5"/>')],
+ metodo:['Metodo',s('<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/>')]}})();
+function kcHTML(kc){if(!kc||!kc.length)return'';return`<div class="kc"><div class="kch">Concetti chiave</div><div class="kcg">${kc.map(g=>{const [n,ic]=KCI[g.g]||[g.g,''];
+ return`<section class="kcb"><div class="kht"><i>${ic}</i>${esc(n)}</div><ul>${g.it.map(([a,b])=>`<li><b>${a}</b>${b}</li>`).join('')}</ul></section>`}).join('')}</div></div>`}
 function renderLesson(c,l){
  if(!l)return go(c.id);
  theme(c.theme?'t-'+c.theme.replace(/^.*\s/,''):'');updStreak();
  $('#crumb').textContent=c.title+' · Lezione '+l.n;const key=c.id+'-'+l.n,done=progress()[key];
  let h=`<section class="chero"><div class="wrap"><div class="eyebrow">Lezione ${l.n}${l.sec?' · '+esc(l.sec):''} · ${esc(l.dur||'')}</div><h1 class="nt">${esc(l.title)}</h1><p>${esc(c.title)} · ${esc(c.sub.split('·')[0])}</p></div></section><div class="wrap">`;
  h+=`<div class="lbar" id="lesPrac"></div>`;
- if(l.brief)h+=`<div class="brief"><h3 class="nt">In breve</h3>${l.brief}</div>`;
+ if(l.brief||l.kc)h+=`<div class="brief"><h3 class="nt">In breve</h3>${l.brief||''}${kcHTML(l.kc)}</div>`;
  h+=`<div class="flow">`+(l.blocks||[]).map(blockHTML).join('')+`</div>`;
  if(!l.ready)h+=`<div class="pending">Questa lezione è in preparazione: trascrizione, citazioni dal PDF del corso e partiture arrivano qui, con i passaggi suonati integrati nel testo.</div>`;
  const i=c.lessons.indexOf(l),prev=c.lessons[i-1],next=c.lessons[i+1];
