@@ -156,5 +156,26 @@
   "lez": [
    5
   ]
+ },
+ "juncopartner": {
+  "r": [
+   {
+    "id": "rmwqf2v6x0",
+    "k": "audio",
+    "c": "Registrazione",
+    "t": "Registrazione",
+    "st": "elaborazione",
+    "tipo": "solo",
+    "midi_auto": true,
+    "pdf_auto": false
+   }
+  ],
+  "t": "Junco Partner",
+  "a": "James Booker",
+  "al": "",
+  "anno": "",
+  "lez": [
+   5
+  ]
  }
 }
