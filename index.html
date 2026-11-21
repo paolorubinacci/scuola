@@ -1513,9 +1513,9 @@ const D=Object.assign({start:null,acc:0,what:'',lez:null},LS.get('timer',{}));le
 function tNow(){return D.acc+(D.start?Date.now()-D.start:0)}
 function hms(ms){const s=Math.floor(ms/1000);return`${Math.floor(s/3600)?Math.floor(s/3600)+':':''}${String(Math.floor(s/60)%60).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`}
 function dStore(){LS.set('timer',D)}
-function timerStart(o){if(!D.start){D.start=Date.now();if(o){if(o.what&&!D.what)D.what=o.what;if(o.lez)D.lez=o.lez}}dStore();pracChanged()}
+function timerStart(o){if(!D.start){if(!D.acc||!D.sid)D.sid=Date.now();D.start=Date.now();if(o){if(o.what&&!D.what)D.what=o.what;if(o.lez)D.lez=o.lez}}dStore();pracChanged()}
 function timerPause(){if(D.start){D.acc=tNow();D.start=null}dStore();pracChanged()}
-function timerReset(){D.start=null;D.acc=0;D.what='';D.lez=null;D.tempi=[];dStore();pracChanged()}
+function timerReset(){D.start=null;D.acc=0;D.what='';D.lez=null;D.tempi=[];D.sid=null;dStore();pracChanged()}
 /* col metronomo (o un ritmo) parte anche la pratica, se non è già in corso; si può spegnere dal metronomo */
 function autoPrac(){if(D.start||!LS.get('autoPrac',true))return;timerStart({what:lessonWhat(),lez:LESSON&&LESSON.l.n});toast('⏱ Pratica avviata insieme al metronomo')}
 /* percorso del tempo durante la sessione: [{s:'♩'|nome ritmo, bpm, sec}] */
@@ -1525,7 +1525,10 @@ function tempiCompact(t){const o=[];(t||[]).filter(x=>x.sec>=10).forEach(x=>{con
 function tempiTxt(t){const c=tempiCompact(t);if(!c.length)return'';const by={};c.forEach(x=>(by[x.s]=by[x.s]||[]).push(x));
  return Object.entries(by).map(([k,l])=>`${k}: ${l.map(x=>x.bpm+' bpm'+(x.sec>=60?' ('+Math.round(x.sec/60)+' min)':'')).join(' → ')}`).join(' · ')}
 function tempiMax(t){return Math.max(0,...tempiCompact(t).map(x=>x.bpm))||null}
-function timerFinish(){timerPause();dStore();const tp=tempiCompact(D.tempi);sessionModal({ms:tNow(),what:D.what||lessonWhat()||(tp.length?[...new Set(tp.map(x=>x.s))].join(' + '):''),lez:D.lez||(LESSON&&LESSON.l.n),tempi:tp,fromTimer:true})}
+/* tempo raggiunto in QUESTA sessione: il più alto tenuto almeno 20 s in tutto (prima il metronomo, poi i ritmi); se nessuno, quello a cui ti sei fermato */
+function tempiReached(t){t=t||[];for(const met of [true,false]){const l=t.filter(x=>(x.s==='Metronomo')===met);if(!l.length)continue;const tot={};l.forEach(x=>tot[x.bpm]=(tot[x.bpm]||0)+x.sec);
+ const ok=Object.keys(tot).filter(b=>tot[b]>=20).map(Number);return ok.length?Math.max(...ok):l[l.length-1].bpm}return null}
+function timerFinish(){timerPause();dStore();const tp=tempiCompact(D.tempi);sessionModal({ms:tNow(),what:D.what||lessonWhat()||(tp.length?[...new Set(tp.map(x=>x.s))].join(' + '):''),lez:D.lez||(LESSON&&LESSON.l.n),tempi:tp,raw:D.tempi||[],fromTimer:true})}
 let pracWL=null;function pracWake(){try{if(D.start&&!pracWL&&navigator.wakeLock&&!document.hidden)navigator.wakeLock.request('screen').then(w=>{pracWL=w;w.addEventListener('release',()=>{pracWL=null})}).catch(()=>{});else if(!D.start&&pracWL){pracWL.release();pracWL=null}}catch(e){}}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)pracWake()});
 function pracChanged(){pracWake();drawPrac();drawMini();live();if(curTab==='diary')paneDiary();updStreak()}
@@ -1632,7 +1635,7 @@ function sessionModal(o){const sh=document.createElement('div');sh.className='mo
  sh.innerHTML=`<form class="af box sess"><div class="lbl">${o.manual?'Aggiungi pratica a mano':'Salva la sessione di pratica'}</div>
  <div class="two"><div><label>Giorno</label><input type="date" name="day" value="${iso(today)}" max="${iso(today)}"></div><div><label>Minuti</label><input type="number" name="min" min="1" max="600" inputmode="numeric" value="${o.ms?Math.max(1,Math.round(o.ms/60000)):''}" placeholder="es. 30"></div></div>
  <label>Su cosa ti sei esercitato</label><input type="text" name="what" value="${esc(o.what||'')}" placeholder="Es. Lezione 3 · sinistra di Tipitina">
- <label>Tempo raggiunto (bpm, facoltativo)</label><input type="number" name="bpm" inputmode="numeric" value="${tempiMax(o.tempi)||(M.playing?M.bpm:R.playing?R.bpm:'')}" placeholder="bpm">
+ <label>Tempo raggiunto (bpm, facoltativo)</label><input type="number" name="bpm" inputmode="numeric" value="${o.fromTimer?(tempiReached(o.raw)||''):''}" placeholder="bpm">
  ${o.tempi&&o.tempi.length?`<p class="small muted" style="margin:6px 0 0">Percorso del tempo registrato: <b>${esc(tempiTxt(o.tempi))}</b></p>`:''}
  <label>Note: cosa hai imparato, cosa hai notato</label><textarea name="note" rows="3" placeholder="Scrivi qui, oppure registra un messaggio vocale"></textarea>
  <div class="rec"><button type="button" class="rb" data-rec>🎙 Detta le note</button><span class="rst2" data-rt></span></div>
@@ -1640,8 +1643,9 @@ function sessionModal(o){const sh=document.createElement('div');sh.className='mo
  ${ghTok()?'':tokHTML()}
  <button class="go" type="submit">Salva nel diario</button><div class="row2"><button type="button" class="btn sm" data-x>${o.fromTimer?'Non salvare (riprendi dopo)':'Annulla'}</button>${o.fromTimer?'<button type="button" class="btn sm del" data-zero>Azzera il timer</button>':''}</div><div class="note" data-m></div></form>`;
  document.body.appendChild(sh);const f=sh.querySelector('form'),say=m=>sh.querySelector('[data-m]').textContent=m;
- const dr=LS.get('sessDraft',null);if(dr&&o.fromTimer&&Date.now()-dr.t<3*864e5){['what','bpm','note'].forEach(k=>{if(dr[k])f.elements[k].value=dr[k]})}
- const saveDraft=()=>{if(o.fromTimer)LS.set('sessDraft',{t:Date.now(),what:f.elements.what.value,bpm:f.elements.bpm.value,note:f.elements.note.value})};
+ const dr=LS.get('sessDraft',null);let bpmHand=false;if(dr&&o.fromTimer&&dr.sid&&dr.sid===D.sid&&Date.now()-dr.t<3*864e5){['what','note'].forEach(k=>{if(dr[k])f.elements[k].value=dr[k]});if(dr.bpmHand&&dr.bpm){f.elements.bpm.value=dr.bpm;bpmHand=true}}
+ f.elements.bpm.addEventListener('input',()=>{bpmHand=true});
+ let saved=false;const saveDraft=()=>{if(o.fromTimer&&!saved)LS.set('sessDraft',{t:Date.now(),sid:D.sid,what:f.elements.what.value,bpm:bpmHand?f.elements.bpm.value:'',bpmHand,note:f.elements.note.value})};
  f.addEventListener('input',saveDraft);const dInt2=setInterval(saveDraft,3000);let rec=null,chunks=[],blob=null,ext=null,rT=null;
  let close=()=>{try{rec&&rec.state!=='inactive'&&rec.stop()}catch(e){}clearInterval(rT);clearInterval(dInt2);sh.remove()};
  sh.onclick=e=>{if(e.target===sh)close()};sh.querySelector('[data-x]').onclick=()=>close();
@@ -1677,6 +1681,7 @@ function sessionModal(o){const sh=document.createElement('div');sh.className='mo
  rb.onclick=()=>{if(srOn||(rec&&rec.state==='recording'))return stopAll();if(useRec)record();else dictate()};
  const close0=close;close=()=>{stopAll();RECORDING=false;sess('playback');close0()};
  f.onsubmit=async e=>{e.preventDefault();const E=f.elements,min=+E.min.value;if(!(min>0)){say('Scrivi quanti minuti hai fatto.');return}
+  saved=true;clearInterval(dInt2);
   if(srOn){srOn=false;try{sr.stop()}catch(e){}await new Promise(r=>setTimeout(r,500))}
   if(rec&&rec.state==='recording'){rec.stop();await new Promise(r=>setTimeout(r,400))}
   const [y,m,d]=E.day.value.split('-').map(Number),now=new Date(),at=(y===now.getFullYear()&&m===now.getMonth()+1&&d===now.getDate())?Date.now():new Date(y,m-1,d,20).getTime();
