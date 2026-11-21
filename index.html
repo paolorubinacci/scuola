@@ -1698,17 +1698,27 @@ function paneDiary(){const run=!!D.start,has=tNow()>0,last=sessions().slice().so
 /* ---- «Chiudi la giornata»: riassunto del giorno + compiti per il futuro; i vocali si cancellano solo dopo l'approvazione ---- */
 const ymd=ts=>{const d=new Date(ts);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const dTxt=d=>new Date(d+'T12:00').toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
-function giorniAperti(){const Dg=DIARIO||{voci:[],giorni:{}},G=Dg.giorni||{},by={};
- Dg.voci.forEach(v=>{if(v.giorno)return;const d=ymd(v.at),g=G[d];if(g&&g.stato!=='approvata'&&(g.voci||[]).includes(v.id))return;(by[d]=by[d]||[]).push(v)});return by}
+/* La giornata NON finisce a mezzanotte: finisce quando premi «Chiudi la giornata». Prende tutte le sessioni non ancora chiuse. */
+function sessAperte(){const Dg=DIARIO||{voci:[],giorni:{}},inG=new Set();Object.values(Dg.giorni||{}).forEach(g=>{if(g.stato!=='approvata')(g.voci||[]).forEach(i=>inG.add(i))});
+ return Dg.voci.filter(v=>!v.giorno&&!inG.has(v.id)).sort((a,b)=>a.at-b.at)}
+function gNonApprovate(){return Object.values((DIARIO||{}).giorni||{}).filter(g=>g.stato!=='approvata')}
+function gNome(g){const a=g.dal||0,b=g.al||0;if(!a)return dTxt(g.d);const da=new Date(a).toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
+ return ymd(a)===ymd(b)?da:da+' (fino a '+new Date(b).toLocaleDateString('it-IT',{weekday:'long',day:'numeric'})+' '+new Date(b).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})+')'}
 async function gCommit(files,days,msg){const t=ghTok();if(!t){syncModal();throw new Error('Serve la chiave GitHub')}
  return ghCommitDiario(t,files,idx=>{idx.giorni=[...new Set([...(idx.giorni||[]),...days])].sort()},msg,m=>toast(m))}
 async function chiudiGiornata(btn){if(D.start||tNow()>0)return toast('Prima salva la pratica in corso con «■ Fine e salva», poi chiudi la giornata');
  if(!ghTok())return syncModal();if(btn){btn.disabled=true;btn.textContent='Preparo…'}
- try{await syncPending(m=>toast(m)).catch(()=>{});await loadDiario(true);const by=giorniAperti(),days=Object.keys(by).sort();
-  if(!days.length){toast('Non ci sono sessioni da chiudere');return renderDiario()}
-  const files=[];for(const d of days){const old=DIARIO.giorni[d],prev=old&&old.stato!=='approvata'?old.voci||[]:[];
-   const g={d,stato:'richiesta',voci:[...new Set(prev.concat(by[d].map(v=>v.id)))],at:Date.now()};files.push({path:'diario/giorni/'+d+'.json.enc',label:'giornata',u8:await encJSON(g)});DIARIO.giorni[d]=g}
-  await gCommit(files,days,'Diario: chiudi la giornata '+days.join(', '));LS.set('diario-cache',DIARIO);toast('✓ Fatto: il riassunto arriva tra qualche minuto, poi lo approvi tu');gPoll()}
+ try{await syncPending(m=>toast(m)).catch(()=>{});await loadDiario(true);// un'unica giornata: le sessioni aperte + quelle delle giornate non ancora approvate (che vengono unite)
+  const vecchie=gNonApprovate(),ids=new Set(vecchie.flatMap(g=>g.voci||[]));sessAperte().forEach(v=>ids.add(v.id));
+  const l=DIARIO.voci.filter(v=>ids.has(v.id)).sort((a,b)=>a.at-b.at);
+  if(!l.length){toast('Non ci sono sessioni da chiudere');return renderDiario()}
+  let d=ymd(l[0].at),k=2;while(DIARIO.giorni[d]&&DIARIO.giorni[d].stato==='approvata')d=ymd(l[0].at)+'-'+(k++);
+  const nota=vecchie.map(g=>g.nota).filter(Boolean).join(' ');
+  const g={d,stato:'richiesta',voci:l.map(v=>v.id),dal:l[0].at,al:l[l.length-1].at,at:Date.now()};if(nota)g.nota=nota;
+  const dels=vecchie.filter(o=>o.d!==d).map(o=>'diario/giorni/'+o.d+'.json.enc'),via=new Set(vecchie.map(o=>o.d));
+  const t=ghTok();await ghCommitDiario(t,[{path:'diario/giorni/'+d+'.json.enc',label:'giornata',u8:await encJSON(g)}],
+   idx=>{idx.giorni=[...new Set([...(idx.giorni||[]).filter(x=>x===d||!via.has(x)),d])].sort()},'Diario: chiudi la giornata',m=>toast(m),dels);
+  vecchie.forEach(o=>delete DIARIO.giorni[o.d]);DIARIO.giorni[d]=g;LS.set('diario-cache',DIARIO);toast('✓ Fatto: il riassunto arriva tra qualche minuto, poi lo approvi tu');gPoll()}
  catch(e){toast(ghErr?ghErr(e):e.message)}if(location.hash==='#diario')renderDiario()}
 let gPollT=0;function gPoll(){clearTimeout(gPollT);gPollT=setTimeout(async()=>{if(location.hash!=='#diario')return;
  const w=Object.values((DIARIO||{}).giorni||{}).some(g=>g.stato==='richiesta');if(!w)return;await loadDiario(true).catch(()=>{});
@@ -1729,12 +1739,12 @@ async function gRifai(d,nota){const g=Object.assign({},DIARIO.giorni[d],{stato:'
  await gCommit([{path:'diario/giorni/'+d+'.json.enc',label:'giornata',u8:await encJSON(g)}],[d],'Diario: rifai il riassunto del '+d);DIARIO.giorni[d]=g;LS.set('diario-cache',DIARIO);gPoll()}
 async function cSalva(lista,msg){const t=ghTok();if(!t)return syncModal();DIARIO.compiti=lista;LS.set('diario-cache',DIARIO);
  try{await ghCommitDiario(t,[{path:'diario/compiti.json.enc',label:'compiti',u8:await encJSON({lista})}],()=>{},msg,()=>{})}catch(e){toast(ghErr?ghErr(e):e.message)}}
-function gHTML(){const Dg=DIARIO||{giorni:{},compiti:[]},G=Dg.giorni||{},by=giorniAperti(),days=Object.keys(by).sort(),oggi=ymd(Date.now());
+function gHTML(){const Dg=DIARIO||{giorni:{},compiti:[]},G=Dg.giorni||{},aperte=sessAperte(),nonApp=gNonApprovate();
  let h='';
  Object.values(G).filter(g=>g.stato&&g.stato!=='approvata').sort((a,b)=>a.d<b.d?-1:1).forEach(g=>{
-  if(g.stato==='richiesta')h+=`<div class="gcard wait"><h3>⏳ Giornata ${g.d===oggi?'di oggi':'del '+dTxt(g.d)}</h3>Sto ascoltando i vocali e preparando il riassunto: ci vogliono alcuni minuti. La pagina si aggiorna da sola.<div class="row"><button class="btn sm" data-grel>↻ Aggiorna adesso</button></div></div>`;
-  else if(g.stato==='errore')h+=`<div class="gcard"><h3>⚠️ Giornata del ${dTxt(g.d)}</h3>${esc(g.err||'Riassunto non riuscito')}<div class="row"><button class="btn sm" data-gredo="${g.d}">↻ Riprova</button></div></div>`;
-  else if(g.stato==='proposta')h+=`<div class="gcard prop" data-gd="${g.d}"><h3>🌙 Da approvare: giornata ${g.d===oggi?'di oggi':'del '+dTxt(g.d)}</h3>
+  if(g.stato==='richiesta')h+=`<div class="gcard wait"><h3>⏳ Giornata di ${esc(gNome(g))}</h3>Sto ascoltando i vocali e preparando il riassunto: ci vogliono alcuni minuti. La pagina si aggiorna da sola.<div class="row"><button class="btn sm" data-grel>↻ Aggiorna adesso</button></div></div>`;
+  else if(g.stato==='errore')h+=`<div class="gcard"><h3>⚠️ Giornata di ${esc(gNome(g))}</h3>${esc(g.err||'Riassunto non riuscito')}<div class="row"><button class="btn sm" data-gredo="${g.d}">↻ Riprova</button></div></div>`;
+  else if(g.stato==='proposta')h+=`<div class="gcard prop" data-gd="${g.d}"><h3>🌙 Da approvare: giornata di ${esc(gNome(g))}</h3>
    <p class="small muted" style="margin:0 0 8px">Controlla e correggi pure. Quando approvi, i vocali e le loro trascrizioni vengono cancellati e resta questo riassunto; le note scritte restano.</p>
    <label class="lbl">Riassunto della giornata</label><textarea data-gr>${esc(g.riassunto||'')}</textarea>
    <label class="lbl" style="margin-top:12px;display:block">Compiti per il futuro (cose che hai detto di voler esercitare)</label>
@@ -1742,8 +1752,8 @@ function gHTML(){const Dg=DIARIO||{giorni:{},compiti:[]},G=Dg.giorni||{},by=gior
    <button class="btn sm" type="button" data-gca>＋ Aggiungi un compito</button>
    <label class="lbl" style="margin-top:12px;display:block">Vuoi aggiungere qualcosa e rifare il riassunto?</label><textarea data-gn style="min-height:70px" placeholder="Es. ho lavorato anche sulla mano destra di Tipitina"></textarea>
    <div class="row"><button class="btn gold" data-gok>✓ Approva e cancella i vocali</button><button class="btn sm" data-gre>↻ Rifai con le aggiunte</button></div></div>`});
- if(days.length){const l=days.flatMap(d=>by[d]),voc=l.filter(v=>v.audio).length,min=Math.round(l.reduce((a,v)=>a+(v.ms||0),0)/60000),old=days.filter(d=>d!==oggi);
-  h+=`<div class="gcard"><h3>Hai finito di esercitarti?</h3>${days.includes(oggi)?`Oggi: ${by[oggi].length} ${by[oggi].length===1?'sessione':'sessioni'}, ${min} min${voc?`, ${voc} ${voc===1?'vocale':'vocali'}`:''}.`:''}${old.length?` Da chiudere anche: ${old.map(dTxt).join(', ')}.`:''} Faccio il riassunto di tutto e aggiungo ai compiti le cose che hai detto di voler esercitare; i vocali si cancellano solo dopo che approvi.
+ if(aperte.length||nonApp.length>1){const l=aperte.concat(nonApp.length>1?Dg.voci.filter(v=>nonApp.some(g=>(g.voci||[]).includes(v.id))):[]),voc=l.filter(v=>v.audio).length,min=Math.round(l.reduce((a,v)=>a+(v.ms||0),0)/60000);
+  h+=`<div class="gcard"><h3>Hai finito di esercitarti?</h3>${aperte.length?`Sessioni da chiudere: ${l.length}, ${min} min${voc?`, ${voc} ${voc===1?'vocale':'vocali'}`:''}. `:''}${nonApp.length>1?'Ci sono '+nonApp.length+' giornate divise a mezzanotte: le unisco in una sola. ':''}La giornata comprende tutte le sessioni non ancora chiuse, anche dopo mezzanotte. Faccio il riassunto solo con quello che hai detto e scritto tu, e aggiungo ai compiti le cose che hai detto di voler esercitare; i vocali si cancellano solo dopo che approvi.
   <div class="row"><button class="btn gold" id="gClose">🌙 Chiudi la giornata</button></div></div>`}
  const open=(Dg.compiti||[]).filter(c=>!c.fatto),done=(Dg.compiti||[]).filter(c=>c.fatto);
  h+=`<div class="gcard"><h3>📝 Compiti per il futuro</h3>${open.map(c=>`<label class="ctask"><input type="checkbox" data-ct="${c.id}"><span>${esc(c.t)}<small>dal ${dTxt(c.d)}</small></span><button class="x" type="button" data-cdel="${c.id}" aria-label="Elimina">✕</button></label>`).join('')||'<p class="small muted" style="margin:4px 0">Nessun compito aperto.</p>'}
