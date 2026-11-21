@@ -1536,8 +1536,8 @@ function loadDiario(force){if(force)diarioLoading=null;return diarioLoading=diar
  await Promise.all(voci.slice(0,40).map(async v=>{const e=elab[v.id];if(e&&e.ordinato&&(e.trascr||!v.audio))return;const u=await rawGet('diario/elab/'+v.id+'.json.enc',true);if(u){try{elab[v.id]=await decJSON(u)}catch(e){}}}));
  const ws=[...new Set(voci.map(v=>settimanaDi(v.at)))].slice(0,8);
  await Promise.all(ws.map(async w=>{const u=await rawGet('diario/settimane/'+w+'.json.enc',true);if(u){try{sett[w]=await decJSON(u)}catch(e){}}}));
- const giorni=Object.assign({},cache.giorni||{});
- await Promise.all((idx.giorni||[]).slice(-60).map(async d=>{if(giorni[d]&&giorni[d].stato==='approvata'&&!force)return;const u=await rawGet('diario/giorni/'+d+'.json.enc',true);if(u){try{giorni[d]=Object.assign(await decJSON(u),{d})}catch(e){}}}));
+ const giorni={},vecchi=cache.giorni||{};   // sempre dal repository: le giornate possono essere unite o corrette
+ await Promise.all((idx.giorni||[]).slice(-60).map(async d=>{const u=await rawGet('diario/giorni/'+d+'.json.enc',true);if(u){try{giorni[d]=Object.assign(await decJSON(u),{d})}catch(e){if(vecchi[d])giorni[d]=vecchi[d]}}else if(vecchi[d])giorni[d]=vecchi[d]}));
  let compiti=cache.compiti||[];{const u=await rawGet('diario/compiti.json.enc',true);if(u){try{compiti=(await decJSON(u)).lista||[]}catch(e){}}}
  DIARIO={voci,elab,sett,giorni,compiti};LS.set('diario-cache',DIARIO);return DIARIO})().catch(e=>{diarioLoading=null;throw e})}
 async function ghCommitDiario(tok,files,addIdx,msg,say,dels){const tree0=[];
