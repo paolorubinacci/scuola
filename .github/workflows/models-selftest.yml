@@ -1,0 +1,44 @@
+name: diario-giornata-selftest
+on:
+  push:
+    branches: [selftest-models]
+permissions:
+  contents: write
+jobs:
+  t:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: richiesta di prova con tutte le sessioni (non tocca main)
+        env:
+          SCUOLA_PW: ${{ secrets.SCUOLA_PW }}
+        run: |
+          pip install -q cryptography faster-whisper
+          python - <<'PY'
+          import json,sys
+          sys.argv=['x']
+          import importlib.util
+          spec=importlib.util.spec_from_file_location('d','tools/diario.py');d=importlib.util.module_from_spec(spec);spec.loader.exec_module(d)
+          vs=[v for v in d.voci() if not v.get('giorno')];ids=[v['id'] for v in vs]
+          idx=json.load(open('diario/indice.json'));idx['giorni']=['prova'];json.dump(idx,open('diario/indice.json','w'))
+          d.scrivi('giorni/prova.json.enc',{'d':'prova','stato':'richiesta','voci':ids})
+          print('sessioni',len(ids))
+          PY
+      - uses: actions/cache@v4
+        with:
+          path: ~/llm
+          key: diario-ollama-qwen25-7b-v1
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash tools/llm.sh
+      - env:
+          SCUOLA_PW: ${{ secrets.SCUOLA_PW }}
+          LOCAL_LLM: http://127.0.0.1:11434
+        run: python tools/diario.py 2>&1 | grep -v "^trascritto\|caratteri"
+      - run: |
+          git config user.name bot; git config user.email bot@users.noreply.github.com
+          mkdir -p prova && cp diario/giorni/prova.json.enc prova/ && git add prova && git commit -qm "selftest: esito (cifrato)" && git push -q

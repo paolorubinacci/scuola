@@ -15,7 +15,7 @@ REGOLA FERMA: solo riassunti di cio' che Paolo ha scritto o detto. Niente consig
   python3 tools/diario.py [RADICE] --controlla      stampa si/no (c'e' qualcosa da fare?)
   python3 tools/diario.py [RADICE] --controlla-audio  stampa si/no (servono le trascrizioni?)
 Variabili: SCUOLA_PW (obbligatoria), ANTHROPIC_API_KEY e ANTHROPIC_MODEL (facoltative), WHISPER_MODEL (default small)."""
-import sys, os, json, datetime, tempfile, traceback, urllib.request, urllib.error
+import sys, os, re, json, datetime, tempfile, traceback, urllib.request, urllib.error, difflib, unicodedata
 from zoneinfo import ZoneInfo
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
@@ -207,34 +207,108 @@ def ordina(lista):
         scrivi('elab/%s.json.enc' % v['id'], e)
 
 
+STOP = set(('hai sei ho lavorato esercitato esercitata esercitati provato provata suonato suonata detto dici vuoi voglio volere '
+             'voler vorrei oggi sessione anche sulla sullo sugli sulle delle della dello degli nella nelle negli questo questa '
+             'questi queste quello quella quelli quelle come molto ancora dopo prima tutto tutti tutte sempre fare fatto fatta '
+             'parte cosa cose perche quando mentre altro altra altri altre ogni proprio essere stato stata sono era erano '
+             'sarebbe meglio dove nello alla alle allo agli dalla dalle dallo dagli dentro sopra sotto verso senza contro '
+             'invece ripassare esercitare esercitarti esercitarmi lavorare lavorarci provare suonare portare').split())
+
+
+def _norm(t):
+    t = unicodedata.normalize('NFKD', str(t).lower())
+    t = ''.join(ch for ch in t if not unicodedata.combining(ch))
+    return re.sub(r'[^a-z0-9]+', ' ', t).strip()
+
+
+def _fedele(testo, fonte_txt, src):
+    """La riga e' accettata solo se la citazione esiste davvero nelle note/trascrizioni
+    e ogni parola di contenuto della riga compare nelle fonti (nessuna frase inventata)."""
+    f = _norm(fonte_txt)
+    if len(f) < 8:
+        return False
+    if f not in src:
+        fw = f.split()
+        best = 0
+        sw = src.split()
+        for k in range(0, max(1, len(sw) - len(fw) + 1)):
+            r = difflib.SequenceMatcher(None, ' '.join(sw[k:k + len(fw)]), f).ratio()
+            best = max(best, r)
+            if best >= 0.86:
+                break
+        if best < 0.86:
+            return False
+    radici = {w[:5] for w in src.split() if len(w) >= 4}
+    for w in _norm(testo).split():
+        if len(w) < 4 or w in STOP or w.isdigit():
+            continue
+        if w[:5] not in radici:
+            return False
+    return True
+
+
+def fatti(l):
+    """Minuti, lezioni e metronomo: li scrive il sistema dai dati delle sessioni, non il modello."""
+    tot = round(sum(v.get('ms', 0) for v in l) / 60000)
+    cosa = []
+    for v in sorted(l, key=lambda v: v['at']):
+        w = (v.get('what') or '').strip()
+        if w and w not in cosa:
+            cosa.append(w)
+    bpm = [v['bpm'] for v in l if v.get('bpm')] + [t.get('bpm') for v in l for t in (v.get('tempi') or []) if t.get('bpm')]
+    righe = ['Totale: %d min di pratica in %d %s' % (tot, len(l), 'sessione' if len(l) == 1 else 'sessioni')]
+    if cosa:
+        righe.append('- Su cosa: ' + ' · '.join(cosa))
+    if bpm:
+        lo, hi = min(bpm), max(bpm)
+        righe.append('- Metronomo: ' + ('%s bpm' % lo if lo == hi else 'da %s a %s bpm' % (lo, hi)))
+    return righe
+
+
 def chiudi(gs, vs):
-    sys_ = ("Sei l'archivista del diario di pratica di Paolo, pianista. Ricevi tutte le sessioni di pratica di una giornata: "
-            "minuti, tempi del metronomo, note scritte e trascrizioni automatiche dei suoi messaggi vocali. Rispondi SOLO con un "
-            "oggetto JSON con due chiavi.\n"
-            "\"riassunto\": una prima riga «Oggi: N minuti di pratica» (N = totale che ricevi), poi un elenco puntato, ogni riga "
-            "comincia con «- » e parla a Paolo in seconda persona («Hai…»): su cosa ti sei esercitato (brani, lezioni, mano sinistra/"
-            "destra, passaggi), i bpm del metronomo (dal piu' lento al piu' veloce), cosa hai notato o scoperto. Una cosa per riga.\n"
-            "\"compiti\": lista di frasi brevi, una per ogni cosa che Paolo ha detto esplicitamente di voler fare, esercitare di piu', "
-            "ripassare o fare piu' tardi/domani/in futuro. Ogni compito deve capirsi da solo, col nome del brano o della lezione "
-            "(es. «Portare le due battute di <brano> in tutte le tonalita'», con il brano vero). Se non ha detto niente del genere, lista vuota. "
-            "Non mettere nei compiti nulla che non abbia detto lui.\n"
-            "Esempio di forma: {\"riassunto\": \"Oggi: 40 minuti di pratica\\n- Hai lavorato su …\\n- Hai notato che …\", \"compiti\": [\"…\"]}\n" + REGOLE)
+    sys_ = ("Ricevi le note scritte e le trascrizioni automatiche dei messaggi vocali di Paolo, pianista, dalle sue sessioni di "
+            "pratica. Devi solo ESTRARRE quello che ha detto lui, senza aggiungere niente. Rispondi SOLO con un oggetto JSON:\n"
+            "{\"punti\": [{\"testo\": \"...\", \"fonte\": \"...\"}], \"compiti\": [{\"testo\": \"...\", \"fonte\": \"...\"}]}\n"
+            "\"punti\": le cose su cui dice di essersi esercitato e quello che dice di aver notato. \"testo\" e' la sua frase, "
+            "accorciata, alla seconda persona («Hai lavorato su…»), usando SOLO parole che compaiono nella fonte. \"fonte\" e' la "
+            "frase copiata ALLA LETTERA dal testo che ricevi, da cui viene il punto.\n"
+            "\"compiti\": solo le cose che dice esplicitamente di voler fare, esercitare o ripassare in futuro, con la stessa forma "
+            "(testo breve + fonte copiata alla lettera). Se non ne dice, lista vuota.\n"
+            "Vietato: conclusioni, valutazioni, progressi («hai migliorato», «ti aiuta a…»), consigli, spiegazioni, cose che lui "
+            "non ha detto. Non scrivere minuti o bpm: li aggiunge il sistema. Se una frase e' incomprensibile, saltala.")
     for g in gs:
         l = [v for v in vs if v['id'] in g.get('voci', [])]
         try:
             if not l:
                 raise RuntimeError('nessuna sessione trovata per questa giornata')
-            testo = '\n\n'.join(descr(v, leggi('elab/%s.json.enc' % v['id']) or {}) for v in l)
-            tot = round(sum(v.get('ms', 0) for v in l) / 60000)
-            extra = ('\n\nAggiunte di Paolo da includere: ' + g['nota']) if g.get('nota') else ''
-            out = claude(sys_, 'Giornata del %s. Totale minuti: %d. Sessioni:\n\n%s%s' % (g['d'], tot, testo, extra), 1500)
-            j = json.loads(out[out.index('{'):out.rindex('}') + 1])
-            r = j.get('riassunto', '')
-            g['riassunto'] = ('\n'.join(x if str(x).startswith(('-', 'Oggi')) else '- ' + str(x) for x in r) if isinstance(r, list) else str(r)).strip()
-            g['compiti'] = [str(c).strip() for c in (j.get('compiti') or []) if str(c).strip()]
+            pezzi = []
+            for v in sorted(l, key=lambda v: v['at']):
+                e = leggi('elab/%s.json.enc' % v['id']) or {}
+                if v.get('note'):
+                    pezzi.append('Nota scritta: ' + v['note'])
+                if e.get('trascr'):
+                    pezzi.append('Messaggio vocale: ' + e['trascr'])
+            if g.get('nota'):
+                pezzi.append('Aggiunta di Paolo: ' + g['nota'])
+            punti, compiti = [], []
+            if pezzi:
+                testo = '\n\n'.join(pezzi)
+                src = _norm(testo)
+                out = claude(sys_, testo, 1500)
+                j = json.loads(out[out.index('{'):out.rindex('}') + 1])
+                for k, dest in (('punti', punti), ('compiti', compiti)):
+                    for it in j.get(k) or []:
+                        if isinstance(it, dict) and it.get('testo') and _fedele(it['testo'], it.get('fonte', ''), src):
+                            t = str(it['testo']).strip().rstrip('.')
+                            if t not in dest:
+                                dest.append(t)
+                        else:
+                            print('scartato (non fedele)', flush=True)
+            g['riassunto'] = '\n'.join(fatti(l) + ['- ' + t for t in punti])
+            g['compiti'] = compiti
             g['stato'] = 'proposta'
             g.pop('err', None)
-            print('giornata', g['d'], len(g['compiti']), 'compiti', flush=True)
+            print('giornata', g['d'], len(punti), 'punti', len(compiti), 'compiti', flush=True)
         except Exception as ex:
             traceback.print_exc()
             g['err'] = 'Riassunto non riuscito: ' + str(ex)[-200:]
