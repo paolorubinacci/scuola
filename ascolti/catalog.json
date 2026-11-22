@@ -227,7 +227,25 @@
     "v": "milner",
     "f": "rmilnerp/spartito.pdf.enc",
     "st": "pronto",
-    "omr": "attesa"
+    "omr": "fatto"
+   },
+   {
+    "id": "rmilnerp-omr",
+    "k": "midi",
+    "c": "MIDI",
+    "t": "MIDI da «Trascrizione integrale (Paddy Milner)»",
+    "f": "rmilnerp/omr.mid.enc",
+    "da": "rmilnerp",
+    "omr": true,
+    "st": "pronto",
+    "info": {
+     "note": 2204,
+     "misure": 68,
+     "pagine": null,
+     "metro": null,
+     "bpm": 80,
+     "parti": 2
+    }
    }
   ],
   "t": "Junco Partner",
