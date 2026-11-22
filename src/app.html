@@ -341,7 +341,7 @@ textarea,input[type=text],input[type=password],input[type=number]{width:100%;bac
 .vs{font:500 13.5px var(--font);color:var(--nmuted)}
 .vhd .ed{flex:none}
 .vav.pic,.vrow .vb i.pic,.vdots i.pic{background-size:cover;background-position:center 30%;color:transparent}
-.csky .planet.empty [data-img]{opacity:.78}
+.csky .planet .rim{fill:none;stroke:#f3ead6;stroke-width:2.5;stroke-opacity:.9;pointer-events:none}
 
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--nline);background:var(--paper);border-radius:999px;padding:5px 10px;font:600 12px/1 var(--font);color:var(--navy);cursor:pointer}
@@ -998,7 +998,7 @@ function cosmoSky(el,x,V,sel,onPick,id){
  const stars=Array.from({length:wide?90:70},()=>`<circle cx="${(rnd()*W).toFixed(1)}" cy="${(rnd()*H).toFixed(1)}" r="${(rnd()*1.4+.4).toFixed(2)}" style="animation-delay:-${(rnd()*6).toFixed(1)}s"/>`).join('');
  const words_=x.t.split(/\s+/),lines=[];words_.forEach(w=>{const l=lines[lines.length-1];if(l&&(l+' '+w).length<=11)lines[lines.length-1]=l+' '+w;else lines.push(w)});
  const fs=lines.some(l=>l.length>9)?(wide?25:20):(wide?29:22);
- const R=V.map(v=>(wide?34:31)+Math.min(4,verKinds(x,v.id).length)*(wide?3:2.5)+(v.img?(wide?10:9):0));
+ const R=V.map(v=>Math.max(v.img?(wide?48:44):0,(wide?34:31)+Math.min(4,verKinds(x,v.id).length)*(wide?3:2.5)+(v.img?(wide?10:9):0)));
  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="group" aria-label="Le versioni di ${esc(x.t)}"><defs>
   <radialGradient id="cgSun" cx="40%" cy="38%" r="70%"><stop offset="0" stop-color="#fff4d6"/><stop offset=".45" stop-color="#e2bd6e"/><stop offset="1" stop-color="#9c7230"/></radialGradient>
   <radialGradient id="cgGlow"><stop offset="0" stop-color="#e2bd6e" stop-opacity=".5"/><stop offset="1" stop-color="#e2bd6e" stop-opacity="0"/></radialGradient>
@@ -1014,7 +1014,7 @@ function cosmoSky(el,x,V,sel,onPick,id){
  const P=V.map((v,i)=>{const g=document.createElementNS('http://www.w3.org/2000/svg','g'),k=verKinds(x,v.id),r=R[i];
   g.setAttribute('class','planet'+(v.id===sel?' on':'')+(k.length?'':' empty'));g.setAttribute('tabindex','0');g.setAttribute('role','button');g.setAttribute('aria-label',v.a);g.dataset.v=v.id;
   g.innerHTML=`<circle class="hit" r="${r+26}"/><circle class="halo" r="${r+9}"/><g class="moons">${k.map((s,j)=>{const a=j/k.length*Math.PI*2;return`<g transform="translate(${((r+(wide?15:17))*Math.cos(a)).toFixed(1)} ${((r+(wide?15:17))*Math.sin(a)).toFixed(1)})"><circle r="${wide?11:14}"/><text font-size="${wide?12:15}">${s}</text></g>`}).join('')}</g>
-   <circle class="body" r="${r}" fill="${pcol(x,v.id)}"/><g clip-path="url(#cgClip${i})" data-img></g><circle r="${r}" fill="url(#cgShade)" pointer-events="none" opacity="${v.img?.35:1}"/>
+   <circle class="body" r="${r}" fill="${pcol(x,v.id)}"/><g clip-path="url(#cgClip${i})" data-img></g><circle r="${r}" fill="url(#cgShade)" pointer-events="none" opacity="${v.img?.22:1}"/>${v.img?`<circle class="rim" r="${r}"/>`:''}
    <text class="ini" font-size="${r*.82}">${esc(initials(v.a))}</text>`;
   front.appendChild(g);const lab=document.createElementNS('http://www.w3.org/2000/svg','text');lab.setAttribute('class','lab'+(v.id===sel?' on':''));const lfs=wide?19:25,two=!wide&&v.a.length>12&&v.a.includes(' ');lab.setAttribute('font-size',lfs);if(two){const k=v.a.lastIndexOf(' ');[v.a.slice(0,k),v.a.slice(k+1)].forEach((s,j)=>{const ts=document.createElementNS('http://www.w3.org/2000/svg','tspan');ts.textContent=s;ts.setAttribute('dy',j?lfs*1.1:0);lab.appendChild(ts)})}else lab.textContent=v.a;lab._two=two?lfs*1.1:0;labs.appendChild(lab);lab.onclick=()=>onPick(v.id);g.onclick=()=>onPick(v.id);g.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onPick(v.id)}};
   if(v.img)mediaURL('ascolti/'+id+'/'+v.img,'image/jpeg').then(u=>{g.querySelector('[data-img]').innerHTML=`<image href="${u}" x="${-r}" y="${-r}" width="${2*r}" height="${2*r}" preserveAspectRatio="xMidYMid slice"/>`;g.querySelector('.ini').style.display='none'}).catch(()=>{});
