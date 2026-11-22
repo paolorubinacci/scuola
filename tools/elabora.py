@@ -151,10 +151,21 @@ def audio(bid, x, r, tmp):
         r['f'] = r['id'] + '/mix.mp3.enc'
         trascrizione(bid, x, r, stems.get('piano', wav), tmp)
         os.remove(src)
-    else:  # rifai: dall'audio gia' pubblicato (traccia del piano se c'e')
-        k = 'piano' if 'piano' in (r.get('stems') or []) else 'mix'
-        _, wav = in_wav(os.path.join(d, r['id'], k + '.mp3.enc'), 'mp3', tmp)
-        trascrizione(bid, x, r, wav, tmp)
+    else:
+        if r.get('separa'):  # separazione a posteriori: dall'audio gia' pubblicato (l'originale non c'e' piu')
+            _, wav = in_wav(os.path.join(d, r['id'], 'mix.mp3.enc'), 'mp3', tmp)
+            stems = separa(wav, os.path.join(tmp, 'sep'))
+            for k, w in stems.items():
+                p = os.path.join(tmp, k + '.mp3')
+                sh('ffmpeg', '-loglevel', 'error', '-y', '-i', w, '-c:a', 'libmp3lame', '-b:a', '128k', p)
+                enc_file(p, os.path.join(d, r['id'], k + '.mp3.enc'))
+            r['stems'] = [k for k in ('drums', 'bass', 'piano', 'vocals', 'other') if k in stems]
+            r['tipo'] = 'band'
+            r.pop('separa', None)
+        if r.get('rifai'):  # rifai la trascrizione: dall'audio gia' pubblicato (traccia del piano se c'e')
+            k = 'piano' if 'piano' in (r.get('stems') or []) else 'mix'
+            _, wav = in_wav(os.path.join(d, r['id'], k + '.mp3.enc'), 'mp3', tmp)
+            trascrizione(bid, x, r, wav, tmp)
 
 
 def video(bid, x, r, tmp):
@@ -247,7 +258,7 @@ def da_fare(cat, quale=None):
     for bid, x in cat.items():
         d = os.path.join(ROOT, 'ascolti', bid)
         for r in x.get('r', []):
-            if quale != 'omr' and r.get('st') == 'elaborazione' and (originale(d, r['id']) or (r.get('rifai') and r.get('k') == 'audio')):
+            if quale != 'omr' and r.get('st') == 'elaborazione' and (originale(d, r['id']) or ((r.get('rifai') or r.get('separa')) and r.get('k') == 'audio')):
                 out.append((bid, r['id']))
             elif quale != 'audio' and r.get('omr') == 'attesa' and r.get('k') in ('pdf', 'img') and r.get('f'):
                 out.append((bid, r['id']))

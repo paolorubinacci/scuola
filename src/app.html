@@ -944,7 +944,7 @@ function tonIt(t){return String(t).replace(/^([A-G])(-|#)?/,(m,l,a)=>TONI[l]+(a=
 function infoTr(i){return i?`Riconosciuto: ${esc(i.metro)}, circa ${esc(i.bpm)} bpm${i.tonalita?', '+esc(tonIt(i.tonalita)):''}.`:''}
 const ASCTAB={};
 function stato(r){return r.omr==='attesa'?'<div class="rst p">⏳ Converto la partitura in MIDI per la tastiera: 5–20 minuti</div>':
- r.omr==='errore'?`<div class="rst e">⚠️ Conversione in MIDI non riuscita. Con ✎ puoi riprovare, o manda a Claude: <code>${esc(r.omr_err||'')}</code></div>`:r.st==='elaborazione'?`<div class="rst p">⏳ In preparazione${r.k==='audio'?(r.tipo==='band'&&!r.rifai?' · separo le tracce':'')+(r.midi_auto||r.pdf_auto?' · trascrivo':''):''}: 5–15 minuti</div>`:
+ r.omr==='errore'?`<div class="rst e">⚠️ Conversione in MIDI non riuscita. Con ✎ puoi riprovare, o manda a Claude: <code>${esc(r.omr_err||'')}</code></div>`:r.st==='elaborazione'?`<div class="rst p">⏳ In preparazione${r.k==='audio'?(r.tipo==='band'&&(!r.rifai||r.separa)?' · separo le tracce':'')+(r.midi_auto||r.pdf_auto?' · trascrivo':''):''}: 5–15 minuti</div>`:
  r.st==='errore'?`<div class="rst e">⚠️ Non riuscito. Ricarica il file, o manda a Claude: <code>${esc(r.err||'')}</code></div>`:''}
 async function ascTrack(c,id,x){
  const base='ascolti/'+id+'/',tabs=SEZ.map(([k,n,f])=>[k,n,x.r.filter(f)]);
@@ -1070,7 +1070,7 @@ function bindEd(el,c,id,x){el.querySelectorAll('[data-ed]').forEach(b=>b.onclick
 function tabAscolto(el,c,id,x,list,base){
  if(!list.length){el.innerHTML=`<div class="empty">Ancora nessuna registrazione. Carica un MP3 (o un altro file audio) con «Aggiungi file».</div>`;return}
  const ready=list.filter(r=>r.st==='pronto');let cur=ready[0]&&ready[0].id;
- el.innerHTML=`<p class="hint">${list.length>1?'Scegli la registrazione da ascoltare. ':''}${list.some(r=>r.k!=='sp')?'Usa il loop A-B e la velocità per studiare un passaggio'+(list.some(r=>(r.stems||[]).length)?'; con «Tracce separate» isoli il piano':'')+'.':''}${list.some(r=>r.k==='yt')?' Le registrazioni da YouTube si ascoltano dal video incorporato; per separare le tracce serve il file MP3 del brano.':''}</p>
+ el.innerHTML=`<p class="hint">${list.length>1?'Scegli la registrazione da ascoltare. ':''}${list.some(r=>r.k!=='sp')?'Usa il loop A-B e la velocità per studiare un passaggio'+(list.some(r=>(r.stems||[]).length)?'; con «Tracce separate» isoli il piano':'')+'.':''}${list.some(r=>r.k==='yt')?' Le registrazioni da YouTube si ascoltano dal video incorporato; per separare le tracce serve il file MP3 del brano.':''}${list.some(r=>r.k==='audio'&&r.st==='pronto'&&!(r.stems||[]).length)?' Per togliere la voce o isolare il piano in una registrazione senza tracce separate: ✎ → «Separa le tracce adesso».':''}</p>
  <div class="reclist">${list.map(r=>`<div class="res sel ${r.id===cur?'on':''}" data-pick="${r.id}">${resHead(c,id,r,(r.stems||[]).length?' · tracce separate':'')}${stato(r)}${(r.avvisi||[]).map(a=>`<div class="rst">${esc(a)}</div>`).join('')}</div>`).join('')}</div><div id="stp"></div>`;
  const play=rid=>{ascStop();const r=list.find(q=>q.id===rid);if(!r||r.st!=='pronto')return;cur=rid;el.querySelectorAll('[data-pick]').forEach(d=>d.classList.toggle('on',d.dataset.pick===rid));
   if(r.k==='yt')ytAudio($('#stp'),r);else if(r.k==='sp')spEmbed($('#stp'),r);else stemPlayer($('#stp'),base+rid,{stems:r.stems||[],dur:r.dur||0})};
@@ -1440,7 +1440,8 @@ function resEdit(c,id,x,r){const sh=document.createElement('div');sh.className='
  ${r.k==='audio'&&r.st==='pronto'?`<div class="lbl">Trascrizione automatica</div>
  <label class="opt chk"><input type="checkbox" name="midi_auto" ${r.midi_auto?'checked':''}><span><b>MIDI sulla tastiera</b></span></label>
  <label class="opt chk"><input type="checkbox" name="pdf_auto" ${r.pdf_auto?'checked':''}><span><b>Partitura PDF (bozza)</b></span></label>
- <label class="opt chk"><input type="checkbox" name="rifai"><span><b>Rifalla adesso</b><small>Se togli una spunta, quella trascrizione viene eliminata</small></span></label>`:''}
+ <label class="opt chk"><input type="checkbox" name="rifai"><span><b>Rifalla adesso</b><small>Se togli una spunta, quella trascrizione viene eliminata</small></span></label>
+ ${(r.stems||[]).length?'':`<div class="lbl">Tracce separate</div><label class="opt chk"><input type="checkbox" name="separa"><span><b>Separa le tracce adesso</b><small>Voce, piano, basso, batteria e altro, per togliere o isolare uno strumento: 5–15 minuti</small></span></label>`}`:''}
  ${r.k==='yt'?`<label class="opt chk"><input type="checkbox" name="ya" ${r.solo_audio?'checked':''}><span><b>Solo audio</b><small>Lo trovi tra le registrazioni da ascoltare invece che tra i video</small></span></label>`:''}
  ${(r.k==='pdf'||r.k==='img')&&!r.auto&&r.omr!=='attesa'?`<label class="opt chk"><input type="checkbox" name="omr"><span><b>${r.omr==='fatto'?'Rifai il MIDI dalla partitura':'Converti in MIDI per la tastiera'}</b><small>Leggo la partitura e ne ricavo le note: 5–20 minuti</small></span></label>`:''}
  ${ghTok()?'':tokHTML()}
@@ -1456,6 +1457,7 @@ function resEdit(c,id,x,r){const sh=document.createElement('div');sh.className='
   run(cat=>{const q=(cat[id]&&cat[id].r||[]).find(z=>z.id===r.id);if(!q)return[];q.t=E.t.value.trim()||q.t;q.c=E.c.value;let gone=[];if(E.vv){if(E.vv.value){q.v=E.vv.value;ASCVER[id]=q.v}else delete q.v}
    if(E.omr&&E.omr.checked){q.omr='attesa';delete q.omr_err}
    if(E.ya){if(E.ya.checked){q.solo_audio=true;if(!CATS.audio.includes(q.c))q.c='Registrazione'}else{delete q.solo_audio;if(!VCAT.includes(q.c))q.c=VCAT[0]}}
+   if(E.separa&&E.separa.checked){q.separa=true;q.tipo='band';q.st='elaborazione';delete q.err}
    if(E.midi_auto){q.midi_auto=E.midi_auto.checked;q.pdf_auto=E.pdf_auto.checked;
     if(E.rifai.checked){q.rifai=true;q.st='elaborazione';delete q.err}
     else{const drop=cat[id].r.filter(z=>z.da===q.id&&((z.k==='midi'&&!q.midi_auto)||(z.k==='pdf'&&!q.pdf_auto)));cat[id].r=cat[id].r.filter(z=>!drop.includes(z));gone=drop.flatMap(files)}}
