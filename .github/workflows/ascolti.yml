@@ -75,10 +75,19 @@ jobs:
         run: |
           git config user.name "Scuola bot"
           git config user.email "scuola-bot@users.noreply.github.com"
-          git add -A ascolti sw.js
+          git checkout -- sw.js 2>/dev/null || true
+          git add -A ascolti
           git diff --cached --quiet && exit 0
           git commit -q -m "Ascolti: brani elaborati"
-          for i in 1 2 3; do git pull -q --rebase && git push -q && break; sleep 5; done
+          # sw.js si rigenera DOPO aver preso le ultime modifiche: cosi' non va mai in conflitto con altri aggiornamenti del sito
+          for i in 1 2 3 4 5; do
+            if git pull -q --rebase; then
+              python tools/pwa.py > /dev/null && git add sw.js && { git diff --cached --quiet || git commit -q -m "Scuola offline: elenco dei file"; }
+              git push -q && exit 0
+            else git rebase --abort; fi
+            sleep 6
+          done
+          exit 1
       - name: Aggiorna il sito
         if: steps.c.outputs.fare == 'si'
         env:
