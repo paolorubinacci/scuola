@@ -77,6 +77,8 @@ header.top .wrap{display:flex;align-items:center;gap:12px;height:56px}
 .lessons .chk{margin-left:auto;font:600 12px var(--font);color:var(--nmuted);white-space:nowrap}.lessons .chk.done{color:#2f7a5b}
 .brief{background:var(--cream);border:1px solid var(--nline);border-left:3px solid var(--gold);padding:16px 18px 6px;margin:22px 0 26px}
 .brief h3{color:var(--navy);margin:0 0 8px;font-size:21px}
+.brief ol.steps{margin:4px 0 8px;padding:0;list-style:none;counter-reset:st}.brief ol.steps li{counter-increment:st;display:flex;align-items:baseline;gap:6px;padding:7px 0;border-bottom:1px dotted var(--nline);cursor:pointer;font-size:15.5px;line-height:1.35}.brief ol.steps li:last-child{border-bottom:0}.brief ol.steps li::before{content:counter(st);font:700 13px/1 var(--font);color:var(--paper);background:var(--navy);border-radius:50%;min-width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;flex:none;align-self:center}.brief ol.steps li .ts{margin-right:2px}
+h2.passo{scroll-margin-top:70px;border-top:2px solid var(--gold);padding-top:14px;margin-top:30px}
 /* concetti chiave: un tema per fascia (icona e nome sopra, filo sottile tra un tema e l'altro).
    Su schermo largo le voci scorrono in due colonne di testo bilanciate, come in un giornale; un tema con una sola voce va a tutta larghezza.
    Su telefono una colonna, con interlinee strette, per non allungare la pagina. */
@@ -615,7 +617,7 @@ function renderLesson(c,l){
 function blockHTML(b){
  const pr=b.practice?practiceBtn(b.practice):'';
  switch(b.t){
-  case'h':return`<h2><span class="nt">${esc(b.text)}</span>${pr}</h2>`;
+  case'h':{const m=/^Passo (\d+)/.exec(b.text);return`<h2${m?` id="passo${m[1]}" class="passo"`:''}><span class="nt">${esc(b.text)}</span>${pr}</h2>`}
   case'p':return`<p>${b.time?`<span class="ts">${esc(b.time)}</span>`:''}${b.html}</p>`;
   case'quote':return`<div class="quote"><span class="src">Dal PDF del corso</span>${b.html}</div>`;
   case'img':return`<figure><img ${/\.enc$/.test(b.src)?'data-enc':'src'}="${esc(b.src)}" alt="${esc(b.cap||'')}" loading="lazy"><figcaption>${esc(b.cap||'')}</figcaption></figure>`;
@@ -627,6 +629,7 @@ function blockHTML(b){
   case'kb':return kbHTML(b);
   default:return''}}
 function practiceBtn(p){return` <button class="pbtn" data-practice='${esc(JSON.stringify(p))}'>♩ ${esc(p.rhythm?(RHY[p.rhythm]?.name||p.label):(p.label||'Metronomo'))} · ${p.bpm} bpm</button>`}
+document.addEventListener('click',e=>{const s=e.target.closest('.brief ol.steps li');if(s){const i=[...s.parentNode.children].indexOf(s)+1,h=document.getElementById('passo'+i);if(h)h.scrollIntoView({behavior:'smooth',block:'start'});return}});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-practice]');if(!b)return;const p=JSON.parse(b.dataset.practice);
  if(p.rhythm&&RHY[p.rhythm]){R.id=p.rhythm;R.bpm=p.bpm;openTools('rhythm',true);startRhythm()}else{M.bpm=p.bpm;if(p.swing!=null)M.swing=p.swing;openTools('metro',true);startMetro()}});
 /* clip player with A-B loop & slow-down (pitch preserved) */
@@ -650,7 +653,7 @@ const KB={},NN=['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'],
 let kbN=0,kbActive=null;
 function kbHTML(b){const id='kb'+(kbN++);KB[id]=b;
  return`<div class="kb" data-k="${id}"><div class="kh"><span class="tag">Tastiera</span><b>${esc(b.title||'')}</b></div>
- <div class="legend">Mano destra<i style="background:var(--blue)"></i> · Mano sinistra<i style="background:var(--coral)"></i></div>
+ <div class="legend">${esc((b.legend||[])[0]||'Mano destra')}<i style="background:var(--blue)"></i> · ${esc((b.legend||[])[1]||'Mano sinistra')}<i style="background:var(--coral)"></i></div>
  <canvas></canvas><div class="prog"><i></i></div>
  <div class="kc"><button class="play" aria-label="Play">▶</button>
  <span class="seg">${[['0','Straight'],['1','Swing']].map(([v,l])=>`<button data-sw="${v}" class="${(+v===(b.swing?1:0))?'on':''}">${l}</button>`).join('')}</span>
