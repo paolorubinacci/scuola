@@ -262,16 +262,23 @@
   "v": [
    {
     "id": "booker",
-    "a": "James Booker"
+    "a": "James Booker",
+    "img": "ver/booker.jpg.enc"
    },
    {
     "id": "drjohn",
-    "a": "Dr. John"
+    "a": "Dr. John",
+    "img": "ver/drjohn.jpg.enc"
    },
    {
     "id": "milner",
     "a": "Paddy Milner",
     "nota": "Il tutor del corso · lezione 6"
+   },
+   {
+    "id": "longhair",
+    "a": "Professor Longhair",
+    "img": "ver/longhair.jpg.enc"
    }
   ],
   "cat": "piano"
