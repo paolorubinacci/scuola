@@ -106,6 +106,31 @@ figure{margin:18px 0}figure img{width:100%;background:#fff;border:1px solid var(
 .clip .vh{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
 .clip .vh b{font:700 15px "Playfair Display",Georgia,serif;color:var(--wine)}.clip .vh .ts{margin-left:auto}
 .clip video{display:block;width:100%;background:#000;max-height:60vh}
+.film{background:var(--paper);border:1px solid var(--nline);border-top:3px solid var(--navy);margin:18px 0 26px}
+.film .fhd{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding:12px 14px;font-family:var(--font)}
+.film .fhd span:first-child{font:700 11px var(--font);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.film .fhd b{font:600 13px var(--font);color:var(--nmuted)}.film .fhd .ts{margin-left:auto}
+.film video{display:block;width:100%;background:#000;max-height:62vh;aspect-ratio:16/10}
+.film .fbar{position:relative;height:22px;background:var(--cream2);cursor:pointer;border-bottom:1px solid var(--nline)}
+.film .fbar .fs{position:absolute;top:0;bottom:0;background:rgba(27,36,64,.06)}.film .fbar .fs.b{background:rgba(27,36,64,.13)}
+.film .fbar .fm{position:absolute;top:7px;height:8px;background:var(--gold)}
+.film .fbar .fp{position:absolute;top:0;bottom:0;width:2px;background:var(--wine);left:0}
+.film .ctl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--nline);font-family:var(--font)}
+.film .fnow{font:600 13px var(--font);color:var(--nmuted);margin-left:auto}
+.film .fsec{list-style:none;margin:0;padding:0}
+.film .fsec li{border-bottom:1px solid var(--nline);padding:10px 14px}.film .fsec li.on{background:var(--cream)}
+.film .fsh{all:unset;cursor:pointer;display:flex;align-items:baseline;gap:8px;min-height:32px}
+.film .fsh b{font:700 16px/1.3 "Playfair Display",Georgia,serif;color:var(--navy)}
+.film .fmo{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 2px}
+.film .fmo button{all:unset;cursor:pointer;font:600 13px var(--font);color:var(--navy);border:1px solid var(--gold2);background:var(--paper);padding:8px 10px;min-height:20px}
+.film .fmo button span{color:var(--gold)}
+.film .fln{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:6px}
+.film .fln button{all:unset;cursor:pointer;font:600 13px var(--font);color:var(--wine);padding:6px 0}
+.flow p > .ts.go{cursor:pointer}
+.parte{margin:40px 0 10px;padding:18px 0 10px;border-top:3px solid var(--navy)}
+.parte span{display:block;font:700 11px var(--font);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.parte b{display:block;font-size:30px;color:var(--navy);margin:4px 0 6px;font-weight:400}
+.parte p{margin:0;font-size:16px;color:var(--nmuted)}
 .clip .ctl{display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px;border-top:1px solid var(--nline);font-family:var(--font)}
 .clip .noclip{padding:12px 14px;font-size:14px;color:var(--nmuted);font-style:italic;border-top:1px solid var(--nline);display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .t-nola .btn{background:var(--paper);border-color:var(--nline);color:var(--navy)}
@@ -610,6 +635,7 @@ function renderLesson(c,l){
  LESSON={c,l};drawPrac();
  $('#doneBtn').onclick=()=>{const p=progress();const dl=LS.get('done-del',{});if(p[key]){delete p[key];dl[key]=Date.now()}else{p[key]=Date.now();delete dl[key];}saveProg(p,dl);progSoon();updStreak();renderLesson(c,l)};
  document.querySelectorAll('.clip[data-src]').forEach(initClip);
+ document.querySelectorAll('.film[data-src]').forEach(initFilm);
  document.querySelectorAll('.kb[data-k]').forEach(initKb);
  document.querySelectorAll('img[data-enc]').forEach(async i=>{i.src=await mediaURL(i.dataset.enc,'image/png')});
  const clips=[...document.querySelectorAll('.clip[data-src]')];(async()=>{const tok=++pfToken;for(const c of clips){if(tok!==pfToken)return;try{await c._load()}catch(e){}}})();
@@ -617,7 +643,9 @@ function renderLesson(c,l){
 function blockHTML(b){
  const pr=b.practice?practiceBtn(b.practice):'';
  switch(b.t){
-  case'h':{const m=/^Passo (\d+)/.exec(b.text);return`<h2${m?` id="passo${m[1]}" class="passo"`:''}><span class="nt">${esc(b.text)}</span>${pr}</h2>`}
+  case'h':{const m=/^Passo (\d+)/.exec(b.text),hid=b.id||(m?'passo'+m[1]:'');return`<h2${hid?` id="${esc(hid)}"`:''}${m||b.id?' class="passo"':''}><span class="nt">${esc(b.text)}</span>${pr}</h2>`}
+  case'parte':return`<div class="parte" id="${esc(b.id||'')}"><span>${esc(b.kick||'')}</span><b class="nt">${esc(b.text)}</b>${b.html?`<p>${b.html}</p>`:''}</div>`;
+  case'film':return filmHTML(b);
   case'p':return`<p>${b.time?`<span class="ts">${esc(b.time)}</span>`:''}${b.html}</p>`;
   case'quote':return`<div class="quote"><span class="src">Dal PDF del corso</span>${b.html}</div>`;
   case'img':return`<figure><img ${/\.enc$/.test(b.src)?'data-enc':'src'}="${esc(b.src)}" alt="${esc(b.cap||'')}" loading="lazy"><figcaption>${esc(b.cap||'')}</figcaption></figure>`;
@@ -632,6 +660,40 @@ function practiceBtn(p){return` <button class="pbtn" data-practice='${esc(JSON.s
 document.addEventListener('click',e=>{const s=e.target.closest('.brief ol.steps li');if(s){const i=[...s.parentNode.children].indexOf(s)+1,h=document.getElementById('passo'+i);if(h)h.scrollIntoView({behavior:'smooth',block:'start'});return}});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-practice]');if(!b)return;const p=JSON.parse(b.dataset.practice);
  if(p.rhythm&&RHY[p.rhythm]){R.id=p.rhythm;R.bpm=p.bpm;openTools('rhythm',true);startRhythm()}else{M.bpm=p.bpm;if(p.swing!=null)M.swing=p.swing;openTools('metro',true);startMetro()}});
+/* ---- «film»: il video INTEGRALE di una lezione, navigabile ----
+   Per le lezioni dove video e PDF non vanno nello stesso ordine: niente rimontaggio. Il video resta intero, diviso in sezioni
+   (solo dove si è sicuri), con i momenti suonati segnati sulla barra; i minuti nel testo (.ts) portano a quel punto del video.
+   I link al PDF (sezione.pdf = id dei titoli della parte «Il PDF») si mettono solo quando l'associazione è certa.
+   {t:'film', src, dur, sezioni:[{da,a,titolo,testo?,pdf?:[id]}], suonati:[{da,a,label}]} */
+const tsec=s=>{const p=String(s).split(':').map(Number);return p.length===3?p[0]*3600+p[1]*60+p[2]:p[0]*60+(p[1]||0)};
+function filmHTML(b){const D=tsec(b.dur||'0:00')||1,S=b.sezioni||[],M=b.suonati||[],pct=x=>(Math.max(0,Math.min(1,tsec(x)/D))*100).toFixed(2);
+ const pdfT=id=>{const h=document.getElementById(id);return h?h.textContent.trim():id};
+ return`<div class="film" data-src="${esc(b.src)}"><div class="fhd"><span>Il video integrale</span><b>${S.length} sezioni · ${M.length} momenti suonati</b><span class="ts">${esc(b.dur||'')}</span></div>
+ <video playsinline preload="none"></video>
+ <div class="fbar" aria-hidden="true">${S.map((s,i)=>`<i class="fs ${i%2?'b':''}" style="left:${pct(s.da)}%;width:${(pct(s.a||b.dur)-pct(s.da)).toFixed(2)}%"></i>`).join('')}${M.map(m=>`<i class="fm" style="left:${pct(m.da)}%;width:${Math.max(.6,pct(m.a)-pct(m.da)).toFixed(2)}%"></i>`).join('')}<i class="fp"></i></div>
+ <div class="ctl"><button class="btn sm" data-fplay>▶ Play</button><span class="seg sp"><button data-r=".5">50%</button><button data-r=".75">75%</button><button data-r="1" class="on">100%</button></span><button class="btn sm" data-fb>⟲ 5 s</button><span class="fnow"></span></div>
+ <ol class="fsec">${S.map((s,i)=>{const mm=M.filter(m=>tsec(m.da)>=tsec(s.da)&&tsec(m.da)<tsec(s.a||b.dur));
+  return`<li><button class="fsh" data-seek="${esc(s.da)}"><span class="ts">${esc(s.da)}</span><b>${esc(s.titolo)}</b></button>
+  ${mm.length?`<div class="fmo">${mm.map(m=>`<button data-seek="${esc(m.da)}" data-to="${esc(m.a)}" title="Riproduci e ripeti">♪ <span>${esc(m.da)}–${esc(m.a)}</span> ${esc(m.label||'')}</button>`).join('')}</div>`:''}
+  <div class="fln">${s.testo?`<button data-jump="${esc(s.testo)}">Il testo ›</button>`:''}${(s.pdf||[]).map(id=>`<button data-jump="${esc(id)}" data-pdft="${esc(id)}">Nel PDF › …</button>`).join('')}</div></li>`}).join('')}</ol></div>`}
+function initFilm(el){const v=el.querySelector('video');let ready=null,loop=null;v.preservesPitch=true;v.webkitPreservesPitch=true;
+ const load=()=>ready=ready||mediaURL(el.dataset.src,'video/mp4').then(u=>{v.src=u;v.setAttribute('controls','');el.classList.add('ok');return u});
+ const D=()=>v.duration||tsec((el.querySelector('.fhd .ts')||{}).textContent||'1');
+ const seek=async(s,to)=>{await load();v.currentTime=tsec(s);loop=to?[tsec(s),tsec(to)]:null;
+  const r=v.getBoundingClientRect();if(r.top<0||r.bottom>innerHeight)v.scrollIntoView({behavior:'smooth',block:'center'});v.play().catch(()=>{})};
+ el.querySelectorAll('[data-pdft]').forEach(b=>{const h=document.getElementById(b.dataset.pdft);if(h)b.textContent='Nel PDF › '+h.textContent.trim()});
+ el.querySelectorAll('[data-seek]').forEach(b=>b.onclick=()=>seek(b.dataset.seek,b.dataset.to));
+ el.querySelectorAll('[data-jump]').forEach(b=>b.onclick=()=>{const h=document.getElementById(b.dataset.jump);if(h)h.scrollIntoView({behavior:'smooth',block:'start'})});
+ el.querySelector('[data-fplay]').onclick=async()=>{await load();v.paused?v.play():v.pause()};
+ v.addEventListener('play',()=>el.querySelector('[data-fplay]').textContent='❚❚ Pausa');v.addEventListener('pause',()=>el.querySelector('[data-fplay]').textContent='▶ Play');
+ el.querySelector('[data-fb]').onclick=async()=>{await load();v.currentTime=Math.max(0,v.currentTime-5)};
+ el.querySelectorAll('[data-r]').forEach(b=>b.onclick=async()=>{await load();v.playbackRate=+b.dataset.r;el.querySelectorAll('[data-r]').forEach(x=>x.classList.toggle('on',x===b))});
+ el.querySelector('.fbar').onclick=async e=>{const r=e.currentTarget.getBoundingClientRect();await load();v.currentTime=(e.clientX-r.left)/r.width*D();loop=null;v.play().catch(()=>{})};
+ v.addEventListener('timeupdate',()=>{const t=v.currentTime;if(loop&&t>=loop[1])v.currentTime=loop[0];
+  el.querySelector('.fp').style.left=(t/D()*100)+'%';el.querySelector('.fnow').textContent=fmt(t)+(loop?' · ripete '+fmt(loop[0])+'–'+fmt(loop[1]):'');
+  const secs=[...el.querySelectorAll('.fsh')];let cur=-1;secs.forEach((b,i)=>{if(tsec(b.dataset.seek)<=t)cur=i});secs.forEach((b,i)=>b.parentNode.classList.toggle('on',i===cur))});
+ /* i minuti del testo portano al punto del video */
+ document.querySelectorAll('.flow p > .ts').forEach(s=>{s.classList.add('go');s.title='Vai a questo punto del video';s.onclick=()=>seek(s.textContent.trim())})}
 /* clip player with A-B loop & slow-down (pitch preserved) */
 function initClip(el){
  const v=el.querySelector('video');let A=null,B=null,loop=false,ready=null;
