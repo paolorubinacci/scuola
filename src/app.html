@@ -215,6 +215,13 @@ figure .fvl button{all:unset;cursor:pointer;font:700 13px var(--font);color:#fff
 .t-nola .btn{background:var(--paper);border-color:var(--nline);color:var(--navy)}
 .t-nola .btn.on{background:#2f7a5b;border-color:#2f7a5b;color:#fff}
 .t-nola .seg{background:var(--paper);border-color:var(--nline)}.t-nola .seg button.on{background:var(--navy);color:var(--cream)}
+.kbw[hidden]{display:none}
+figure.kbf .sc{position:relative;background:#fff;border:1px solid var(--nline);padding-bottom:50px}
+figure.kbf .sc img{border:0;display:block}
+.kbt{position:absolute;right:8px;bottom:6px;width:40px;height:40px;border-radius:50%;border:1.5px solid var(--navy,#1d2b4f);background:#fff;color:var(--navy,#1d2b4f);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.kbt small{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;border-radius:9px;background:var(--gold,#c9a24a);color:#fff;font:700 11px/18px var(--font);text-align:center}
+.kbt.on{background:var(--navy,#1d2b4f);color:#fff}
+.kbtl{display:inline-flex;align-items:center;gap:6px;margin:6px 0 14px}.kbtl svg{width:18px;height:18px}
 .kb{background:#fff;border:1px solid var(--line);border-radius:16px;margin:16px 0 24px;overflow:hidden;font-family:var(--font);color:var(--ink)}
 .t-nola .kb{border-color:var(--nline);border-left:3px solid var(--gold);border-radius:0}
 .kb .kh{display:flex;align-items:center;gap:8px;padding:12px 14px 6px;flex-wrap:wrap}
@@ -718,7 +725,7 @@ function renderLesson(c,l){
  h+=`<div class="lbar" id="lesPrac"></div>`;
  if(l.brief||l.kc)h+=`<div class="brief"><h3 class="nt">In breve</h3>${l.brief||''}${kcHTML(l.kc)}</div>`;
  FILMCTX={key:c.id+'-'+l.n,scores:filmScores(l.blocks)};
- h+=`<div class="flow">`+(l.blocks||[]).map(blockHTML).join('')+`</div>`;
+ h+=`<div class="flow">`+flowHTML(l)+`</div>`;
  if(!l.ready)h+=`<div class="pending">Questa lezione è in preparazione: trascrizione, citazioni dal PDF del corso e partiture arrivano qui, con i passaggi suonati integrati nel testo.</div>`;
  const i=c.lessons.indexOf(l),prev=c.lessons[i-1],next=c.lessons[i+1];
  h+=`<div class="row" style="justify-content:space-between;margin:30px 0">${prev?`<button class="btn sm" data-go="${c.id}-l${prev.n}">‹ Lezione ${prev.n}</button>`:'<span></span>'}
@@ -734,6 +741,23 @@ function renderLesson(c,l){
  document.querySelectorAll('img[data-enc]').forEach(async i=>{i.src=await mediaURL(i.dataset.enc,'image/png')});
  const clips=[...document.querySelectorAll('.clip[data-src]')];(async()=>{const tok=++pfToken;for(const c of clips){if(tok!==pfToken)return;try{await c._load()}catch(e){}}})();
 }
+/* Tastiere nascoste (dalla lezione 7, o con "kbHide":true): ogni partitura ha un cerchietto in basso a destra (in una fascia
+   sotto le note, così non copre mai la partitura) che mostra/nasconde le tastiere che la seguono. */
+const KBI='<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="1" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M7.3 5v14M12 5v14M16.7 5v14" stroke="currentColor" stroke-width="1.4"/><path d="M5.6 5h3.2v7.5H5.6zM10.4 5h3.2v7.5h-3.2zM15.1 5h3.2v7.5h-3.2z" fill="currentColor"/></svg>';
+let kbwN=0;
+function flowHTML(l){const B=l.blocks||[],hide=l.kbHide??(l.n>=7);if(!hide)return B.map(blockHTML).join('');
+ let h='';for(let i=0;i<B.length;i++){const b=B[i];
+  if(b.t==='img'||b.t==='kb'){let j=b.t==='img'?i+1:i;const ks=[];while(B[j]&&B[j].t==='kb')ks.push(B[j++]);
+   if(!ks.length){h+=blockHTML(b);continue}
+   const id='kbw'+(kbwN++),lab=ks.length>1?'Mostra le tastiere':'Mostra la tastiera';
+   if(b.t==='img')h+=`<figure class="kbf"><div class="sc"><img ${/\.enc$/.test(b.src)?'data-enc':'src'}="${esc(b.src)}" alt="${esc(b.cap||'')}" loading="lazy"><button class="kbt" data-kbw="${id}" aria-expanded="false" aria-label="${lab}" title="${lab}">${KBI}${ks.length>1?`<small>${ks.length}</small>`:''}</button></div><figcaption>${esc(b.cap||'')}</figcaption></figure>`;
+   else h+=`<button class="btn sm kbtl" data-kbw="${id}" aria-expanded="false">${KBI} ${lab}</button>`;
+   h+=`<div class="kbw" id="${id}" hidden>${ks.map(kbHTML).join('')}</div>`;i=j-1;continue}
+  h+=blockHTML(b)}return h}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-kbw]');if(!t)return;const w=document.getElementById(t.dataset.kbw);if(!w)return;
+ const show=w.hidden;if(!show&&kbActive)kbActive();w.hidden=!show;
+ document.querySelectorAll(`[data-kbw="${t.dataset.kbw}"]`).forEach(x=>{x.classList.toggle('on',show);x.setAttribute('aria-expanded',show);const l=show?(w.children.length>1?'Nascondi le tastiere':'Nascondi la tastiera'):(w.children.length>1?'Mostra le tastiere':'Mostra la tastiera');x.title=l;x.setAttribute('aria-label',l);if(x.classList.contains('kbtl'))x.innerHTML=KBI+' '+l});
+ if(show)w.querySelectorAll('canvas').forEach(c=>c.dispatchEvent(new Event('resize')))});
 function blockHTML(b){
  const pr=b.practice?practiceBtn(b.practice):'';
  switch(b.t){
@@ -882,7 +906,7 @@ function layoutFilm(){const flow=document.querySelector('.flow'),film=flow&&flow
   tb.querySelectorAll('h2').forEach(h=>{h.classList.remove('passo');h.classList.add('th');h.querySelectorAll('.nt').forEach(x=>x.classList.remove('nt'))})}
  if(!pdfP)return;const hs=[];let x=pdfP.nextElementSibling;
  while(x&&!x.classList.contains('parte')){if(x.tagName==='H2'&&x.id){hs.push({h:x,im:0,kb:0});x.classList.remove('passo');x.classList.add('ph');x.querySelectorAll('.nt').forEach(y=>y.classList.remove('nt'));x.insertAdjacentHTML('afterbegin',`<em>PDF · ${hs.length}</em>`)}
-  else if(hs.length){const c=hs[hs.length-1];if(x.tagName==='FIGURE')c.im++;if(x.classList.contains('kb'))c.kb++}x=x.nextElementSibling}
+  else if(hs.length){const c=hs[hs.length-1];if(x.tagName==='FIGURE')c.im++;if(x.classList.contains('kb'))c.kb++;if(x.classList.contains('kbw'))c.kb+=x.children.length}x=x.nextElementSibling}
  if(!hs.length)return;const nav=document.createElement('nav');nav.className='ptoc';
  nav.innerHTML=hs.map((c,i)=>`<button data-pj="${esc(c.h.id)}"><em>${i+1}</em><span>${esc((c.h.querySelector('span')||c.h).textContent.trim())}</span><small>${[c.im?c.im+(c.im>1?' partiture':' partitura'):'',c.kb?c.kb+(c.kb>1?' tastiere':' tastiera'):''].filter(Boolean).join(' · ')}</small></button>`).join('');
  pdfP.after(nav);nav.querySelectorAll('[data-pj]').forEach(b=>b.onclick=()=>document.getElementById(b.dataset.pj).scrollIntoView({behavior:'smooth',block:'start'}))}

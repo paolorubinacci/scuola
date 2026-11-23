@@ -30,6 +30,9 @@ Si usa solo se OGNI esempio del PDF corrisponde con certezza a un momento del vi
 2. Sotto, la trascrizione divisa con le stesse sezioni: `{"t":"h","id":"lN-s1","text":"…"}` + paragrafi `p` con `time` (i minuti diventano link al punto del video).
 3. `{"t":"parte","id":"pdf","kick":"Parte 2","text":"Il PDF, nell'ordine in cui è scritto"}`, poi il PDF dall'inizio alla fine, nel SUO ordine:
    titoli `{"t":"h","id":"lN-pdf1","text":"…"}`, testo alla lettera (`quote`), partiture (`img`) con la loro tastiera (`kb`).
+   OGNI partitura con note ha la sua tastiera (`kb`) subito dopo l'`img` (anche più di una). Dalla lezione 7 in poi
+   (o con `"kbHide":true` sulla lezione) le tastiere sono nascoste: sulla partitura c'è un cerchietto in basso a destra,
+   in una fascia sotto le note (non copre mai la partitura), che le mostra/nasconde. Il rendering lo fa da solo.
 4. Mai la stessa cosa in due posti; mai un argomento del PDF spezzato in sezioni diverse; mai un esempio del video
    presentato come se fosse quello del PDF (o viceversa) se non è certo.
 5. «In breve» e «Concetti chiave»: riassumono il video e il PDF tenendoli distinti («nel video…», «nel PDF…»).
