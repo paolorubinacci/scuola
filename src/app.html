@@ -415,6 +415,9 @@ textarea,input[type=text],input[type=password],input[type=number]{width:100%;bac
 .csky .sun.on .ring,.csky .sun:focus-visible .ring{stroke-opacity:.9;stroke-dasharray:4 6;animation:spin 18s linear infinite;transform-box:fill-box;transform-origin:center}
 @keyframes spin{to{transform:rotate(360deg)}}
 .csky .planet{cursor:pointer;outline:none}
+.csky svg{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+.csky .planet.lis .halo{opacity:1;stroke:#f3ead6;stroke-width:4;animation:lis 1.1s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes lis{0%,100%{transform:scale(1);opacity:.95}50%{transform:scale(1.12);opacity:.35}}
 .csky .planet .hit{fill:transparent}
 .csky .planet .halo{fill:none;stroke:#d9b36a;stroke-width:3;opacity:0;transition:opacity .3s}
 .csky .planet.on .halo,.csky .planet:focus-visible .halo{opacity:1}
@@ -1231,7 +1234,41 @@ async function ascCosmo(c,id,x,want){
  const sky=cosmoSky($('#csky'),x,V,sel,pick,id);drawRow();vPanel(c,id,x,sel);
  /* se cambia l'orientamento (iPad), ridisegno il cielo con le proporzioni giuste */
  let lw=$('#csky').clientWidth;const onR=()=>{const el=$('#csky');if(!el){removeEventListener('resize',onR);return}if(Math.abs(el.clientWidth-lw)>80){lw=el.clientWidth;sky.stop();Object.assign(sky,cosmoSky(el,x,V,sel,pick,id))}};addEventListener('resize',onR)}
+/* ---- tieni premuto un pianeta: ascolti un momento rappresentativo della sua versione, con dissolvenza; rilasci e sfuma ----
+   Il punto di partenza: r.rep (calcolato quando il brano viene elaborato), altrimenti lo calcolo qui una volta e lo ricordo. */
+const LPX={skip:false,cur:null,el:{}};
+function lpRes(x,v){return x.r.find(r=>r.k==='audio'&&r.st==='pronto'&&r.f&&verOf(x,r)===v.id)}
+async function lpRep(id,r){if(r.rep!=null)return r.rep;const k='rep-'+id+'-'+r.id,c=LS.get(k,null);if(c!=null)return c;
+ try{const u=await mediaURL('ascolti/'+id+'/'+r.f,'audio/mpeg'),buf=await (await fetch(u)).arrayBuffer(),dur=r.dur||200;
+  const oc=new OfflineAudioContext(1,Math.ceil(8000*(dur+2)),8000),ab=await new Promise((ok,ko)=>oc.decodeAudioData(buf,ok,ko));
+  const d=ab.getChannelData(0),n=Math.floor(d.length/8000),rm=[];for(let i=0;i<n;i++){let q=0;for(let j=i*8000;j<(i+1)*8000;j++){const y=(d[j]+(ab.numberOfChannels>1?ab.getChannelData(1)[j]:d[j]))/2;q+=y*y}rm.push(Math.sqrt(q/8000)+1e-6)}
+  const mid=rm.slice(Math.floor(n*.1),Math.floor(n*.9)).sort((a,b)=>a-b),med=mid[Math.floor(mid.length/2)]||1e-3,L=16;let best=null;
+  for(let s=Math.floor(n*.25);s<Math.max(Math.floor(n*.25)+1,Math.floor(n*.6));s++){if(s+L>n)break;let sc=.02*Math.abs(s-.4*n);for(let j=s;j<s+L;j++){sc+=Math.abs(Math.log(rm[j]/med));if(rm[j]<.3*med)sc+=3}if(!best||sc<best[0])best=[sc,s]}
+  const t=best?Math.max(0,best[1]-1.5):n*.4;LS.set(k,t);return t}catch(e){return (r.dur||100)*.4}}
+async function lpStart(g,x,v,id){const r=lpRes(x,v);if(!r){toast('Per '+v.a+' non c\'è ancora una registrazione da ascoltare');return}
+ ac();ascStop();const key=id+'|'+r.id;let o=LPX.el[key];
+ if(!o){const a=new Audio();a.preload='auto';a.setAttribute('playsinline','');a.src=await mediaURL('ascolti/'+id+'/'+r.f,'audio/mpeg');
+  const src=AC.createMediaElementSource(a),gn=AC.createGain();gn.gain.value=0;src.connect(gn);gn.connect(MASTER);o=LPX.el[key]={a,gn,ctx:AC}}
+ if(o.ctx!==AC){delete LPX.el[key];return lpStart(g,x,v,id)}
+ if(!LPX.cur||LPX.cur.g!==g||!LPX.cur.down)return;   // rilasciato mentre caricava
+ const t0=await lpRep(id,r);if(!LPX.cur||LPX.cur.g!==g||!LPX.cur.down)return;
+ LPX.cur.o=o;clearTimeout(o.stopT);o.a.currentTime=t0;PLAY.add('lp');
+ const now=AC.currentTime;o.gn.gain.cancelScheduledValues(now);o.gn.gain.setValueAtTime(0,now);o.gn.gain.linearRampToValueAtTime(1,now+.9);
+ o.a.play().catch(()=>{});g.classList.add('lis')}
+function lpStop(){const c=LPX.cur;LPX.cur=null;if(!c)return;clearTimeout(c.timer);c.g.classList.remove('lis');const o=c.o;if(!o)return;
+ const now=AC.currentTime;o.gn.gain.cancelScheduledValues(now);o.gn.gain.setValueAtTime(o.gn.gain.value,now);o.gn.gain.linearRampToValueAtTime(0,now+.6);
+ o.stopT=setTimeout(()=>{o.a.pause();PLAY.delete('lp')},680)}
+function lpBind(g,x,v,id){
+ g.addEventListener('contextmenu',e=>e.preventDefault());
+ g.addEventListener('pointerdown',e=>{if(e.button>0)return;try{g.setPointerCapture(e.pointerId)}catch(_){}lpStop();
+  const c=LPX.cur={g,down:true,long:false,x0:e.clientX,y0:e.clientY};c.timer=setTimeout(()=>{if(!c.down)return;c.long=true;LPX.skip=true;g.classList.add('lis');lpStart(g,x,v,id)},380)});
+ g.addEventListener('pointermove',e=>{const c=LPX.cur;if(c&&c.g===g&&!c.long&&Math.hypot(e.clientX-c.x0,e.clientY-c.y0)>14){clearTimeout(c.timer);c.down=false}});
+ const up=()=>{const c=LPX.cur;if(!c||c.g!==g)return;c.down=false;clearTimeout(c.timer);if(c.long){lpStop();setTimeout(()=>{LPX.skip=false},450)}else LPX.cur=null};
+ ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>g.addEventListener(ev,up))}
+/* appena si apre il brano, preparo in silenzio le registrazioni delle versioni, così tenendo premuto parte subito */
+function lpPrep(x,id){setTimeout(()=>{VERS(x).forEach(v=>{const r=lpRes(x,v);if(r)mediaURL('ascolti/'+id+'/'+r.f,'audio/mpeg').then(()=>lpRep(id,r)).catch(()=>{})})},800)}
 function cosmoSky(el,x,V,sel,onPick,id){
+ lpPrep(x,id);
  const wide=el.clientWidth>=640,W=wide?1000:600,H=wide?570:700,cx=W/2,cy=wide?287:350,n=V.length,SR=wide?76:60;
  const orb=V.map((v,i)=>{const t=n>1?i/(n-1):0;return wide?{rx:255+165*t,ry:112+84*t}:{rx:142+82*t,ry:140+108*t}});
  let seed=[...x.t].reduce((a,ch)=>a*31+ch.charCodeAt(0)>>>0,7);const rnd=()=>(seed=(seed*1664525+1013904223)>>>0)/4294967296;
@@ -1256,7 +1293,7 @@ function cosmoSky(el,x,V,sel,onPick,id){
   g.innerHTML=`<circle class="hit" r="${r+26}"/><circle class="halo" r="${r+9}"/><g class="moons">${k.map((s,j)=>{const a=j/k.length*Math.PI*2;return`<g transform="translate(${((r+(wide?15:17))*Math.cos(a)).toFixed(1)} ${((r+(wide?15:17))*Math.sin(a)).toFixed(1)})"><circle r="${wide?11:14}"/><text font-size="${wide?12:15}">${s}</text></g>`}).join('')}</g>
    <circle class="body" r="${r}" fill="${pcol(x,v.id)}"/><g clip-path="url(#cgClip${i})" data-img></g><circle r="${r}" fill="url(#cgShade)" pointer-events="none" opacity="${v.img?.22:1}"/>${v.img?`<circle class="rim" r="${r}"/>`:''}
    <text class="ini" font-size="${r*.82}">${esc(initials(v.a))}</text>`;
-  front.appendChild(g);const lab=document.createElementNS('http://www.w3.org/2000/svg','text');lab.setAttribute('class','lab'+(v.id===sel?' on':''));const lfs=wide?19:25,two=!wide&&v.a.length>12&&v.a.includes(' ');lab.setAttribute('font-size',lfs);if(two){const k=v.a.lastIndexOf(' ');[v.a.slice(0,k),v.a.slice(k+1)].forEach((s,j)=>{const ts=document.createElementNS('http://www.w3.org/2000/svg','tspan');ts.textContent=s;ts.setAttribute('dy',j?lfs*1.1:0);lab.appendChild(ts)})}else lab.textContent=v.a;lab._two=two?lfs*1.1:0;labs.appendChild(lab);lab.onclick=()=>onPick(v.id);g.onclick=()=>onPick(v.id);g.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onPick(v.id)}};
+  front.appendChild(g);const lab=document.createElementNS('http://www.w3.org/2000/svg','text');lab.setAttribute('class','lab'+(v.id===sel?' on':''));const lfs=wide?19:25,two=!wide&&v.a.length>12&&v.a.includes(' ');lab.setAttribute('font-size',lfs);if(two){const k=v.a.lastIndexOf(' ');[v.a.slice(0,k),v.a.slice(k+1)].forEach((s,j)=>{const ts=document.createElementNS('http://www.w3.org/2000/svg','tspan');ts.textContent=s;ts.setAttribute('dy',j?lfs*1.1:0);lab.appendChild(ts)})}else lab.textContent=v.a;lab._two=two?lfs*1.1:0;labs.appendChild(lab);lab.onclick=()=>onPick(v.id);g.onclick=()=>{if(LPX.skip)return;onPick(v.id)};lpBind(g,x,v,id);g.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onPick(v.id)}};
   if(v.img)mediaURL('ascolti/'+id+'/'+v.img,'image/jpeg').then(u=>{g.querySelector('[data-img]').innerHTML=`<image href="${u}" x="${-r}" y="${-r}" width="${2*r}" height="${2*r}" preserveAspectRatio="xMidYMid slice"/>`;g.querySelector('.ini').style.display='none'}).catch(()=>{});
   return{g,v,i,lab,dy:r+(k.length?(wide?34:40):(wide?24:30)),up:-(r+(k.length?(wide?30:34):(wide?14:18))),moons:g.querySelector('.moons'),behind:false}});
  const sun=svg.querySelector('[data-sun]');sun.onclick=()=>onPick('_');sun.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onPick('_')}};

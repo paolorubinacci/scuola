@@ -42,7 +42,8 @@
     "dur": 201.53,
     "st": "pronto",
     "midi_auto": false,
-    "pdf_auto": false
+    "pdf_auto": false,
+    "rep": 52.5
    },
    {
     "id": "rmwo3795z0",
@@ -123,7 +124,8 @@
      "other"
     ],
     "dur": 194.53,
-    "f": "rmwobjf9i0/mix.mp3.enc"
+    "f": "rmwobjf9i0/mix.mp3.enc",
+    "rep": 74.5
    }
   ],
   "t": "Street Parade",
@@ -156,7 +158,8 @@
     ],
     "dur": 310.07,
     "f": "rmwqf2v6x0/mix.mp3.enc",
-    "v": "booker"
+    "v": "booker",
+    "rep": 163.5
    },
    {
     "id": "rmwqf2v6x0-mid",
@@ -198,7 +201,8 @@
     ],
     "dur": 272.12,
     "f": "rmwqf2dnh0/mix.mp3.enc",
-    "v": "drjohn"
+    "v": "drjohn",
+    "rep": 125.5
    },
    {
     "id": "rmilnerv",
@@ -223,7 +227,8 @@
     "f": "rmilnera/mix.mp3.enc",
     "st": "pronto",
     "midi_auto": false,
-    "pdf_auto": false
+    "pdf_auto": false,
+    "rep": 43.5
    },
    {
     "id": "rmilnerp",
