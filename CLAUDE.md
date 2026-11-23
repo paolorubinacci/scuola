@@ -24,7 +24,9 @@ Si usa solo se OGNI esempio del PDF corrisponde con certezza a un momento del vi
    - Le partiture del PDF NON le abbina Claude: le abbina Paolo dal sito («🔗 Abbina partitura», per ogni momento suonato).
      Si salvano in `abbinamenti/abbinamenti.json.enc` ({"nola-7":{"1:26":["img/….png.enc"]}}); durante quel momento
      «♫ Partitura» le mostra sopra il video, in alto (lontano dalle mani). Sotto ogni partitura del PDF compare «▶ Nel video».
-   - Le sezioni del testo e del PDF sono richiudibili (si generano da sole dai titoli `h` con `id`).
+   - Sotto il video c'è l'indice delle sezioni (numerate come sulla barra). La trascrizione resta chiusa dietro «Accedi alla trascrizione»;
+     il PDF resta intero, con titoli sobri numerati («PDF · 1») e un indice iniziale: il font Nola solo per i titoli delle Parti.
+   - «Concetti chiave»: riquadri quadrati in griglia, uno per concetto (niente liste lunghe, niente angoli arrotondati).
 2. Sotto, la trascrizione divisa con le stesse sezioni: `{"t":"h","id":"lN-s1","text":"…"}` + paragrafi `p` con `time` (i minuti diventano link al punto del video).
 3. `{"t":"parte","id":"pdf","kick":"Parte 2","text":"Il PDF, nell'ordine in cui è scritto"}`, poi il PDF dall'inizio alla fine, nel SUO ordine:
    titoli `{"t":"h","id":"lN-pdf1","text":"…"}`, testo alla lettera (`quote`), partiture (`img`) con la loro tastiera (`kb`).
