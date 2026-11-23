@@ -20,6 +20,11 @@ Si usa solo se OGNI esempio del PDF corrisponde con certezza a un momento del vi
    - `sezioni`: solo dove il cambio di argomento è chiaro da quello che dice il tutor. Titoli brevi, descrittivi, senza interpretazioni.
    - `suonati`: tutti i momenti in cui suona (sulla barra diventano segni dorati; toccandoli si ripetono in loop).
    - `pdf`: SOLO se l'associazione è certa (il tutor nomina quell'esempio, o suona esattamente le note scritte). Altrimenti niente link.
+   - Il lettore mostra solo la sezione in corso (titolo, ‹ ›, i momenti suonati di quella sezione, che si ripetono in loop): niente liste lunghe.
+   - Le partiture del PDF NON le abbina Claude: le abbina Paolo dal sito («🔗 Abbina partitura», per ogni momento suonato).
+     Si salvano in `abbinamenti/abbinamenti.json.enc` ({"nola-7":{"1:26":["img/….png.enc"]}}); durante quel momento
+     «♫ Partitura» le mostra sopra il video, in alto (lontano dalle mani). Sotto ogni partitura del PDF compare «▶ Nel video».
+   - Le sezioni del testo e del PDF sono richiudibili (si generano da sole dai titoli `h` con `id`).
 2. Sotto, la trascrizione divisa con le stesse sezioni: `{"t":"h","id":"lN-s1","text":"…"}` + paragrafi `p` con `time` (i minuti diventano link al punto del video).
 3. `{"t":"parte","id":"pdf","kick":"Parte 2","text":"Il PDF, nell'ordine in cui è scritto"}`, poi il PDF dall'inizio alla fine, nel SUO ordine:
    titoli `{"t":"h","id":"lN-pdf1","text":"…"}`, testo alla lettera (`quote`), partiture (`img`) con la loro tastiera (`kb`).
