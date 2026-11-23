@@ -294,6 +294,57 @@
     "img": "ver/longhair.jpg.enc"
    }
   ],
-  "cat": "piano"
+  "cat": "piano",
+  "storia": "«Junco Partner» è stato inciso per la prima volta nel 1951 dal cantante James Waynes (detto anche «Wee Willie» Wayne) per l'etichetta Sittin' In With di Bob Shad. Sul disco gli autori sono Shad e «Robert Ellen», che era uno pseudonimo dello stesso Shad.\n\nIl pezzo però è più vecchio del disco: viene direttamente da «Junker's Blues», scritto negli anni Venti dal pianista di New Orleans Willie «Drive 'em Down» Hall, che non lo incise mai. Secondo Mac Rebennack (Dr. John), in città era già un inno di strada, cantato anche ad Angola, la prigione-fattoria della Louisiana; il suo ritmo veniva chiamato «jailbird beat», il ritmo dei galeotti.\n\nNel 1952 lo ripresero, tra gli altri, Louis Jordan e Richard Hayes. Negli anni Settanta passa di mano in mano tra i grandi del piano di New Orleans: Dr. John lo incide nel 1972 in «Dr. John's Gumbo» (scritto «Junko Partner»), Professor Longhair lo registra più volte in quegli anni (anche per «Rock 'n' Roll Gumbo»), e James Booker nel 1976 gli dà il titolo del suo album di piano solo, «Junco Partner». Nel 1980 i Clash lo portano nel reggae, in «Sandinista!».",
+  "tema": "Il «junco» è un tossico (da «junker», «junkie»). La canzone lo racconta mentre barcolla per la strada, strafatto, e lui risponde con spavalderia che qualche mese di prigione non gli fa paura: ad Angola ha amici che scontano pene lunghissime.\n\nLe altre strofe cambiano molto da una versione all'altra: soldi, alcol, che cosa farebbe se fosse ricco. Più che un canto di prigione, è la canzone dell'uomo che in prigione ci finisce.",
+  "forma": {
+   "nota": "Dal corso (lezioni 4 e 6), in Sol: <b>16 battute</b>, non un blues di 12. Rispetto al blues ci sono <b>4 battute di Sol in più</b> prima di andare al V; alla fine un turnaround per ricominciare la forma. Le versioni dei maestri possono essere in altre tonalità e variare la forma: questa è la griglia del corso.",
+   "righe": [
+    [
+     "Sol",
+     "Sol",
+     "Sol",
+     "Sol"
+    ],
+    [
+     "Do",
+     "Do",
+     "Sol",
+     "Sol"
+    ],
+    [
+     "Sol",
+     "Sol",
+     "Sol",
+     "Sol"
+    ],
+    [
+     "Re",
+     "Re",
+     "Sol",
+     "Sol"
+    ]
+   ],
+   "img": "img/jp-forma.png.enc",
+   "lez": 4
+  },
+  "fonti": [
+   {
+    "t": "Wikipedia · Junco Partner",
+    "u": "https://en.wikipedia.org/wiki/Junco_Partner"
+   },
+   {
+    "t": "Wikipedia · Junker Blues",
+    "u": "https://en.wikipedia.org/wiki/Junker_Blues"
+   },
+   {
+    "t": "Wikipedia · Dr. John's Gumbo",
+    "u": "https://en.wikipedia.org/wiki/Dr._John%27s_Gumbo"
+   },
+   {
+    "t": "Guernica · On Stoicism (Peter Trachtenberg, su «Junco Partner»)",
+    "u": "https://www.guernicamag.com/on-stoicism/"
+   }
+  ]
  }
 }

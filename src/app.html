@@ -415,6 +415,14 @@ textarea,input[type=text],input[type=password],input[type=number]{width:100%;bac
 .csky .sun.on .ring,.csky .sun:focus-visible .ring{stroke-opacity:.9;stroke-dasharray:4 6;animation:spin 18s linear infinite;transform-box:fill-box;transform-origin:center}
 @keyframes spin{to{transform:rotate(360deg)}}
 .csky .planet{cursor:pointer;outline:none}
+.fgrid{border-top:1px solid var(--nline);border-left:1px solid var(--nline);max-width:560px;margin:10px 0 12px}
+.frow{display:grid;grid-template-columns:repeat(4,1fr)}
+.fcell{border-right:1px solid var(--nline);border-bottom:1px solid var(--nline);height:62px;position:relative;display:flex;align-items:center;justify-content:center;background:var(--paper)}
+.fcell small{position:absolute;left:5px;top:4px;font:600 10px var(--font);color:var(--nmuted)}
+.fcell b{font:700 20px var(--font);color:var(--navy)}.fcell.rip b{font-weight:400;color:var(--nmuted);font-size:17px}
+.frow .fcell:first-child{border-left:3px solid var(--gold)}
+details.fpdf{margin:4px 0 8px}details.fpdf summary{cursor:pointer;font:600 14px var(--font);color:var(--wine);padding:8px 0}details.fpdf img{width:100%;background:#fff;border:1px solid var(--nline)}
+.ltxt{white-space:pre-line}
 .csky svg{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation}
 .csky .planet.lis .halo{opacity:1;stroke:#f3ead6;stroke-width:4;animation:lis 1.1s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
 @keyframes lis{0%,100%{transform:scale(1);opacity:.95}50%{transform:scale(1.12);opacity:.35}}
@@ -1423,13 +1431,21 @@ function tabVideo(el,c,id,x,list,base){
    const v=p.querySelector('video');v.preservesPitch=true;p.querySelectorAll('[data-vs]').forEach(b2=>b2.onclick=()=>{v.playbackRate=+b2.dataset.vs;p.querySelectorAll('[data-vs]').forEach(y=>y.classList.toggle('on',y===b2))});
    p.querySelector('[data-vb]').onclick=()=>{v.currentTime=Math.max(0,v.currentTime-5)}}
   catch(err){box.innerHTML='<div class="note">Video non ancora disponibile: riprova tra un minuto (serve la connessione).</div>'}})}
+/* la struttura del brano: griglia degli accordi, una casella per battuta (dal corso), più la partitura del PDF se c'è */
+function formaHTML(f){if(!f)return'';const n0=[0];return`<div class="asec">La struttura</div>${f.nota?`<p class="atext" style="margin-top:0">${f.nota}</p>`:''}
+ <div class="fgrid">${f.righe.map(r=>`<div class="frow">${r.map((ch,i)=>{const n=++n0[0],same=i>0&&r[i-1]===ch;return`<div class="fcell${same?' rip':''}"><small>${n}</small><b>${same?'%':esc(ch)}</b></div>`}).join('')}</div>`).join('')}</div>
+ ${f.img?`<details class="fpdf"><summary>La forma nella partitura del PDF${f.lez?' · lezione '+f.lez:''}</summary><img data-enc="${esc(f.img)}" alt="La forma nella partitura del PDF"></details>`:''}`}
 function tabScheda(el,c,id,x){
  el.innerHTML=`${x.tag&&x.tag.length?`<div class="chips" style="margin-top:14px">${x.tag.map(t=>`<span class="chip s">${esc(t)}</span>`).join('')}</div>`:''}
  ${x.storia?`<div class="asec">La storia</div><div class="atext">${paras(x.storia)}</div>`:'<div class="empty">Ancora nessuna storia: scrivila da «Modifica la scheda», o chiedi a Claude di prepararla.</div>'}
+ ${x.tema?`<div class="asec">Di cosa parla</div><div class="atext">${paras(x.tema)}</div>`:''}
+ ${formaHTML(x.forma)}
+ <div class="asec">Il testo</div>${x.testo?`<div class="atext ltxt">${esc(x.testo)}</div>`:`<p class="atext muted" style="margin-top:0">Non ancora inserito: incollalo da «Modifica la scheda».</p>`}
  ${x.studio&&x.studio.length?`<div class="asec">Perché studiarlo</div><ul class="aul">${x.studio.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:''}
  ${x.acquista?`<div class="asec">Partitura pubblicata</div><p class="atext"><a href="${esc(x.acquista.u)}" target="_blank" rel="noopener">${esc(x.acquista.t)}</a></p>`:''}
  ${x.fonti&&x.fonti.length?`<div class="asec">Fonti</div><ul class="aul src">${x.fonti.map(f=>`<li><a href="${esc(f.u)}" target="_blank" rel="noopener">${esc(f.t)}</a></li>`).join('')}</ul>`:''}
- <div class="row2"><button class="btn sm gold" data-go="${c.id}-ascolti-${id}-modifica">✎ Modifica la scheda</button></div>`}
+ <div class="row2"><button class="btn sm gold" data-go="${c.id}-ascolti-${id}-modifica">✎ Modifica la scheda</button></div>`;
+ el.querySelectorAll('img[data-enc]').forEach(async i=>{i.src=await mediaURL(i.dataset.enc,'image/png')})}
 
 /* ---- PDF dentro la pagina (PDF.js, Mozilla, Apache 2.0) ---- */
 let PDFJS=null;
@@ -1751,6 +1767,8 @@ function ascForm(c,id,x,cat){const isNew=!id;
  <label>Artista<input type="text" name="a" list="artisti" value="${esc(x.a||'')}" placeholder="Es. Dr. John"></label><datalist id="artisti">${ASC.disco.map(d=>`<option value="${esc(d.a)}">`).join('')}</datalist>
  <div class="two"><label>Album<input type="text" name="al" value="${esc(x.al||'')}"></label><label>Anno<input type="text" name="anno" inputmode="numeric" value="${esc(x.anno||'')}"></label></div>
  <label>La storia del brano<textarea name="storia" rows="7" placeholder="Lascia vuoto e chiedi a Claude di scriverla">${esc(x.storia||'')}</textarea></label>
+ <label>Di cosa parla<textarea name="tema" rows="4">${esc(x.tema||'')}</textarea></label>
+ <label>Il testo<textarea name="testo" rows="8" placeholder="Incolla qui il testo del brano">${esc(x.testo||'')}</textarea></label>
  <label>Perché studiarlo · una cosa per riga<textarea name="studio" rows="4">${esc((x.studio||[]).join('\n'))}</textarea></label>
  <label>Caratteristiche · separate da virgola<input type="text" name="tag" value="${esc((x.tag||[]).join(', '))}" placeholder="Es. Piano solo, Gospel, Rumba"></label>
  ${tokHTML()}<button class="go" type="submit">${isNew?'Crea il brano':'Salva la scheda'}</button><div class="note" id="afm"></div></form>
@@ -1758,7 +1776,7 @@ function ascForm(c,id,x,cat){const isNew=!id;
  $('#af').onsubmit=async e=>{e.preventDefault();const f=e.target,btn=f.querySelector('.go'),say=m=>$('#afm').textContent=m,v=n=>f.elements[n].value.trim();btn.disabled=true;
   try{const t=await needTok(f,say);if(!t){btn.disabled=false;return}
    let tid=id||Object.keys(cat).find(k=>normA(cat[k].t)===normA(v('t')))||slug(v('t'));
-   const ch={t:v('t'),a:v('a'),al:v('al'),anno:v('anno'),storia:f.elements.storia.value.trim(),studio:f.elements.studio.value.split('\n').map(s=>s.trim()).filter(Boolean),tag:v('tag').split(',').map(s=>s.trim()).filter(Boolean)};
+   const ch={t:v('t'),a:v('a'),al:v('al'),anno:v('anno'),storia:f.elements.storia.value.trim(),tema:f.elements.tema.value.trim(),testo:f.elements.testo.value.trim(),studio:f.elements.studio.value.split('\n').map(s=>s.trim()).filter(Boolean),tag:v('tag').split(',').map(s=>s.trim()).filter(Boolean)};
    CAT=Promise.resolve(await ghCommit(t,[],cat=>{cat[tid]=Object.assign(cat[tid]||{r:[]},ch)},(isNew?'Ascolti: nuovo brano «':'Ascolti: scheda «')+ch.t+'» (dal sito)',say));
    ASCTAB[tid]='scheda';toast('✓ Pubblicato');go(c.id+'-ascolti-'+tid)}
   catch(err){btn.disabled=false;say(ghErr(err))}}}
