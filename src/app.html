@@ -84,13 +84,15 @@ h2.passo{scroll-margin-top:70px;border-top:2px solid var(--gold);padding-top:14p
    Su telefono una colonna, con interlinee strette, per non allungare la pagina. */
 .kc{margin:18px 0 10px;border-top:2px solid var(--navy)}
 .kc .kch{font:700 11px/1 var(--font);letter-spacing:.16em;text-transform:uppercase;color:var(--navy);padding:10px 0 10px}
-.kcg{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:0;border-top:1px solid var(--nline);border-left:1px solid var(--nline)}
-.kct{border-right:1px solid var(--nline);border-bottom:1px solid var(--nline);background:var(--paper);padding:12px 12px 14px;min-height:150px;display:flex;flex-direction:column;gap:6px}
-.kct .kk{display:flex;align-items:center;gap:6px;font:700 10px/1.2 var(--font);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
-.kct .kk i{color:var(--navy);line-height:0}.kct .kk i svg{width:18px;height:18px}
-.kct b{font:700 16px/1.25 "Playfair Display",Georgia,serif;color:var(--wine)}
-.kct span{font:500 13.5px/1.4 var(--font);color:var(--ink)}
-@media (max-width:640px){.kcg{grid-template-columns:1fr 1fr}.kct{min-height:0;padding:10px}.kct b{font-size:15px}.kct span{font-size:13px}}
+.kcg{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+.kct{border:1px solid var(--nline);border-top:3px solid var(--navy);background:var(--paper);padding:0 0 4px}
+.kct .kk{display:flex;align-items:center;gap:8px;font:700 11px/1.2 var(--font);letter-spacing:.14em;text-transform:uppercase;color:var(--navy);padding:10px 14px 8px;border-bottom:1px solid var(--nline)}
+.kct .kk i{color:var(--gold);line-height:0}.kct .kk i svg{width:20px;height:20px}
+.kct ul{list-style:none;margin:0;padding:0}
+.kct li{padding:9px 14px 10px;border-top:1px solid var(--nline)}.kct li:first-child{border-top:0}
+.kct li b{display:block;font:700 15.5px/1.25 "Playfair Display",Georgia,serif;color:var(--wine);margin-bottom:3px}
+.kct li span{display:block;font:500 13.5px/1.4 var(--font);color:var(--ink)}
+@media (max-width:640px){.kcg{grid-template-columns:1fr}.kct li{padding:8px 12px}.kct li b{font-size:15px}.kct li span{font-size:13px}}
 .flow h2{font-size:24px;color:var(--navy);margin:34px 0 8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--nline);padding-bottom:6px;font-weight:400}
 .flow p{margin:0 0 14px}
 .ts{display:inline-block;white-space:nowrap;font:700 11px/1 var(--font);color:var(--gold);border:1px solid var(--gold2);border-radius:3px;padding:3px 5px;margin-right:7px;vertical-align:2px;background:var(--paper)}
@@ -705,8 +707,9 @@ const KCI=(()=>{const s=x=>`<svg viewBox="0 0 24 24" fill="none" stroke="current
  musicisti:['Musicisti',s('<circle cx="12" cy="8" r="4"/><path d="M4.5 21c0-4.2 3.4-7 7.5-7s7.5 2.8 7.5 7"/>')],
  ascolti:['Brani e ascolti',s('<path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4.5" height="7" rx="1.5"/><rect x="16.5" y="14" width="4.5" height="7" rx="1.5"/>')],
  metodo:['Metodo',s('<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/>')]}})();
-function kcHTML(kc){if(!kc||!kc.length)return'';return`<div class="kc"><div class="kch">Concetti chiave</div><div class="kcg">${kc.map(g=>{const [n,ic]=KCI[g.g]||[g.g,''];
- return g.it.map(([a,b])=>`<div class="kct"><div class="kk"><i>${ic}</i>${esc(n)}</div><b>${a}</b><span>${b}</span></div>`).join('')}).join('')}</div></div>`}
+function kcHTML(kc){if(!kc||!kc.length)return'';const G=[],by={};kc.forEach(g=>{if(!by[g.g]){by[g.g]={g:g.g,it:[]};G.push(by[g.g])}by[g.g].it.push(...g.it)});
+ return`<div class="kc"><div class="kch">Concetti chiave</div><div class="kcg">${G.map(g=>{const [n,ic]=KCI[g.g]||[g.g,''];
+ return`<div class="kct"><div class="kk"><i>${ic}</i>${esc(n)}</div><ul>${g.it.map(([a,b])=>`<li><b>${a}</b><span>${b}</span></li>`).join('')}</ul></div>`}).join('')}</div></div>`}
 function renderLesson(c,l){
  if(!l)return go(c.id);
  theme(c.theme?'t-'+c.theme.replace(/^.*\s/,''):'');updStreak();
