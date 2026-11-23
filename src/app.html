@@ -1439,7 +1439,7 @@ function tabScheda(el,c,id,x){
  el.innerHTML=`${x.tag&&x.tag.length?`<div class="chips" style="margin-top:14px">${x.tag.map(t=>`<span class="chip s">${esc(t)}</span>`).join('')}</div>`:''}
  ${x.storia?`<div class="asec">La storia</div><div class="atext">${paras(x.storia)}</div>`:'<div class="empty">Ancora nessuna storia: scrivila da «Modifica la scheda», o chiedi a Claude di prepararla.</div>'}
  ${x.tema?`<div class="asec">Di cosa parla</div><div class="atext">${paras(x.tema)}</div>`:''}
- ${formaHTML(x.forma)}
+ ${x.forma?formaHTML(x.forma):`<div class="asec">La struttura</div><p class="atext muted" style="margin-top:0">Arriva quando c'è la partitura o la sequenza degli accordi.</p>`}
  <div class="asec">Il testo</div>${x.testo?`<div class="atext ltxt">${esc(x.testo)}</div>`:`<p class="atext muted" style="margin-top:0">Non ancora inserito: incollalo da «Modifica la scheda».</p>`}
  ${x.studio&&x.studio.length?`<div class="asec">Perché studiarlo</div><ul class="aul">${x.studio.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:''}
  ${x.acquista?`<div class="asec">Partitura pubblicata</div><p class="atext"><a href="${esc(x.acquista.u)}" target="_blank" rel="noopener">${esc(x.acquista.t)}</a></p>`:''}

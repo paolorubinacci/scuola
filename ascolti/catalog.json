@@ -103,7 +103,8 @@
    }
   ],
   "agg": "2026-11-19",
-  "cat_sugg": "piano"
+  "cat_sugg": "piano",
+  "tema": "È un brano strumentale, per pianoforte solo: non ha un testo. Il titolo è il nome della madre di Mac Rebennack, Dorothy, e il pezzo è scritto per lei."
  },
  "streetparade": {
   "r": [
@@ -130,13 +131,41 @@
   ],
   "t": "Street Parade",
   "a": "Earl King",
-  "al": "",
+  "al": "Street Parade",
   "anno": "",
   "agg": "2026-11-20",
   "lez": [
    2
   ],
-  "cat_sugg": "stile"
+  "cat_sugg": "stile",
+  "tag": [
+   "Mardi Gras",
+   "Second line",
+   "Con i Meters"
+  ],
+  "storia": "«Street Parade» è di Earl King, chitarrista e autore di New Orleans (è suo anche «Big Chief», reso famoso da Professor Longhair). L'ha incisa con Allen Toussaint alla produzione e agli arrangiamenti e con i Meters come band, nelle sessioni per la Sansu, la società di Toussaint e Marshall Sehorn. Le fonti non sono d'accordo sulla data: tra il 1969 e il 1972.\n\nL'album di quelle sessioni doveva uscire con la Atlantic, ma non se ne fece niente. Uscì solo il singolo, «Street Parade» in due parti, sulla piccola etichetta Kansu; l'album completo è arrivato solo all'inizio degli anni Ottanta, ed è stato ristampato nel 2024 dal Tipitina's Record Club.\n\nOggi è uno dei classici del Carnevale di New Orleans, insieme a «Big Chief».",
+  "tema": "È una canzone del Mardi Gras: celebra le parate di strada del Carnevale. Tutta la musica è costruita sullo spirito della parata, con il groove della second line.",
+  "studio": [
+   "Nel corso (lezione 2, i ritmi) è l'esempio moderno dello street beat: nell'introduzione il basso suona una variante del ritmo di «tango»; quando parte il groove, la batteria accenta l'ultimo tempo di ogni seconda battuta e il basso prende quell'accento, a volte legandolo oltre la battuta."
+  ],
+  "fonti": [
+   {
+    "t": "WWOZ · la storia di «Street Parade»",
+    "u": "https://www.wwoz.org/blog/201966"
+   },
+   {
+    "t": "Home of the Groove · Street Parading With Earl (2008)",
+    "u": "https://homeofthegroove.blogspot.com/2008/01/street-parading-with-earl-mardi-gras-la.html"
+   },
+   {
+    "t": "Where Y'at · recensione della ristampa (2024)",
+    "u": "https://www.whereyat.com/album-review-earl-king-street-parade"
+   },
+   {
+    "t": "Tulane, Music Rising · Earl King",
+    "u": "https://musicrising.tulane.edu/?p=760"
+   }
+  ]
  },
  "juncopartner": {
   "r": [
