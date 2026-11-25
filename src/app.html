@@ -584,6 +584,7 @@ details.fpdf{margin:4px 0 8px}details.fpdf summary{cursor:pointer;font:600 14px 
  .prac .pb{display:grid!important;grid-template-columns:1fr 1fr;gap:8px}.prac .pb button{width:100%;padding:12px 6px;font-size:14px;white-space:nowrap}.prac .pb button:last-child:nth-child(even){grid-column:1/-1}.prac .pb .pbig{grid-column:1/-1;padding:14px}
  #app{padding-bottom:96px}}
 .lessons li.lsec{display:block;cursor:default;background:none;border:0;box-shadow:none;padding:18px 4px 6px;font:800 13px var(--font);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}.lessons li.lsec:first-child{padding-top:4px}
+.film.wait .fhd b::after{content:' · ⏳ caricamento del video…'}.film.ko .fhd b::after{content:' · non caricato, tocca ▶ per riprovare';color:#c0392b}
 </style>
 </head>
 <body>
@@ -621,7 +622,7 @@ function b2u(b){const s=atob(b),u=new Uint8Array(s.length);for(let i=0;i<s.lengt
 async function kdf(pw,salt){const k0=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);
  return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:200000,hash:'SHA-256'},k0,{name:'AES-GCM',length:256},false,['decrypt'])}
 const keyCache={};
-async function decBytes(raw,pw){const salt=raw.slice(0,16),iv=raw.slice(16,28),ct=raw.slice(28),h=salt.join(',');const key=await (keyCache[h]=keyCache[h]||kdf(pw,salt));
+async function decBytes(raw,pw){const salt=raw.slice(0,16),iv=raw.slice(16,28),ct=raw.subarray(28),/* subarray: niente copia (video grandi su iPhone/iPad) */h=salt.join(',');const key=await (keyCache[h]=keyCache[h]||kdf(pw,salt));
  return {pt:new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv},key,ct)),key}}
 let PW=null;
 async function unlock(pw,silent){
@@ -633,8 +634,11 @@ async function unlock(pw,silent){
 const blobCache={};
 function mediaURL(src,type){
  if(!/\.enc$/.test(src))return Promise.resolve(src);
- return blobCache[src]=blobCache[src]||(async()=>{const r=await fetch(src);const raw=new Uint8Array(await r.arrayBuffer());
-  const {pt}=await decBytes(raw,PW);return URL.createObjectURL(new Blob([pt],{type}))})().catch(e=>{delete blobCache[src];throw e})}
+ return blobCache[src]=blobCache[src]||(async()=>{const r=await fetch(src);if(!r.ok)throw new Error('HTTP '+r.status);let raw=new Uint8Array(await r.arrayBuffer());
+  let {pt}=await decBytes(raw,PW);raw=null;const b=new Blob([pt],{type});pt=null;return URL.createObjectURL(b)})().catch(e=>{delete blobCache[src];throw e})}
+/* i video interi sono grandi (80–90 MB): uscendo da una lezione si liberano, altrimenti su iPhone/iPad la memoria finisce e il video dopo non si carica */
+function freeVideos(keep){for(const k of Object.keys(blobCache)){if(!/\.mp4\.enc$/.test(k)||(keep&&keep.includes(k)))continue;const p=blobCache[k];delete blobCache[k];
+ Promise.resolve(p).then(u=>{document.querySelectorAll('video').forEach(v=>{if(v.src===u){v.pause();v.removeAttribute('src');v.load()}});URL.revokeObjectURL(u)}).catch(()=>{})}}
 /* background prefetch: clips of the open lesson load one after another, so a tap plays at once */
 let pfToken=0;
 async function prefetch(list){const tok=++pfToken;for(const [src,type] of list){if(tok!==pfToken)return;try{await mediaURL(src,type)}catch(e){}}}
@@ -658,7 +662,7 @@ function progress(){return LS.get('done',{})}
 /* lezioni fatte: ora si salva il momento (conta nei giorni di fila); le vecchie spunte senza data valgono da oggi */
 (()=>{const p=LS.get('done',{});let ch=false;for(const k in p)if(p[k]===true){p[k]=Date.now();ch=true}if(ch)LS.set('done',p)})();
 function render(){
- ascStop();
+ ascStop();freeVideos();
  LESSON=null;if(location.hash==='#diario')return renderDiario();
  const h=location.hash.slice(1),am=h.match(/^(.+?)-ascolti(?:-([a-z0-9]+)(?:-(modifica|carica|v_[a-z0-9_]+))?)?$/);
  if(am){const ac_=DATA.courses.find(x=>x.id===am[1]);if(ac_)return renderAscolti(ac_,am[2],am[3])}
@@ -823,7 +827,8 @@ function initFilm(el){const F=JSON.parse(el.dataset.f),O=F.t0?tsec(F.t0):0,V0=el
  /* t0: il file comincia dopo la sigla, a quel minuto del player del corso; i tempi della lezione restano quelli del player */
  v=O?new Proxy(V0,{get(t,k){if(k==='currentTime')return t.currentTime+O;if(k==='duration')return t.duration?t.duration+O:t.duration;const x=t[k];return typeof x==='function'?x.bind(t):x},set(t,k,val){if(k==='currentTime')t.currentTime=Math.max(0,val-O);else t[k]=val;return true}}):V0,S=F.sezioni||F.S,M=F.M,K=FILMCTX?FILMCTX.key:'',SC=FILMCTX?FILMCTX.scores:[];
  let ready=null,loop=null,curS=-1,curM=-1,big=false,abbM=-1,scIdx=0,scList='',showTx=false;v.preservesPitch=true;v.webkitPreservesPitch=true;
- const load=()=>ready=ready||mediaURL(el.dataset.src,'video/mp4').then(u=>{v.src=u;v.setAttribute('controls','');el.classList.add('ok');return u});
+ const load=()=>ready=ready||(el.classList.add('wait'),mediaURL(el.dataset.src,'video/mp4')).then(u=>{v.src=u;v.setAttribute('controls','');el.classList.remove('wait','ko');el.classList.add('ok');return u},
+  e=>{ready=null;el.classList.remove('wait');el.classList.add('ko');toast('Il video non si è caricato: tocca di nuovo ▶ per riprovare');throw e});
  const D=()=>v.duration||tsec(F.dur||'1');
  const mS=i=>[tsec(M[i].da),tsec(M[i].a)];
  const secOf=t=>{let c=0;S.forEach((s,i)=>{if(tsec(s.da)<=t+.01)c=i});return c};
