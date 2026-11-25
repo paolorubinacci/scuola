@@ -302,10 +302,19 @@
     "c": "Registrazione",
     "t": "Junco Partner - Rock ‘n’ Roll Gumbo",
     "v": "longhair",
-    "st": "elaborazione",
+    "st": "pronto",
     "tipo": "band",
     "midi_auto": true,
-    "pdf_auto": false
+    "pdf_auto": false,
+    "stems": [
+     "drums",
+     "bass",
+     "piano",
+     "vocals",
+     "other"
+    ],
+    "dur": 208.54,
+    "f": "rmww3l7170/mix.mp3.enc"
    }
   ],
   "t": "Junco Partner",
@@ -318,7 +327,7 @@
    6,
    7
   ],
-  "agg": "2026-11-22",
+  "agg": "2026-11-25",
   "cat_sugg": "piano",
   "v": [
    {
