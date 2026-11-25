@@ -295,6 +295,17 @@
     "v": "longhair",
     "u": "https://youtu.be/z0kom8C0MYQ?is=CANiqGa55-ZHkmkq",
     "st": "pronto"
+   },
+   {
+    "id": "rmww3l7170",
+    "k": "audio",
+    "c": "Registrazione",
+    "t": "Junco Partner - Rock ‘n’ Roll Gumbo",
+    "v": "longhair",
+    "st": "elaborazione",
+    "tipo": "band",
+    "midi_auto": true,
+    "pdf_auto": false
    }
   ],
   "t": "Junco Partner",
