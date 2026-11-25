@@ -810,7 +810,7 @@ function abbSet(k,da,list){const A=abbAll(),m=A[k]||{};if(list.length)m[da]=list
  abbSet.t=setTimeout(()=>abbPush().then(st=>toast(st==='ok'?'✓ Abbinamento salvato: lo ritrovi anche su iPad e iPhone':st==='nokey'?'Salvato su questo dispositivo. Collega la chiave GitHub (nel Diario) per ritrovarlo ovunque':'Salvato sul dispositivo; lo invio a GitHub appena c\'è connessione')),1200)}
 window.addEventListener('online',()=>abbPush());
 function filmHTML(b){const D=tsec(b.dur||'0:00')||1,S=b.sezioni||[],M=b.suonati||[],pct=x=>(Math.max(0,Math.min(1,tsec(x)/D))*100).toFixed(2);
- return`<div class="film" data-src="${esc(b.src)}" data-f="${esc(JSON.stringify({dur:b.dur,S,M}))}"><div class="fhd"><span>Il video integrale</span><b>${S.length} sezioni · ${M.length} momenti suonati</b><span class="ts">${esc(b.dur||'')}</span></div>
+ return`<div class="film" data-src="${esc(b.src)}" data-f="${esc(JSON.stringify({dur:b.dur,t0:b.t0||'',S,M}))}"><div class="fhd"><span>Il video integrale</span><b>${S.length} sezioni · ${M.length} momenti suonati</b><span class="ts">${esc(b.dur||'')}</span></div>
  <div class="fv"><video playsinline preload="none"></video><div class="fsc"><div class="sh"></div><div class="sb"></div></div></div>
  <div class="fbar">${S.map((s,i)=>`<i class="fs ${i%2?'b':''}" data-s="${i}" style="left:${pct(s.da)}%;width:${(pct(s.a||b.dur)-pct(s.da)).toFixed(2)}%"><b>${i+1}</b></i>`).join('')}${M.map((m,i)=>`<i class="fm" data-m="${i}" title="${esc(m.da+'–'+m.a)}" style="left:${pct(m.da)}%;width:${Math.max(.6,pct(m.a)-pct(m.da)).toFixed(2)}%"></i>`).join('')}<i class="fp"></i></div>
  <div class="ctl"><button class="btn sm" data-fplay>▶ Play</button><span class="seg sp"><button data-r=".5">50%</button><button data-r=".75">75%</button><button data-r="1" class="on">100%</button></span><button class="btn sm" data-fb title="Indietro di 5 secondi">⟲ 5 s</button>
@@ -819,7 +819,9 @@ function filmHTML(b){const D=tsec(b.dur||'0:00')||1,S=b.sezioni||[],M=b.suonati|
  <div class="fnw"><div class="fst"><button data-ps aria-label="Sezione precedente">‹</button><div><small></small><b></b></div><button data-ns aria-label="Sezione successiva">›</button></div><div class="fch"></div><div class="fln"></div></div>
  <div class="fabb"></div>
  <div class="fix"><div class="k">Le sezioni del video</div><ol>${S.map((s,i)=>`<li data-i="${i}"><button data-sx="${i}"><em>${i+1}</em><span>${esc(s.titolo)}</span><small>${esc(s.da)}</small></button></li>`).join('')}</ol></div></div>`}
-function initFilm(el){const v=el.querySelector('video'),F=JSON.parse(el.dataset.f),S=F.sezioni||F.S,M=F.M,K=FILMCTX?FILMCTX.key:'',SC=FILMCTX?FILMCTX.scores:[];
+function initFilm(el){const F=JSON.parse(el.dataset.f),O=F.t0?tsec(F.t0):0,V0=el.querySelector('video'),
+ /* t0: il file comincia dopo la sigla, a quel minuto del player del corso; i tempi della lezione restano quelli del player */
+ v=O?new Proxy(V0,{get(t,k){if(k==='currentTime')return t.currentTime+O;if(k==='duration')return t.duration?t.duration+O:t.duration;const x=t[k];return typeof x==='function'?x.bind(t):x},set(t,k,val){if(k==='currentTime')t.currentTime=Math.max(0,val-O);else t[k]=val;return true}}):V0,S=F.sezioni||F.S,M=F.M,K=FILMCTX?FILMCTX.key:'',SC=FILMCTX?FILMCTX.scores:[];
  let ready=null,loop=null,curS=-1,curM=-1,big=false,abbM=-1,scIdx=0,scList='',showTx=false;v.preservesPitch=true;v.webkitPreservesPitch=true;
  const load=()=>ready=ready||mediaURL(el.dataset.src,'video/mp4').then(u=>{v.src=u;v.setAttribute('controls','');el.classList.add('ok');return u});
  const D=()=>v.duration||tsec(F.dur||'1');

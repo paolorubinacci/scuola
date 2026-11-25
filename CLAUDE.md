@@ -38,6 +38,9 @@ Si usa solo se OGNI esempio del PDF corrisponde con certezza a un momento del vi
 5. «In breve» e «Concetti chiave»: riassumono il video e il PDF tenendoli distinti («nel video…», «nel PDF…»).
 
 Il video integrale: H.264 720p circa 1 Mbps, `-movflags +faststart`, tastiera di Soundslice compresa; sotto i 95 MB; cifrato con `tools/scuola.py enc`.
+**Niente sigla** (regola di Paolo, 25/11/2026): il video comincia dopo i titoli iniziali del corso e finisce prima di quelli finali.
+Nel blocco `film` si mette `"t0":"0:05"` = il minuto del player del corso in cui comincia il file: tutti i tempi (sezioni, suonati, trascrizione)
+restano quelli del player del corso, il lettore li converte da solo. `dur` = minuto del player in cui finisce il file.
 
 ## Strumenti
 - `SCUOLA_PW=… python3 tools/scuola.py decrypt|build|enc` (password: la dà Paolo; mai scriverla nel repository).
